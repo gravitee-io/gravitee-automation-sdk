@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.3.1...am-mock-server/v1.3.2) (2026-10-05)
+
+
+### Bug Fixes
+
+* add ':masked' to unstructed drift tag + OAS regen ([52ec51b](https://github.com/gravitee-io/gravitee-automation-sdk/commit/52ec51ba279bfb2b31395502661c8e8130ffe3b5))
+* **deps:** bump am-sdk to v2.3.1 ([8439ae7](https://github.com/gravitee-io/gravitee-automation-sdk/commit/8439ae75c17a33c2cab665fbffb8ffb9415ebc8b))
+
 ## [1.3.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.3.0...am-mock-server/v1.3.1) (2026-09-29)
 
 
