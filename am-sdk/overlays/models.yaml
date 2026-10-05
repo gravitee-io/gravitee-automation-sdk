@@ -68,28 +68,28 @@ actions:
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:masked
   - target: $.components.schemas.AutomationIdentityProvider.properties.configuration
     update:
       x-go-type: unstructured.Stringified
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:masked
   - target: $.components.schemas.AutomationReporter.properties.configuration
     update:
       x-go-type: unstructured.Stringified
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:masked
   - target: $.components.schemas.AutomationDataPlane.properties.configuration
     update:
       x-go-type: unstructured.Unstructured
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:masked
 
   # Read-only properties are set by AM, never part of the desired state: drift detection skips them.
   - target: $.components.schemas.*.properties[?(@.readOnly == true)]
