@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.3.0...am-sdk/v2.3.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* add ':masked' to unstructed drift tag + OAS regen ([52ec51b](https://github.com/gravitee-io/gravitee-automation-sdk/commit/52ec51ba279bfb2b31395502661c8e8130ffe3b5))
+
 ## [2.3.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.2.1...am-sdk/v2.3.0) (2026-09-29)
 
 
