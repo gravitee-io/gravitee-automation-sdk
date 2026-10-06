@@ -1,0 +1,95 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: "3"
+
+vars:
+  MODULES: am-sdk apim-sdk common am-mock-server
+  # Modules that hold Go code; the others are placeholders and are skipped.
+  GO_MODULES:
+    sh: for m in {{.MODULES}}; do [ -n "$(find $m -name '*.go' -print -quit)" ] && printf '%s ' $m; done; true
+  AM_OAS_BRANCH: '{{.AM_OAS_BRANCH | default "master"}}'
+  AM_OAS_URL: https://raw.githubusercontent.com/gravitee-io/gravitee-access-management/refs/heads/{{.AM_OAS_BRANCH}}/docs/automation/openapi.yaml
+  AM_OAS_FILE: am-sdk/openapi/openapi.yaml
+  LICENSE_IGNORES: -ignore "**/*.gen.go" -ignore "**/*.gen.yaml" -ignore ".github/**" -ignore ".idea/**"
+
+tasks:
+  lint:
+    desc: Run all linters
+    cmds:
+      - task: lint:vet
+      - task: lint:staticcheck
+      - task: lint:revive
+      - task: lint:licenses
+
+  lint:vet:
+    desc: Run go vet
+    cmds:
+      - for: { var: GO_MODULES }
+        cmd: cd {{.ITEM}} && go vet ./...
+
+  lint:staticcheck:
+    desc: Run staticcheck
+    cmds:
+      - for: { var: GO_MODULES }
+        cmd: cd {{.ITEM}} && staticcheck ./...
+
+  lint:revive:
+    desc: Run revive
+    cmds:
+      - for: { var: GO_MODULES }
+        cmd: cd {{.ITEM}} && revive -config ../.revive.toml -formatter friendly -exclude "./**/*.gen.go" ./...
+
+  lint:licenses:
+    desc: Check license headers
+    cmds:
+      - addlicense -check -f LICENSE_TEMPLATE.txt {{.LICENSE_IGNORES}} .
+
+  lint:fix:
+    desc: Auto-fix linting issues and add license headers
+    cmds:
+      - for: { var: GO_MODULES }
+        cmd: find {{.ITEM}} -name '*.go' -not -name '*.gen.go' -exec goimports -w {} +
+      - addlicense -f LICENSE_TEMPLATE.txt {{.LICENSE_IGNORES}} .
+
+  sync-oas:
+    desc: Download the AM Automation OAS from gravitee-access-management (AM_OAS_BRANCH to override)
+    cmds:
+      - curl -fsSL "{{.AM_OAS_URL}}" -o {{.AM_OAS_FILE}}
+
+  check-oas:
+    desc: Fail if the committed AM OAS differs from upstream
+    cmds:
+      - curl -fsSL "{{.AM_OAS_URL}}" -o /tmp/am-openapi.yaml
+      - diff -u {{.AM_OAS_FILE}} /tmp/am-openapi.yaml || { echo "OAS out of date. Run 'task sync-oas' and commit."; exit 1; }
+
+  generate:
+    desc: Run go generate across all modules
+    cmds:
+      - for: { var: GO_MODULES }
+        cmd: cd {{.ITEM}} && go generate ./...
+
+  test:
+    desc: Run tests (with the race detector for common)
+    cmds:
+      - for: { var: GO_MODULES }
+        cmd: cd {{.ITEM}} && go test {{if eq .ITEM "common"}}-race {{end}}./...
+
+  tools:
+    desc: Install development tools
+    cmds:
+      - go install honnef.co/go/tools/cmd/staticcheck@v0.8.1
+      - go install github.com/mgechev/revive@v1.16.0
+      - go install github.com/google/addlicense@v1.2.0
+      - go install golang.org/x/tools/cmd/goimports@v0.50.0

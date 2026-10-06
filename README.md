@@ -67,13 +67,14 @@ Requests are validated against the OpenAPI spec: an invalid body or parameter ge
 ## Prerequisites
 
 - Go 1.26+
+- [Task](https://taskfile.dev) 3.x (`brew install go-task` or `go install github.com/go-task/task/v3/cmd/task@latest`)
 
 ## Build & Test
 
 ```bash
 go test ./am-sdk/... ./am-mock-server/... ./common/...
 go test ./am-mock-server/server/...
-make sync-oas          # AM_OAS_BRANCH to override
+task sync-oas          # AM_OAS_BRANCH to override
 go generate ./am-sdk/... ./am-mock-server/...
 ```
 

@@ -38,7 +38,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: make check-oas
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: task check-oas
 
   generate:
     needs: changes
@@ -49,11 +53,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
-      - run: make generate
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: task generate
       - name: Check for uncommitted changes
         run: |
           if [ -n "$(git diff --name-only)" ]; then
-            echo "::error::Generated files are out of date. Run 'make generate' and commit the result."
+            echo "::error::Generated files are out of date. Run 'task generate' and commit the result."
             git diff --stat
             exit 1
           fi
@@ -67,8 +75,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
-      - run: make tools
-      - run: make lint
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: task tools
+      - run: task lint
 
   test:
     needs: changes
@@ -79,7 +91,11 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
-      - run: make test
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: task test
 
   ci-ok:
     if: always()

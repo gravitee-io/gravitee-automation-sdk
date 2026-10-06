@@ -17,27 +17,28 @@ If you are an AI agent operating in this repository:
 ### Prerequisites
 
 - Go 1.26+
+- [Task](https://taskfile.dev) 3.x (`brew install go-task` or `go install github.com/go-task/task/v3/cmd/task@latest`)
 
 ### Build & Test
 
 ```bash
 # Install lint/dev tools (staticcheck, revive, addlicense, goimports)
-make tools
+task tools
 
 # Sync AM Automation OAS from gravitee-access-management (AM_OAS_BRANCH, default master)
-make sync-oas
+task sync-oas
 
 # Regenerate all code (overlays + oapi-codegen)
-make generate
+task generate
 
 # Run all linters (vet, staticcheck, revive, license headers)
-make lint
+task lint
 
 # Auto-fix lint issues and add license headers
-make lint-fix
+task lint:fix
 
 # Run all tests across all modules
-make test
+task test
 
 # Run tests for a single module
 go test ./am-mock-server/server/...
@@ -62,7 +63,7 @@ Go SDK clients and a mock server for the Gravitee Access Management (AM) Automat
 | Layer | Technology |
 |-------|------------|
 | Language | Go 1.26 |
-| Build | Go workspace (`go.work`) |
+| Build | Go workspace (`go.work`), [Task](https://taskfile.dev) (`Taskfile.yml`) |
 | Code generation | oapi-codegen + OpenAPI Overlay 1.1.0 |
 | HTTP (mock server) | chi v5 |
 | CLI (mock server) | cobra |
@@ -86,7 +87,7 @@ A Go workspace with four modules:
 All generated code comes from a single OpenAPI spec at `am-sdk/openapi/openapi.yaml`. Generation is driven by `//go:generate` directives in `generate.go` files and involves two steps:
 
 1. **Overlay merge** — `am-sdk/overlays/mergeoverlay.go` is a CLI tool that merges multiple YAML overlay files into one. Overlays rename models (strip `Automation` prefix via `x-go-type-name`), standardize operationIds (`get`, `list`, `upsert`, `delete`), and (for SDK clients) rewrite paths to bake `orgId`/`envId` into the server URL.
-2. **oapi-codegen** — Generates typed Go clients or strict servers from the overlaid spec. Configs live under `<module>/gen/` so package directories only hold Go files (the SDK uses `am-sdk/gen/models.cfg.yaml` → `models.gen.go` and `am-sdk/gen/client.cfg.yaml` → `client.gen.go`; the mock server uses `am-mock-server/gen/server/cfg.yaml`). The experimental CRD package keeps its config and overlay in place. Paths inside a config are relative to the package directory, where `go generate` runs.
+2. **oapi-codegen** — Generates typed Go clients or strict servers from the overlaid spec. Configs live under `<module>/gen/` so package directories only hold Go files (the SDK uses `am-sdk/gen/models.cfg.yaml` → `models.gen.go` and `am-sdk/gen/client.cfg.yaml` → `client.gen.go`; the mock server uses `am-mock-server/gen/server/cfg.yaml`). Paths inside a config are relative to the package directory, where `go generate` runs.
 
 ### Overlay Chains
 
@@ -96,7 +97,6 @@ The overlay chain differs between SDK and mock server:
 |--------|----------------|-------------------|
 | SDK (`am-sdk/pkg/sdk/`) | `models.yaml` + `operations.yaml` + `paths.yaml` (bakes org/env into the server URL and strips them from paths) | Client + models (all tags), with `WithDefaults()` from `am-sdk/templates/typedef.tmpl` |
 | Mock server (`am-mock-server/server/`) | `models.yaml` + `operations.yaml` | chi strict-server + models (all tags, original paths kept) |
-| CRD models (`am-sdk/pkg/crd/domain/`) | `models.yaml` + `operations.yaml` + its own `overlay.yaml` (experimental) | Models only |
 
 **Files ending in `.gen.go` are generated — do not edit them.**
 

@@ -58,6 +58,6 @@ All modules start at `0.0.0` in the manifest. The first `feat:` commit touching 
 
 | Job | What it does |
 |---|---|
-| `generate` | Runs `make generate`, fails if generated files have uncommitted changes |
+| `generate` | Runs `task generate`, fails if generated files have uncommitted changes |
 | `lint` | `go vet` + `staticcheck` + `revive` + license header check |
 | `test` | `go test ./...` per module |
