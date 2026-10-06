@@ -1,0 +1,3 @@
+[{"id":"2a5b","environmentId":"DEFAULT","organizationId":"DEFAULT","entityId":"mcp-proxy.github","name":"GitHub","contextPath":"/mcp/github","mode":"PROXY",
+  "proxy":{"serverUrl":"https://api.githubcopilot.com/mcp/","upstreamAuth":{"type":"BEARER"}},"state":"STARTED",
+  "plans":[{"name":"gold","security":{"type":"API_KEY","source":"HEADER"}}]}]

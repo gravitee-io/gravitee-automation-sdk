@@ -15,7 +15,7 @@
 version: "3"
 
 vars:
-  MODULES: am-sdk apim-sdk common am-mock-server
+  MODULES: am-sdk apim-sdk common am-mock-server gops
   # Modules that hold Go code; the others are placeholders and are skipped.
   GO_MODULES:
     sh: for m in {{.MODULES}}; do [ -n "$(find $m -name '*.go' -print -quit)" ] && printf '%s ' $m; done; true

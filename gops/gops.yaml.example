@@ -1,0 +1,11 @@
+# gops configuration: where the Automation API is and how to authenticate.
+# Copy to gops.yaml (or pass --config). GOPS_TOKEN overrides auth.token.
+url: http://localhost:8083/automation
+organization: DEFAULT
+environment: DEFAULT
+auth:
+  # one of: a bearer token (service account) ...
+  token: ""
+  # ... or basic credentials
+  username: admin
+  password: admin
