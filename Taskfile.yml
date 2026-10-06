@@ -22,7 +22,7 @@ vars:
   AM_OAS_BRANCH: '{{.AM_OAS_BRANCH | default "master"}}'
   AM_OAS_URL: https://raw.githubusercontent.com/gravitee-io/gravitee-access-management/refs/heads/{{.AM_OAS_BRANCH}}/docs/automation/openapi.yaml
   AM_OAS_FILE: am-sdk/openapi/openapi.yaml
-  LICENSE_IGNORES: -ignore "**/*.gen.go" -ignore "**/*.gen.yaml" -ignore ".github/**" -ignore ".idea/**"
+  LICENSE_IGNORES: -ignore "**/*.gen.go" -ignore "**/*.gen.yaml" -ignore ".github/**" -ignore ".idea/**" -ignore "apim-sdk/openapi/**/*.yaml" -ignore "gops/internal/transform/crd/manifests/*.yaml"
 
 tasks:
   lint:

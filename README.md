@@ -10,7 +10,7 @@ Aim: talk to AM the same way GKO does (idempotent PUT, org/env scoped), and test
 common/            shared: API context, errors, response helpers, in-memory store
 am-sdk/            AM Automation client (generated + thin facade)
 am-mock-server/    in-memory HTTP mock of the same API
-apim-sdk/          placeholder (empty)
+apim-sdk/          APIM Automation client (generated from the merged APIM + AIM document)
 ```
 
 ## AM SDK

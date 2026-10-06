@@ -12,8 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sdk
+// Package openapi embeds the merged APIM Automation OpenAPI document the SDK is generated from,
+// so tools built on the SDK (schema-driven exporters, validators) read the same contract.
+package openapi
 
-//go:generate go run ../../../common/cmd/mergeoverlay ../../overlays/models.yaml ../../overlays/operations.yaml ../../overlays/paths.yaml ../../gen/overlay.gen.yaml
-//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config ../../gen/models.cfg.yaml ../../openapi/openapi.yaml
-//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config ../../gen/client.cfg.yaml ../../openapi/openapi.yaml
+import _ "embed"
+
+//go:embed openapi.yaml
+var spec []byte
+
+// Spec returns the merged OpenAPI document (APIM Automation API + AI Management fragment) as YAML.
+func Spec() []byte {
+	return spec
+}

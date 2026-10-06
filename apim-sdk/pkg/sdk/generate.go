@@ -14,6 +14,6 @@
 
 package sdk
 
-//go:generate go run ../../../common/cmd/mergeoverlay ../../overlays/models.yaml ../../overlays/operations.yaml ../../overlays/paths.yaml ../../gen/overlay.gen.yaml
+//go:generate go run ../../../common/cmd/mergeoverlay ../../overlays/operations.yaml ../../overlays/paths.yaml ../../gen/overlay.gen.yaml
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config ../../gen/models.cfg.yaml ../../openapi/openapi.yaml
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config ../../gen/client.cfg.yaml ../../openapi/openapi.yaml

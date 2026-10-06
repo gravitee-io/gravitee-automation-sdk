@@ -78,7 +78,7 @@ A Go workspace with four modules:
 | `common` | Shared utilities: `apicontext` (auth + base URL), `response` (status helpers + generic `Payload[T]` extractor), `store` (channel-based in-memory generic store), `errors`, `refs` |
 | `am-sdk` | Generated SDK clients for AM resources (domains, certificates, identity providers, reporters). All resources are generated into the single `am-sdk/pkg/sdk` package |
 | `am-mock-server` | Standalone mock HTTP server implementing the same OpenAPI spec with strict-server codegen. Used for integration-testing the SDK |
-| `apim-sdk` | Placeholder module for a future APIM SDK (empty) |
+| `apim-sdk` | Generated SDK client for the APIM Automation API, from the APIM document merged with the AI Management fragment (`common/cmd/mergespec`), in `apim-sdk/pkg/sdk`; `apim-sdk/openapi` embeds the merged document |
 
 ---
 
@@ -86,7 +86,7 @@ A Go workspace with four modules:
 
 All generated code comes from a single OpenAPI spec at `am-sdk/openapi/openapi.yaml`. Generation is driven by `//go:generate` directives in `generate.go` files and involves two steps:
 
-1. **Overlay merge** — `am-sdk/overlays/mergeoverlay.go` is a CLI tool that merges multiple YAML overlay files into one. Overlays rename models (strip `Automation` prefix via `x-go-type-name`), standardize operationIds (`get`, `list`, `upsert`, `delete`), and (for SDK clients) rewrite paths to bake `orgId`/`envId` into the server URL.
+1. **Overlay merge** — `common/cmd/mergeoverlay` is a CLI tool that merges multiple YAML overlay files into one. Overlays rename models (strip `Automation` prefix via `x-go-type-name`), standardize operationIds (`get`, `list`, `upsert`, `delete`), and (for SDK clients) rewrite paths to bake `orgId`/`envId` into the server URL.
 2. **oapi-codegen** — Generates typed Go clients or strict servers from the overlaid spec. Configs live under `<module>/gen/` so package directories only hold Go files (the SDK uses `am-sdk/gen/models.cfg.yaml` → `models.gen.go` and `am-sdk/gen/client.cfg.yaml` → `client.gen.go`; the mock server uses `am-mock-server/gen/server/cfg.yaml`). Paths inside a config are relative to the package directory, where `go generate` runs.
 
 ### Overlay Chains
