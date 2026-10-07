@@ -38,14 +38,15 @@ var manifests embed.FS
 type crd struct {
 	doc  *schema.Document
 	crds map[string]*schema.CRD
+	opts Options
 }
 
-func newCRD() (*crd, error) {
+func newCRD(opts Options) (*crd, error) {
 	doc, err := schema.ParseOpenAPI(openapi.Spec())
 	if err != nil {
 		return nil, err
 	}
-	t := &crd{doc: doc, crds: map[string]*schema.CRD{}}
+	t := &crd{doc: doc, crds: map[string]*schema.CRD{}, opts: opts}
 	entries, err := fs.ReadDir(manifests, "crd/manifests")
 	if err != nil {
 		return nil, err
@@ -84,7 +85,7 @@ func (t *crd) Transform(r resource.Resource, name string) ([]byte, []string, err
 	if !ok {
 		return nil, nil, fmt.Errorf("no CRD embedded for kind %s", r.Kind.CRDKind)
 	}
-	m := &mapper{notes: nil}
+	m := &mapper{stripIDs: t.opts.StripIDs}
 	spec := m.object(r.State, state, c.Spec, "spec")
 	out, err := yaml.Marshal(manifest{
 		APIVersion: c.APIVersion(),
@@ -99,7 +100,8 @@ func (t *crd) Transform(r resource.Resource, name string) ([]byte, []string, err
 }
 
 type mapper struct {
-	notes []string
+	stripIDs bool
+	notes    []string
 }
 
 // object maps one object node. oas describes what the API returned, crd what the manifest accepts.
@@ -115,6 +117,9 @@ func (m *mapper) object(tree map[string]any, oas, crd *schema.Schema, path strin
 		}
 		if k == "hrid" && isEmpty(v) {
 			continue // not created through the Automation API: GKO derives the hrid from the object name
+		}
+		if k == "id" && m.stripIDs {
+			continue // the user chose a portable manifest over adopting this environment's plans and pages
 		}
 		if !typed {
 			out[k] = v

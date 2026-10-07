@@ -37,6 +37,8 @@ type Options struct {
 	Resources []string
 	Output    string
 	Force     bool
+	// StripIDs drops nested APIM identifiers from manifests (see transform.Options).
+	StripIDs bool
 	// Renames maps a resource id to the object name it must get, regardless of its display name.
 	Renames map[string]string
 }
@@ -80,7 +82,7 @@ func (e *ExistsError) Error() string {
 
 // Run performs the export.
 func Run(ctx context.Context, opts Options, deps Deps) (*Report, error) {
-	transformer, err := transform.Lookup(opts.Format)
+	transformer, err := transform.Lookup(opts.Format, transform.Options{StripIDs: opts.StripIDs})
 	if err != nil {
 		return nil, err
 	}

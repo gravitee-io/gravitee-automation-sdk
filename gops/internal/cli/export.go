@@ -34,6 +34,9 @@ const (
 	collisionPrompt = "prompt"
 	collisionSuffix = "suffix"
 	collisionFail   = "fail"
+
+	idsKeep  = "keep"
+	idsStrip = "strip"
 )
 
 func exportCommand(s streams) *cli.Command {
@@ -53,6 +56,7 @@ Exit codes: 0 done, 2 the run failed or the input was incomplete.`,
 			&cli.BoolFlag{Name: "force", Usage: "overwrite existing files"},
 			&cli.StringFlag{Name: "on-collision", Usage: "how to settle two resources slugging to the same name: prompt (terminal only), suffix (name, name-2, …), fail (default without a terminal)"},
 			&cli.StringSliceFlag{Name: "rename", Usage: "force the object name of a resource, as <id>=<name>; repeatable"},
+			&cli.StringFlag{Name: "ids", Usage: "crd only: keep the APIM identifiers of plans and pages so GKO adopts them on apply, or strip them for a portable manifest (keep, strip; asked in a terminal, keep otherwise)"},
 			&cli.BoolFlag{Name: "json", Usage: "print the report (or the collisions) as JSON on stdout"},
 			&cli.BoolFlag{Name: "no-input", Usage: "never prompt; fail when an input is missing", Sources: cli.EnvVars("GOPS_NO_INPUT")},
 		},
@@ -66,61 +70,25 @@ func runExport(ctx context.Context, cmd *cli.Command, s streams) error {
 	interactive := s.interactive(cmd.Bool("no-input"))
 	asJSON := cmd.Bool("json")
 
-	format := cmd.String("format")
-	if format == "" {
-		if !interactive {
-			return usageError("--format is required (%s)", strings.Join(transform.Formats(), ", "))
-		}
-		var err error
-		if format, err = askFormat(s); err != nil {
-			return err
-		}
+	format, err := resolveFormat(cmd, s, interactive)
+	if err != nil {
+		return err
 	}
-	if !slices.Contains(transform.Formats(), format) {
-		return usageError("unknown format %q (expected one of %s)", format, strings.Join(transform.Formats(), ", "))
+	resources, err := resolveResources(cmd, s, interactive)
+	if err != nil {
+		return err
 	}
-
-	resources := splitList(cmd.String("resources"))
-	if len(resources) == 0 {
-		if !interactive {
-			return usageError("--resources is required (%s)", strings.Join(kindNames(), ", "))
-		}
-		var err error
-		if resources, err = askResources(s); err != nil {
-			return err
-		}
+	resolver, err := resolveCollisionPolicy(cmd, s, interactive)
+	if err != nil {
+		return err
 	}
-	for _, r := range resources {
-		if _, ok := resource.Lookup(r); !ok {
-			return usageError("unknown resource kind %q (expected one of %s)", r, strings.Join(kindNames(), ", "))
-		}
-	}
-
-	onCollision := cmd.String("on-collision")
-	if onCollision == "" {
-		onCollision = collisionFail
-		if interactive {
-			onCollision = collisionPrompt
-		}
-	}
-	var resolver naming.Resolver
-	switch onCollision {
-	case collisionPrompt:
-		if !interactive {
-			return usageError("--on-collision=prompt needs a terminal; use suffix, fail or --rename")
-		}
-		resolver = promptResolver{s}
-	case collisionSuffix:
-		resolver = naming.SuffixResolver{}
-	case collisionFail:
-		resolver = naming.FailResolver{}
-	default:
-		return usageError("unknown --on-collision %q (prompt, suffix, fail)", onCollision)
-	}
-
 	renames, err := parseRenames(cmd.StringSlice("rename"))
 	if err != nil {
 		return usageError("%s", err)
+	}
+	stripIDs, err := resolveIDs(cmd, s, interactive, format)
+	if err != nil {
+		return err
 	}
 
 	cfg, err := config.Load(cmd.String("config"))
@@ -142,6 +110,7 @@ func runExport(ctx context.Context, cmd *cli.Command, s streams) error {
 		Output:    cmd.String("output"),
 		Force:     cmd.Bool("force"),
 		Renames:   renames,
+		StripIDs:  stripIDs,
 	}, export.Deps{Client: client, Resolver: resolver, ConfirmOverwrite: confirm})
 	if err != nil {
 		if ce, ok := export.IsCollision(err); ok && asJSON {
@@ -164,6 +133,86 @@ func runExport(ctx context.Context, cmd *cli.Command, s streams) error {
 	}
 	fmt.Fprintf(s.out, "%d file(s) written\n", len(report.Files))
 	return nil
+}
+
+// Each resolve* reads one input: the flag first, a prompt when a terminal allows it, an exit 2 otherwise.
+
+func resolveFormat(cmd *cli.Command, s streams, interactive bool) (string, error) {
+	format := cmd.String("format")
+	if format == "" {
+		if !interactive {
+			return "", usageError("--format is required (%s)", strings.Join(transform.Formats(), ", "))
+		}
+		var err error
+		if format, err = askFormat(s); err != nil {
+			return "", err
+		}
+	}
+	if !slices.Contains(transform.Formats(), format) {
+		return "", usageError("unknown format %q (expected one of %s)", format, strings.Join(transform.Formats(), ", "))
+	}
+	return format, nil
+}
+
+func resolveResources(cmd *cli.Command, s streams, interactive bool) ([]string, error) {
+	resources := splitList(cmd.String("resources"))
+	if len(resources) == 0 {
+		if !interactive {
+			return nil, usageError("--resources is required (%s)", strings.Join(kindNames(), ", "))
+		}
+		var err error
+		if resources, err = askResources(s); err != nil {
+			return nil, err
+		}
+	}
+	for _, r := range resources {
+		if _, ok := resource.Lookup(r); !ok {
+			return nil, usageError("unknown resource kind %q (expected one of %s)", r, strings.Join(kindNames(), ", "))
+		}
+	}
+	return resources, nil
+}
+
+func resolveCollisionPolicy(cmd *cli.Command, s streams, interactive bool) (naming.Resolver, error) {
+	policy := cmd.String("on-collision")
+	if policy == "" {
+		policy = collisionFail
+		if interactive {
+			policy = collisionPrompt
+		}
+	}
+	switch policy {
+	case collisionPrompt:
+		if !interactive {
+			return nil, usageError("--on-collision=prompt needs a terminal; use suffix, fail or --rename")
+		}
+		return promptResolver{s}, nil
+	case collisionSuffix:
+		return naming.SuffixResolver{}, nil
+	case collisionFail:
+		return naming.FailResolver{}, nil
+	}
+	return nil, usageError("unknown --on-collision %q (prompt, suffix, fail)", policy)
+}
+
+// resolveIDs only applies to manifests; the raw formats are the API state as returned.
+func resolveIDs(cmd *cli.Command, s streams, interactive bool, format string) (bool, error) {
+	if format != "crd" {
+		return false, nil
+	}
+	switch ids := cmd.String("ids"); ids {
+	case idsKeep:
+		return false, nil
+	case idsStrip:
+		return true, nil
+	case "":
+		if interactive {
+			return askStripIDs(s)
+		}
+		return false, nil
+	default:
+		return false, usageError("unknown --ids %q (keep, strip)", ids)
+	}
 }
 
 func printJSON(s streams, v any) {

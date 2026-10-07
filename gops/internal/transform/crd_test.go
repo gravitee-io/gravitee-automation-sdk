@@ -56,7 +56,12 @@ func apiState() map[string]any {
 
 func transformAPI(t *testing.T, state map[string]any) (map[string]any, []string) {
 	t.Helper()
-	tr, err := Lookup("crd")
+	return transformAPIWith(t, state, Options{})
+}
+
+func transformAPIWith(t *testing.T, state map[string]any, opts Options) (map[string]any, []string) {
+	t.Helper()
+	tr, err := Lookup("crd", opts)
 	require.NoError(t, err)
 	kind, _ := resource.Lookup("apis")
 	out, notes, err := tr.Transform(resource.Resource{Kind: kind, ID: "7f2c", Name: "Petstore", State: state}, "petstore")
@@ -106,8 +111,20 @@ func TestCRD_KeepsAStoredHrid(t *testing.T) {
 	assert.Equal(t, "petstore", m["spec"].(map[string]any)["hrid"])
 }
 
+func TestCRD_StripIDs(t *testing.T) {
+	m, _ := transformAPI(t, apiState())
+	plans := m["spec"].(map[string]any)["plans"].(map[string]any)
+	assert.Equal(t, "p1", plans["Keyless"].(map[string]any)["id"], "kept by default: GKO adopts the plan on apply")
+
+	m, _ = transformAPIWith(t, apiState(), Options{StripIDs: true})
+	spec := m["spec"].(map[string]any)
+	assert.NotContains(t, spec["plans"].(map[string]any)["Keyless"], "id")
+	assert.NotContains(t, spec["pages"].(map[string]any)["Home"], "id")
+	assert.Equal(t, "Petstore", spec["name"], "only identifiers go")
+}
+
 func TestCRD_McpProxy(t *testing.T) {
-	tr, err := Lookup("crd")
+	tr, err := Lookup("crd", Options{})
 	require.NoError(t, err)
 	kind, _ := resource.Lookup("mcp-proxies")
 	state := map[string]any{
@@ -134,12 +151,12 @@ func TestCRD_McpProxy(t *testing.T) {
 }
 
 func TestLookup_TerraformIsASlot(t *testing.T) {
-	tr, err := Lookup("tf")
+	tr, err := Lookup("tf", Options{})
 	require.NoError(t, err)
 	kind, _ := resource.Lookup("apis")
 	_, _, err = tr.Transform(resource.Resource{Kind: kind}, "x")
 	assert.ErrorIs(t, err, ErrNotImplemented)
 
-	_, err = Lookup("hcl")
+	_, err = Lookup("hcl", Options{})
 	assert.ErrorContains(t, err, `unknown format "hcl"`)
 }

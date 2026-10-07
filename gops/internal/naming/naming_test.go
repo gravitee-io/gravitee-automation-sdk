@@ -24,12 +24,12 @@ import (
 
 func TestSlug(t *testing.T) {
 	cases := map[string]string{
-		"Petstore":            "petstore",
-		"Petstore API (v2)":   "petstore-api-v2",
-		"  GitHub MCP proxy ": "github-mcp-proxy",
-		"déjà vu":             "d-j-vu",
-		"":                    "unnamed",
-		"---":                 "unnamed",
+		"Petstore":              "petstore",
+		"Petstore API (v2)":     "petstore-api-v2",
+		"  GitHub MCP proxy ":   "github-mcp-proxy",
+		"déjà vu":               "d-j-vu",
+		"":                      "unnamed",
+		"---":                   "unnamed",
 		strings.Repeat("a", 70): strings.Repeat("a", 63),
 	}
 	for in, want := range cases {

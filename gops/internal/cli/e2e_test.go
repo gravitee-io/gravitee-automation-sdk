@@ -119,6 +119,15 @@ func TestExport_EndToEnd(t *testing.T) {
 	assert.Equal(t, "rate-limit", step["policy"])
 	assert.Equal(t, map[string]any{"rate": map[string]any{"limit": 10}}, step["configuration"], "policy configuration passes through")
 
+	// --ids strip: the same manifest without the plan and page identifiers.
+	stripped := t.TempDir()
+	code = Run(context.Background(), []string{"gops", "export", "--config", cfg, "--format", "crd", "--resources", "apis", "--output", stripped, "--no-input", "--rename", "8a1d=petstore-v2", "--ids", "strip"}, bytes.NewReader(nil), &stdout, &stderr)
+	require.Equal(t, ExitOK, code, stderr.String())
+	raw, err = os.ReadFile(filepath.Join(stripped, "apis", "petstore.yaml"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(raw), "id: p1")
+	assert.NotContains(t, string(raw), "id: pg1")
+
 	// Third attempt: nothing may be overwritten without --force.
 	stdout.Reset()
 	stderr.Reset()

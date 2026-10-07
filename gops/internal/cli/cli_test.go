@@ -60,6 +60,10 @@ func TestExport_NonInteractiveContract(t *testing.T) {
 	assert.Equal(t, ExitFailure, code)
 	assert.Contains(t, msg, "expected <id>=<name>")
 
+	code, msg = execute(t, "export", "--config", cfg, "--format", "crd", "--resources", "apis", "--ids", "drop")
+	assert.Equal(t, ExitFailure, code)
+	assert.Contains(t, msg, `unknown --ids "drop"`)
+
 	code, msg = execute(t, "export", "--config", filepath.Join(t.TempDir(), "missing.yaml"), "--format", "crd", "--resources", "apis")
 	assert.Equal(t, ExitFailure, code)
 	assert.Contains(t, msg, "read config")

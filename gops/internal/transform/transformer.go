@@ -35,20 +35,28 @@ type Transformer interface {
 // ErrNotImplemented marks a format that is registered but not written yet.
 var ErrNotImplemented = errors.New("not implemented")
 
+// Options are the choices a transformer leaves to the user.
+type Options struct {
+	// StripIDs drops the APIM identifiers nested in a manifest (plans.*.id, pages.*.id). With them,
+	// GKO adopts the existing plans and pages on apply in this environment; without them, the
+	// manifest is portable and GKO creates new ones.
+	StripIDs bool
+}
+
 // Formats lists the --format values, in display order.
 func Formats() []string {
 	return []string{"json", "yaml", "crd", "tf"}
 }
 
 // Lookup returns the transformer for a --format value.
-func Lookup(format string) (Transformer, error) {
+func Lookup(format string, opts Options) (Transformer, error) {
 	switch format {
 	case "json":
 		return rawJSON{}, nil
 	case "yaml":
 		return rawYAML{}, nil
 	case "crd":
-		return newCRD()
+		return newCRD(opts)
 	case "tf":
 		return terraform{}, nil
 	}

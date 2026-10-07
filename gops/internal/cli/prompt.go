@@ -64,6 +64,21 @@ func askResources(s streams) ([]string, error) {
 	return picked, err
 }
 
+// askStripIDs is a judgment call no rule can make: identifiers tie the manifest to this
+// environment (GKO adopts the plans and pages) or go so the manifest moves to another one.
+func askStripIDs(s streams) (bool, error) {
+	var strip bool
+	err := run(s, huh.NewGroup(
+		huh.NewConfirm().
+			Title("Strip the APIM identifiers from the manifests?").
+			Description("Keep them and GKO adopts the existing plans and pages when the manifest is applied in this environment.\nStrip them for a portable manifest: GKO creates new plans and pages.").
+			Affirmative("Strip").
+			Negative("Keep").
+			Value(&strip),
+	))
+	return strip, err
+}
+
 func confirmOverwrite(s streams, paths []string) (bool, error) {
 	var ok bool
 	err := run(s, huh.NewGroup(

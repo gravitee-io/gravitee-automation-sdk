@@ -36,6 +36,7 @@ without one (CI, an agent, `--no-input`), a missing input fails with exit 2 and 
 | `--format` missing | select | exit 2 |
 | `--resources` missing | multi-select | exit 2 |
 | two resources share a name | one input per resource (`--on-collision=prompt`) | exit 2 with the collisions; `--on-collision=suffix` or `--rename <id>=<name>` settles them |
+| `--format=crd` without `--ids` | confirm: keep or strip the APIM identifiers | `keep` |
 | a file exists, no `--force` | confirm | exit 2 naming the file |
 | report | one line per file | `--json`: the report, or the collisions, on stdout |
 
@@ -61,6 +62,10 @@ The mapping is driven by the two schemas rather than by per-kind code:
 4. CRD nodes with `x-kubernetes-preserve-unknown-fields` (`listeners`, flow selectors) pass through.
 5. `metadata.name` is the settled object name; an empty `hrid` is dropped, GKO derives it from
    the namespace and name.
+6. The identifiers nested in the manifest (`plans.*.id`, `pages.*.id`) are a choice, not a rule:
+   kept (`--ids keep`, the default), GKO adopts the existing plans and pages when the manifest is
+   applied in the same environment; stripped (`--ids strip`), the manifest moves to another
+   environment and GKO creates them. In a terminal, `gops` asks.
 
 The CRDs are copied from gravitee-kubernetes-operator (`internal/transform/crd/manifests`); the
 OpenAPI document is the one `apim-sdk` embeds.
