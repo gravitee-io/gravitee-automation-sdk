@@ -715,7 +715,7 @@ type IdentityProvider struct {
 	// DomainWhitelist Email domains allowed to authenticate through this identity provider. When set, users whose email domain is not listed are rejected.
 	//
 	// Example: ["example.com"]
-	DomainWhitelist []string `json:"domainWhitelist,omitempty"`
+	DomainWhitelist []string `drift:"empty-is-nil" json:"domainWhitelist,omitempty"`
 
 	// DryRunErrors Validation errors returned when dryRun is true. Absent when validation succeeds.
 	DryRunErrors []DryRunError `drift:"ignore" json:"dryRunErrors,omitempty"`
