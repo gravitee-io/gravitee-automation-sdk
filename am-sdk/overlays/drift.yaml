@@ -31,15 +31,15 @@ actions:
   - target: $.components.schemas.AutomationCertificate.properties.configuration
     update:
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:masked
   - target: $.components.schemas.AutomationIdentityProvider.properties.configuration
     update:
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:masked
   - target: $.components.schemas.AutomationReporter.properties.configuration
     update:
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:masked
   - target: $.components.schemas.AutomationDataPlane.properties.configuration
     update:
       x-oapi-codegen-extra-tags:
