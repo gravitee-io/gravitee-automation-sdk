@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.4](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.3.3...am-sdk/v2.3.4) (2026-10-08)
+
+
+### Bug Fixes
+
+* tags dropped during rebase ([9670415](https://github.com/gravitee-io/gravitee-automation-sdk/commit/9670415b947e33f654c08f8487016502180897e4))
+
 ## [2.3.3](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.3.2...am-sdk/v2.3.3) (2026-10-08)
 
 
