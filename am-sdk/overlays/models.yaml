@@ -14,7 +14,7 @@
 
 overlay: 1.1.0
 info:
-  title: Shape generated models (drop Automation prefix, add struct tags)
+  title: Shape generated models (drop Automation prefix, map free-form configurations)
   version: 0.0.1
 actions:
   - target: $.components.schemas.AutomationAccountSettings
@@ -51,48 +51,24 @@ actions:
     update:
       x-go-type-name: SamlSettings
 
-  # Values AM fills in server-side without an OpenAPI default: drift detection must ignore them when unset locally.
-  - target: $.components.schemas.AutomationDomain.properties.dataPlaneId
-    update:
-      x-oapi-codegen-extra-tags:
-        drift: ignore-remote-default
-  - target: $.components.schemas.SpiffeDomainSettings.properties.defaultAllowedAlgorithms
-    update:
-      x-oapi-codegen-extra-tags:
-        drift: ignore-only:remote
-
-  # Free-form plugin configurations: compared as unstructured objects by drift detection.
+  # Free-form plugin configurations: typed as unstructured objects.
   - target: $.components.schemas.AutomationCertificate.properties.configuration
     update:
       x-go-type: unstructured.Stringified
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
-      x-oapi-codegen-extra-tags:
-        drift: unstructured:masked
   - target: $.components.schemas.AutomationIdentityProvider.properties.configuration
     update:
       x-go-type: unstructured.Stringified
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
-      x-oapi-codegen-extra-tags:
-        drift: unstructured:masked
   - target: $.components.schemas.AutomationReporter.properties.configuration
     update:
       x-go-type: unstructured.Stringified
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
-      x-oapi-codegen-extra-tags:
-        drift: unstructured:masked
   - target: $.components.schemas.AutomationDataPlane.properties.configuration
     update:
       x-go-type: unstructured.Unstructured
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
-      x-oapi-codegen-extra-tags:
-        drift: unstructured:masked
-
-  # Read-only properties are set by AM, never part of the desired state: drift detection skips them.
-  - target: $.components.schemas.*.properties[?(@.readOnly == true)]
-    update:
-      x-oapi-codegen-extra-tags:
-        drift: ignore
