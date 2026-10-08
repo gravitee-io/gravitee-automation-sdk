@@ -8,7 +8,13 @@ func (v {{.TypeName}}) WithDefaults() {{.TypeName}} {
 {{- range .Schema.Properties}}
 {{- $d := .Schema.OAPISchema.Default}}
 {{- if ne $d nil}}
-{{- if .HasOptionalPointer}}
+{{- if or .Schema.ArrayType .Schema.OAPISchema.AdditionalProperties.Schema}}
+{{- $type := .GoTypeDef}}{{if .HasOptionalPointer}}{{$type = slice .GoTypeDef 1}}{{end}}
+	if v.{{.GoFieldName}} == nil {
+		value := {{$type}}{ {{- if .Schema.ArrayType}}{{range $i, $e := $d}}{{if $i}}, {{end}}{{printf "%#v" $e}}{{end}}{{else}}{{range $k, $e := $d}}{{printf "%q" $k}}: {{printf "%#v" $e}}, {{end}}{{end -}} }
+		v.{{.GoFieldName}} = {{if .HasOptionalPointer}}&{{end}}value
+	}
+{{- else if .HasOptionalPointer}}
 	if v.{{.GoFieldName}} == nil {
 		v.{{.GoFieldName}} = new({{slice .GoTypeDef 1}}({{printf "%#v" $d}}))
 	}

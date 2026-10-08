@@ -229,7 +229,7 @@ type ClientInterface interface {
 
 	// DeleteCertificate Delete a certificate
 	//
-	// Deletes an Automation-managed certificate by its key. Deleting a certificate that does not exist also returns 204.
+	// Deletes an Automation-managed certificate by its key. A domain that names it by key in saml.certificate or certificateSettings.fallbackCertificate keeps the reference, which resolves again once a certificate with the same key is created. Deleting a certificate that does not exist also returns 204.
 	//
 	// Corresponds with DELETE /domains/{domainKey}/certificates/{certKey} (the `DeleteCertificate` operationId).
 	DeleteCertificate(ctx context.Context, domainKey string, certKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -268,7 +268,7 @@ type ClientInterface interface {
 
 	// DeleteIdentityProvider Delete an identity provider
 	//
-	// Deletes an Automation-managed identity provider by its key. Deleting an identity provider that does not exist also returns 204.
+	// Deletes an Automation-managed identity provider by its key. A domain that names it in accountSettings.defaultIdentityProviderForRegistration keeps the reference, which resolves again once an identity provider with the same key is created. Deleting an identity provider that does not exist also returns 204.
 	//
 	// Corresponds with DELETE /domains/{domainKey}/identities/{identityKey} (the `DeleteIdentityProvider` operationId).
 	DeleteIdentityProvider(ctx context.Context, domainKey string, identityKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -555,7 +555,7 @@ func (c *Client) UpsertCertificate(ctx context.Context, domainKey string, params
 
 // DeleteCertificate Delete a certificate
 //
-// Deletes an Automation-managed certificate by its key. Deleting a certificate that does not exist also returns 204.
+// Deletes an Automation-managed certificate by its key. A domain that names it by key in saml.certificate or certificateSettings.fallbackCertificate keeps the reference, which resolves again once a certificate with the same key is created. Deleting a certificate that does not exist also returns 204.
 //
 // Corresponds with DELETE /domains/{domainKey}/certificates/{certKey} (the `DeleteCertificate` operationId).
 func (c *Client) DeleteCertificate(ctx context.Context, domainKey string, certKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -644,7 +644,7 @@ func (c *Client) UpsertIdentityProvider(ctx context.Context, domainKey string, p
 
 // DeleteIdentityProvider Delete an identity provider
 //
-// Deletes an Automation-managed identity provider by its key. Deleting an identity provider that does not exist also returns 204.
+// Deletes an Automation-managed identity provider by its key. A domain that names it in accountSettings.defaultIdentityProviderForRegistration keeps the reference, which resolves again once an identity provider with the same key is created. Deleting an identity provider that does not exist also returns 204.
 //
 // Corresponds with DELETE /domains/{domainKey}/identities/{identityKey} (the `DeleteIdentityProvider` operationId).
 func (c *Client) DeleteIdentityProvider(ctx context.Context, domainKey string, identityKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1795,7 +1795,7 @@ type ClientWithResponsesInterface interface {
 
 	// DeleteCertificateWithResponse Delete a certificate
 	//
-	// Deletes an Automation-managed certificate by its key. Deleting a certificate that does not exist also returns 204.
+	// Deletes an Automation-managed certificate by its key. A domain that names it by key in saml.certificate or certificateSettings.fallbackCertificate keeps the reference, which resolves again once a certificate with the same key is created. Deleting a certificate that does not exist also returns 204.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -1840,7 +1840,7 @@ type ClientWithResponsesInterface interface {
 
 	// DeleteIdentityProviderWithResponse Delete an identity provider
 	//
-	// Deletes an Automation-managed identity provider by its key. Deleting an identity provider that does not exist also returns 204.
+	// Deletes an Automation-managed identity provider by its key. A domain that names it in accountSettings.defaultIdentityProviderForRegistration keeps the reference, which resolves again once an identity provider with the same key is created. Deleting an identity provider that does not exist also returns 204.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -3199,7 +3199,7 @@ func (c *ClientWithResponses) UpsertCertificateWithResponse(ctx context.Context,
 
 // DeleteCertificateWithResponse Delete a certificate
 //
-// Deletes an Automation-managed certificate by its key. Deleting a certificate that does not exist also returns 204.
+// Deletes an Automation-managed certificate by its key. A domain that names it by key in saml.certificate or certificateSettings.fallbackCertificate keeps the reference, which resolves again once a certificate with the same key is created. Deleting a certificate that does not exist also returns 204.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -3274,7 +3274,7 @@ func (c *ClientWithResponses) UpsertIdentityProviderWithResponse(ctx context.Con
 
 // DeleteIdentityProviderWithResponse Delete an identity provider
 //
-// Deletes an Automation-managed identity provider by its key. Deleting an identity provider that does not exist also returns 204.
+// Deletes an Automation-managed identity provider by its key. A domain that names it in accountSettings.defaultIdentityProviderForRegistration keeps the reference, which resolves again once an identity provider with the same key is created. Deleting an identity provider that does not exist also returns 204.
 //
 // Returns a wrapper object for the known response body format(s).
 //

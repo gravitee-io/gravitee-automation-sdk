@@ -123,6 +123,24 @@ func (e WebAuthnSettingsUserVerification) Valid() bool {
 	}
 }
 
+// Defines values for XFrameSettingsAction.
+const (
+	DENY       XFrameSettingsAction = "DENY"
+	SAMEORIGIN XFrameSettingsAction = "SAMEORIGIN"
+)
+
+// Valid indicates whether the value is a known member of the XFrameSettingsAction enum.
+func (e XFrameSettingsAction) Valid() bool {
+	switch e {
+	case DENY:
+		return true
+	case SAMEORIGIN:
+		return true
+	default:
+		return false
+	}
+}
+
 // AutomationAccountSettings User account settings for the domain: brute-force protection, registration, password reset, remember-me, and MFA challenge behavior.
 type AutomationAccountSettings = AccountSettings
 
@@ -142,7 +160,7 @@ type AccountSettings struct {
 	// CompleteRegistrationWhenResetPassword Whether resetting a password also completes a pending registration.
 	CompleteRegistrationWhenResetPassword *bool `json:"completeRegistrationWhenResetPassword,omitempty"`
 
-	// DefaultIdentityProviderForRegistration Key of an identity provider that exists under this domain, used as the default for user registration. Resolved against the domain's identity providers when applied; a value that does not match an existing identity provider is rejected with a 400 response.
+	// DefaultIdentityProviderForRegistration Key of an identity provider managed under this domain, used as the default for user registration. The reference is not checked against existing identity providers: it can name one created after the domain or since deleted, and resolves whenever an identity provider with that key exists.
 	//
 	// Example: users-idp
 	DefaultIdentityProviderForRegistration *string `json:"defaultIdentityProviderForRegistration,omitempty"`
@@ -278,28 +296,31 @@ type AutomationCIBASettings = CIBASettings
 // CIBASettings Client-Initiated Backchannel Authentication (CIBA) settings for the domain. CIBA lets a relying party initiate end-user authentication from a separate consumption device, without redirecting the user through the browser. Authentication device notifiers are not managed by the Automation API and are not exposed here.
 type CIBASettings struct {
 	// AuthReqExpiry Default validity period, in seconds, of the issued auth_req_id.
-	//
-	// Example: 600
 	AuthReqExpiry *int32 `json:"authReqExpiry,omitempty"`
 
 	// BindingMessageLength Maximum number of characters accepted for the binding_message parameter.
-	//
-	// Example: 256
 	BindingMessageLength *int32 `json:"bindingMessageLength,omitempty"`
 
 	// Enabled Whether Client-Initiated Backchannel Authentication is enabled for the domain.
 	Enabled *bool `json:"enabled,omitempty"`
 
 	// TokenReqInterval Minimum delay, in seconds, that a client must wait between two polls of the token endpoint for the same auth_req_id (POLL or PING delivery mode).
-	//
-	// Example: 5
 	TokenReqInterval *int32 `json:"tokenReqInterval,omitempty"`
 }
 
 // WithDefaults returns a copy of CIBASettings with unset fields set to their OpenAPI defaults.
 func (v CIBASettings) WithDefaults() CIBASettings {
+	if v.AuthReqExpiry == nil {
+		v.AuthReqExpiry = new(int32(600))
+	}
+	if v.BindingMessageLength == nil {
+		v.BindingMessageLength = new(int32(256))
+	}
 	if v.Enabled == nil {
 		v.Enabled = new(bool(false))
+	}
+	if v.TokenReqInterval == nil {
+		v.TokenReqInterval = new(int32(5))
 	}
 	return v
 }
@@ -358,7 +379,7 @@ type AutomationCertificateSettings = CertificateSettings
 
 // CertificateSettings Domain-level certificate settings.
 type CertificateSettings struct {
-	// FallbackCertificate Key of a certificate managed under this domain, used as the fallback certificate when a client does not specify one. Must reference a certificate created via the domain's certificate endpoints.
+	// FallbackCertificate Key of a certificate managed under this domain, used as the fallback certificate when a client does not specify one. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever a certificate with that key exists.
 	//
 	// Example: default
 	FallbackCertificate *string `json:"fallbackCertificate,omitempty"`
@@ -607,6 +628,9 @@ func (v Domain) WithDefaults() Domain {
 		withDefaults := v.AccountSettings.WithDefaults()
 		v.AccountSettings = &withDefaults
 	}
+	if v.AlertEnabled == nil {
+		v.AlertEnabled = new(bool(false))
+	}
 	if v.CertificateSettings != nil {
 		withDefaults := v.CertificateSettings.WithDefaults()
 		v.CertificateSettings = &withDefaults
@@ -731,6 +755,22 @@ type IdentityProvider struct {
 
 // WithDefaults returns a copy of IdentityProvider with unset fields set to their OpenAPI defaults.
 func (v IdentityProvider) WithDefaults() IdentityProvider {
+	if v.DomainWhitelist == nil {
+		value := []string{}
+		v.DomainWhitelist = value
+	}
+	if v.GroupMapper == nil {
+		value := map[string][]string{}
+		v.GroupMapper = value
+	}
+	if v.Mappers == nil {
+		value := map[string]string{}
+		v.Mappers = value
+	}
+	if v.RoleMapper == nil {
+		value := map[string][]string{}
+		v.RoleMapper = value
+	}
 	if v.System == nil {
 		v.System = new(bool(false))
 	}
@@ -854,7 +894,7 @@ type AutomationSamlSettings = SamlSettings
 
 // SamlSettings Settings for the domain acting as a SAML 2.0 identity provider (IdP).
 type SamlSettings struct {
-	// Certificate Key of a certificate managed under this domain, used to sign SAML responses. Must reference a certificate created via the domain's certificate endpoints.
+	// Certificate Key of a certificate managed under this domain, used to sign SAML responses. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever a certificate with that key exists.
 	//
 	// Example: signing-cert
 	Certificate *string `json:"certificate,omitempty"`
@@ -1012,7 +1052,7 @@ func (v FormField) WithDefaults() FormField {
 
 // IdJagSettings ID-JAG issuance behavior of token exchange.
 type IdJagSettings struct {
-	// LaxValidation Lax validation: also accept an access token issued to the requesting client as the subject token. By default only an ID token is accepted.
+	// LaxValidation Lax validation: also accept an access token as the subject token. By default only an ID token is accepted. The access token must be issued to the requesting client or, when an MCP server requests, have that MCP server as audience.
 	LaxValidation *bool `json:"laxValidation,omitempty"`
 }
 
@@ -1375,6 +1415,10 @@ func (v SpiffeDomainSettings) WithDefaults() SpiffeDomainSettings {
 	if v.ClockSkewSeconds == nil {
 		v.ClockSkewSeconds = new(int32(30))
 	}
+	if v.DefaultAllowedAlgorithms == nil {
+		value := []string{"RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "EdDSA"}
+		v.DefaultAllowedAlgorithms = value
+	}
 	if v.Enabled == nil {
 		v.Enabled = new(bool(false))
 	}
@@ -1436,7 +1480,7 @@ type TokenExchangeSettings struct {
 	// IdJagSettings ID-JAG issuance behavior of token exchange.
 	IdJagSettings *IdJagSettings `json:"idJagSettings,omitempty"`
 
-	// MaxDelegationDepth Maximum depth of the delegation chain (nested "act" claims). Clamped to the range 1–100.
+	// MaxDelegationDepth Maximum depth of the delegation chain (nested "act" claims). Range 1–100.
 	MaxDelegationDepth *int32 `json:"maxDelegationDepth,omitempty"`
 
 	// TokenExchangeOAuthSettings OAuth-specific token-exchange behavior, such as how scopes are handled, with optional inheritance from domain defaults.
@@ -1671,10 +1715,10 @@ func (v WebProtectionSettings) WithDefaults() WebProtectionSettings {
 
 // XFrameSettings Controls whether the domain's pages may be embedded in frames on other origins.
 type XFrameSettings struct {
-	// Action X-Frame-Options action. Supported values: DENY, SAMEORIGIN. Leave empty to omit the header.
+	// Action X-Frame-Options action. Omit to leave the header out.
 	//
 	// Example: DENY
-	Action *string `json:"action,omitempty"`
+	Action *XFrameSettingsAction `json:"action,omitempty"`
 
 	// Enabled Whether X-Frame-Options is enabled for the domain when not inherited.
 	Enabled *bool `json:"enabled,omitempty"`
@@ -1693,6 +1737,11 @@ func (v XFrameSettings) WithDefaults() XFrameSettings {
 	}
 	return v
 }
+
+// XFrameSettingsAction X-Frame-Options action. Omit to leave the header out.
+//
+// Example: DENY
+type XFrameSettingsAction string
 
 // XssProtectionSettings Controls the legacy X-XSS-Protection response header.
 type XssProtectionSettings struct {
