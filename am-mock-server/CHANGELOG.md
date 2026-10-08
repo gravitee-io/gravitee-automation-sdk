@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.3](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.3.2...am-mock-server/v1.3.3) (2026-10-08)
+
+
+### Bug Fixes
+
+* 'set' drift tag and no drift tags in server gen ([e054134](https://github.com/gravitee-io/gravitee-automation-sdk/commit/e054134fd8ecb1c4da995e046a75734a3d3ee7d7))
+* **deps:** bump am-sdk to v2.3.2 ([a6ea623](https://github.com/gravitee-io/gravitee-automation-sdk/commit/a6ea623a3e834d4f940f966d5a628edd32e79590))
+
 ## [1.3.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.3.1...am-mock-server/v1.3.2) (2026-10-05)
 
 
