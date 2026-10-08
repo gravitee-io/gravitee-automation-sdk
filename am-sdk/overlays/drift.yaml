@@ -56,3 +56,9 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: set
+
+  # Array AM defaults to []: absent and empty mean the same thing.
+  - target: $.components.schemas.*.properties[?@.type == "array" && length(@.default) == 0]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
