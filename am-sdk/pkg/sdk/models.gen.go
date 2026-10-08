@@ -333,7 +333,7 @@ type Certificate struct {
 	// Configuration Plugin-specific configuration as a JSON-encoded string. Its shape is defined by the selected certificate type. Sensitive values, as flagged by the plugin, are returned as ******** in every response; an unset sensitive value is omitted. Sending ******** back on update keeps the stored value; sending it on create is rejected. The uploaded keystore file is masked too; sending ******** back keeps it.
 	//
 	// Example: {"jks":{"content":"...","name":"keystore.jks"},"storepass":"secret","alias":"mykey","keypass":"secret"}
-	Configuration *unstructured.Stringified `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Stringified `drift:"unstructured:masked" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
@@ -707,7 +707,7 @@ type IdentityProvider struct {
 	// Configuration Plugin-specific configuration as a JSON-encoded string. Its shape is defined by the selected identity provider type. Sensitive values, as flagged by the plugin, are returned as ******** in every response; an unset sensitive value is omitted. Sending ******** back on update keeps the stored value; sending it on create is rejected.
 	//
 	// Example: {"users":[{"username":"admin","password":"..."}]}
-	Configuration *unstructured.Stringified `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Stringified `drift:"unstructured:masked" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
@@ -842,7 +842,7 @@ type Reporter struct {
 	// Configuration Plugin-specific configuration as a JSON-encoded string. Its shape is defined by the selected reporter type. Sensitive values, as flagged by the plugin, are returned as ******** in every response; an unset sensitive value is omitted. Sending ******** back on update keeps the stored value; sending it on create is rejected.
 	//
 	// Example: {"bootstrapServers":"kafka:9092","topic":"audit"}
-	Configuration *unstructured.Stringified `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Stringified `drift:"unstructured:masked" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
