@@ -312,7 +312,7 @@ type Certificate struct {
 	// Configuration Plugin-specific configuration as a JSON-encoded string. Its shape is defined by the selected certificate type. Sensitive values, as flagged by the plugin, are returned as ******** in every response; an unset sensitive value is omitted. Sending ******** back on update keeps the stored value; sending it on create is rejected. The uploaded keystore file is masked too; sending ******** back keeps it.
 	//
 	// Example: {"jks":{"content":"...","name":"keystore.jks"},"storepass":"secret","alias":"mykey","keypass":"secret"}
-	Configuration *unstructured.Stringified `drift:"unstructured:masked" json:"configuration,omitempty"`
+	Configuration *unstructured.Stringified `drift:"unstructured" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
@@ -442,7 +442,7 @@ type DataPlane struct {
 	// Configuration Connection settings. Write-only: it can hold credentials.
 	//
 	// Example: {"mongodb":{"dbname":"gravitee-am-acme","host":"mongo","port":27017}}
-	Configuration *unstructured.Unstructured `drift:"unstructured:masked" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
@@ -577,7 +577,7 @@ type Domain struct {
 	// Tags Sharding tags that control which gateways deploy this domain.
 	//
 	// Example: ["eu","production"]
-	Tags []string `json:"tags,omitempty"`
+	Tags []string `drift:"set" json:"tags,omitempty"`
 
 	// TokenExchangeSettings OAuth 2.0 Token Exchange (RFC 8693) configuration for the domain, covering impersonation and delegation.
 	TokenExchangeSettings *TokenExchangeSettings `json:"tokenExchangeSettings,omitempty"`
@@ -683,7 +683,7 @@ type IdentityProvider struct {
 	// Configuration Plugin-specific configuration as a JSON-encoded string. Its shape is defined by the selected identity provider type. Sensitive values, as flagged by the plugin, are returned as ******** in every response; an unset sensitive value is omitted. Sending ******** back on update keeps the stored value; sending it on create is rejected.
 	//
 	// Example: {"users":[{"username":"admin","password":"..."}]}
-	Configuration *unstructured.Stringified `drift:"unstructured:masked" json:"configuration,omitempty"`
+	Configuration *unstructured.Stringified `drift:"unstructured" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
@@ -794,7 +794,7 @@ type AutomationReporter = Reporter
 // Reporter A reporter managed under a domain by the Automation API. Reporters persist audit events to a backend. The key field is the stable, immutable identity used for idempotent create-or-update.
 type Reporter struct {
 	// AttributeMappingEventTypes Audit event types the attribute mappings apply to. Empty means every event type. Ignored when system is true.
-	AttributeMappingEventTypes []string `json:"attributeMappingEventTypes,omitempty"`
+	AttributeMappingEventTypes []string `drift:"set" json:"attributeMappingEventTypes,omitempty"`
 
 	// AttributeMappings Additional attributes exported alongside the regular audit payload. Each entry pairs an expression read from the audit context with the field name its value is exported under. Ignored when system is true; a system reporter exports no additional attributes.
 	AttributeMappings []ReporterAttributeMapping `json:"attributeMappings,omitempty"`
@@ -802,7 +802,7 @@ type Reporter struct {
 	// Configuration Plugin-specific configuration as a JSON-encoded string. Its shape is defined by the selected reporter type. Sensitive values, as flagged by the plugin, are returned as ******** in every response; an unset sensitive value is omitted. Sending ******** back on update keeps the stored value; sending it on create is rejected.
 	//
 	// Example: {"bootstrapServers":"kafka:9092","topic":"audit"}
-	Configuration *unstructured.Stringified `drift:"unstructured:masked" json:"configuration,omitempty"`
+	Configuration *unstructured.Stringified `drift:"unstructured" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
@@ -884,17 +884,17 @@ type CorsSettings struct {
 	// AllowedHeaders Request headers permitted on cross-origin requests.
 	//
 	// Example: ["Authorization","Content-Type"]
-	AllowedHeaders []string `json:"allowedHeaders,omitempty"`
+	AllowedHeaders []string `drift:"set" json:"allowedHeaders,omitempty"`
 
 	// AllowedMethods HTTP methods permitted on cross-origin requests.
 	//
 	// Example: ["GET","POST","PUT","DELETE"]
-	AllowedMethods []string `json:"allowedMethods,omitempty"`
+	AllowedMethods []string `drift:"set" json:"allowedMethods,omitempty"`
 
 	// AllowedOrigins Origins permitted to make cross-origin requests. Use "*" to allow any origin.
 	//
 	// Example: ["https://app.example.com"]
-	AllowedOrigins []string `json:"allowedOrigins,omitempty"`
+	AllowedOrigins []string `drift:"set" json:"allowedOrigins,omitempty"`
 
 	// Enabled Whether CORS handling is enabled for the domain when not inherited.
 	Enabled *bool `json:"enabled,omitempty"`
