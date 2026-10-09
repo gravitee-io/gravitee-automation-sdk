@@ -18,7 +18,9 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"slices"
 	"sort"
+	"strings"
 
 	"github.com/gravitee-io/gravitee-automation-sdk/apim-sdk/openapi"
 	"github.com/gravitee-io/gravitee-automation-sdk/gops/internal/resource"
@@ -108,6 +110,9 @@ type mapper struct {
 func (m *mapper) object(tree map[string]any, oas, crd *schema.Schema, path string) map[string]any {
 	out := map[string]any{}
 	typed := crd != nil && !crd.PreserveUnknown && len(crd.Properties) > 0
+	if typed {
+		tree = fold(tree, crd)
+	}
 	for _, k := range sortedKeys(tree) {
 		v := tree[k]
 		p := path + "." + k
@@ -128,6 +133,10 @@ func (m *mapper) object(tree map[string]any, oas, crd *schema.Schema, path strin
 		crdProp := crd.Property(k)
 		if crdProp == nil {
 			m.notes = append(m.notes, fmt.Sprintf("%s: dropped, not in the CRD", p))
+			continue
+		}
+		if s, ok := v.(string); ok && len(crdProp.Enum) > 0 && !slices.Contains(crdProp.Enum, s) {
+			m.notes = append(m.notes, fmt.Sprintf("%s: dropped %q, the CRD accepts %s", p, s, strings.Join(crdProp.Enum, ", ")))
 			continue
 		}
 		out[k] = m.value(v, oasProp, crdProp, p)
@@ -171,6 +180,62 @@ func (m *mapper) value(v any, oas, crd *schema.Schema, path string) any {
 		return m.object(val, oas, crd, path)
 	}
 	return v
+}
+
+// fold nests the fields of a discriminated object the way the CRD declares them. The Automation API
+// writes {type: API_KEY, source: HEADER}; the CRD writes {type: API_KEY, apiKey: {source: HEADER}},
+// one sub-object per type value. When the CRD object has a `type` enum and a property named after
+// the value (API_KEY → apiKey, OAUTH2_AUTH0 → auth0), the fields the CRD does not declare at this
+// level move under that property.
+func fold(tree map[string]any, crd *schema.Schema) map[string]any {
+	typeProp := crd.Property("type")
+	value, ok := tree["type"].(string)
+	if typeProp == nil || len(typeProp.Enum) == 0 || !ok {
+		return tree
+	}
+	target := branchFor(value, crd)
+	if target == "" {
+		return tree
+	}
+	if _, already := tree[target]; already {
+		return tree
+	}
+	out, nested := map[string]any{}, map[string]any{}
+	for k, v := range tree {
+		if crd.Property(k) != nil {
+			out[k] = v
+		} else {
+			nested[k] = v
+		}
+	}
+	if len(nested) > 0 {
+		out[target] = nested
+	}
+	return out
+}
+
+// branchFor names the CRD property holding the fields of a type value: the property whose name,
+// lower-cased and without separators, equals the value or ends it (OAUTH2_AUTH0 → auth0).
+func branchFor(value string, crd *schema.Schema) string {
+	want := normalize(value)
+	best := ""
+	for name, prop := range crd.Properties {
+		if name == "type" || prop.Type != "object" || len(prop.Properties) == 0 {
+			continue
+		}
+		n := normalize(name)
+		if n == want {
+			return name
+		}
+		if strings.HasSuffix(want, n) && len(n) > len(normalize(best)) {
+			best = name
+		}
+	}
+	return best
+}
+
+func normalize(s string) string {
+	return strings.ToLower(strings.NewReplacer("_", "", "-", "").Replace(s))
 }
 
 // keyOf picks the map key of a listed item: its name, else its hrid, else its position.

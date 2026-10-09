@@ -25,6 +25,8 @@ type Schema struct {
 	ItemsSchema          *Schema
 	AdditionalProperties *Schema
 	ReadOnly             bool
+	// Enum lists the allowed values of a scalar, when the schema restricts them.
+	Enum []string
 	// PreserveUnknown marks a CRD node with x-kubernetes-preserve-unknown-fields: anything goes under it.
 	PreserveUnknown bool
 }

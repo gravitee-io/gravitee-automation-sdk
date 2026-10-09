@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,7 +93,9 @@ func TestExport_EndToEnd(t *testing.T) {
 	assert.Equal(t, "petstore-v2", report.Files[1].Name)
 	assert.Equal(t, "github", report.Files[2].Name)
 	assert.Equal(t, filepath.Join(out, "mcp-proxies", "github.yaml"), report.Files[2].Path)
-	assert.Len(t, report.Notes, 1, "primaryOwner dropped once (the second API has none)")
+	notes := strings.Join(report.Notes, "\n")
+	assert.Contains(t, notes, "petstore.yaml: spec.primaryOwner: dropped, not in the CRD")
+	assert.Contains(t, notes, `petstore.yaml: spec.lifecycleState: dropped "CREATED"`)
 
 	raw, err := os.ReadFile(filepath.Join(out, "apis", "petstore.yaml"))
 	require.NoError(t, err)

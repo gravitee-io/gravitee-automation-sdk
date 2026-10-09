@@ -99,14 +99,25 @@ func Run(ctx context.Context, opts Options, deps Deps) (*Report, error) {
 		path string
 	}
 	var targets []target
+	var skipped []string
 	for _, kindName := range opts.Resources {
 		kind, ok := resource.Lookup(kindName)
 		if !ok {
 			return nil, fmt.Errorf("unknown resource kind %q", kindName)
 		}
-		resources, err := list(ctx, kind)
+		listed, err := list(ctx, kind)
 		if err != nil {
 			return nil, err
+		}
+		resources := listed[:0]
+		for _, r := range listed {
+			if kind.Skip != nil {
+				if why := kind.Skip(r); why != "" {
+					skipped = append(skipped, fmt.Sprintf("%s %q (%s): skipped, %s", kind.Name, r.Name, r.ID, why))
+					continue
+				}
+			}
+			resources = append(resources, r)
 		}
 		names, err := settleNames(resources, opts.Renames, deps.Resolver)
 		if err != nil {
@@ -139,7 +150,7 @@ func Run(ctx context.Context, opts Options, deps Deps) (*Report, error) {
 		}
 	}
 
-	report := &Report{}
+	report := &Report{Notes: skipped}
 	for _, t := range targets {
 		content, notes, err := transformer.Transform(t.res, t.name)
 		if err != nil {

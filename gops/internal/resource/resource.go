@@ -44,6 +44,8 @@ type Kind struct {
 	CRDKind string
 	// List fetches the resources of the kind through the SDK.
 	List func(ctx context.Context, client *sdk.APIMClient) ([]Resource, error)
+	// Skip reports why a listed resource belongs to another kind, or "" to export it.
+	Skip func(r Resource) string
 }
 
 // Kinds returns every kind gops can export, in display order.
@@ -65,6 +67,14 @@ var apis = &Kind{
 	Name:        "apis",
 	StateSchema: "ApiV4State",
 	CRDKind:     "ApiV4Definition",
+	// An MCP proxy is stored as a V4 API of type MCP_PROXY, so GET /apis lists it too. GKO manages it
+	// through McpProxy: exporting it here as well would put one resource under two CRDs.
+	Skip: func(r Resource) string {
+		if r.State["type"] == "MCP_PROXY" {
+			return "an MCP proxy, exported by --resources=mcp-proxies"
+		}
+		return ""
+	},
 }
 
 var mcpProxies = &Kind{

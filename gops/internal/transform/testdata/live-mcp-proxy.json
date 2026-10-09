@@ -1,0 +1,24 @@
+{
+  "entityId": "mcp-proxy.github",
+  "name": "GitHub",
+  "description": "GitHub MCP proxy",
+  "contextPath": "/mcp/github",
+  "mode": "PROXY",
+  "proxy": {
+    "serverUrl": "https://api.githubcopilot.com/mcp/"
+  },
+  "state": "STOPPED",
+  "identityProviders": [],
+  "plans": [
+    {
+      "name": "gold",
+      "security": {
+        "type": "API_KEY",
+        "source": "HEADER"
+      }
+    }
+  ],
+  "id": "edd14a73-f9dd-3b77-bfae-94c69e2926e2",
+  "environmentId": "DEFAULT",
+  "organizationId": "DEFAULT"
+}

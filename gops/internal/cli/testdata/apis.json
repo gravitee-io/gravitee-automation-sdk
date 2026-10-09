@@ -4,7 +4,7 @@
   "primaryOwner":{"id":"u1","displayName":"admin","type":"USER"},
   "listeners":[{"type":"HTTP","paths":[{"path":"/pets/"}],"entrypoints":[{"type":"http-proxy","qos":"AUTO"}]}],
   "endpointGroups":[{"name":"default-group","type":"http-proxy","endpoints":[{"name":"default","type":"http-proxy","weight":1,"inheritConfiguration":false,"configuration":{"target":"https://petstore.example"}}]}],
-  "plans":[{"id":"p1","hrid":null,"name":"Keyless","security":{"type":"KEY_LESS"},"status":"PUBLISHED","type":"STANDARD","validation":"AUTO","mode":"STANDARD"}],
+  "plans":[{"id":"p1","hrid":null,"name":"Keyless","security":{"type":"KEY_LESS"},"status":"PUBLISHED","validation":"AUTO","mode":"STANDARD"}],
   "pages":[{"id":"pg1","hrid":null,"name":"Home","type":"MARKDOWN","content":"# hi","published":true,"visibility":"PUBLIC"}],
   "flows":[{"name":"all","enabled":true,"selectors":[{"type":"HTTP","path":"/","pathOperator":"STARTS_WITH"}],"request":[{"name":"rate","enabled":true,"policy":"rate-limit","configuration":{"rate":{"limit":10}}}]}]},
  {"id":"8a1d","crossId":"x2","environmentId":"DEFAULT","organizationId":"DEFAULT","hrid":null,

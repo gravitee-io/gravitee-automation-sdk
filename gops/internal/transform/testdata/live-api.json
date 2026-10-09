@@ -1,0 +1,106 @@
+{
+  "hrid": null,
+  "name": "Petstore",
+  "version": "1.0",
+  "type": "PROXY",
+  "description": "Petstore 1.0",
+  "tags": [],
+  "listeners": [
+    {
+      "type": "HTTP",
+      "paths": [
+        {
+          "path": "/pets/",
+          "overrideAccess": false
+        }
+      ],
+      "pathMappings": [],
+      "requestValidation": {
+        "rejectNullByte": true
+      },
+      "entrypoints": [
+        {
+          "type": "http-proxy",
+          "qos": "AUTO"
+        }
+      ],
+      "servers": []
+    }
+  ],
+  "endpointGroups": [
+    {
+      "name": "default-group",
+      "type": "http-proxy",
+      "loadBalancer": {
+        "type": "ROUND_ROBIN"
+      },
+      "endpoints": [
+        {
+          "name": "default",
+          "type": "http-proxy",
+          "weight": 1,
+          "inheritConfiguration": false,
+          "configuration": {
+            "target": "https://petstore.swagger.io/v2"
+          },
+          "services": {},
+          "secondary": false,
+          "tenants": []
+        }
+      ],
+      "services": {}
+    }
+  ],
+  "analytics": {
+    "enabled": true,
+    "connectionEvents": []
+  },
+  "plans": [
+    {
+      "id": "d4b52ae8-417a-469f-b52a-e8417ac69f2a",
+      "hrid": null,
+      "name": "Keyless",
+      "description": "Free access",
+      "security": {
+        "type": "KEY_LESS"
+      },
+      "characteristics": [],
+      "excludedGroups": [],
+      "status": "STAGING",
+      "tags": [],
+      "type": "API",
+      "validation": "AUTO",
+      "flows": [],
+      "mode": "STANDARD"
+    }
+  ],
+  "flowExecution": {
+    "mode": "DEFAULT",
+    "matchRequired": false
+  },
+  "flows": [],
+  "groups": [],
+  "visibility": "PRIVATE",
+  "state": "STOPPED",
+  "labels": [],
+  "metadata": [
+    {
+      "key": "email-support",
+      "name": "email-support",
+      "format": "MAIL",
+      "value": "${(api.primaryOwner.email)!''}",
+      "defaultValue": "support@change.me"
+    }
+  ],
+  "lifecycleState": "CREATED",
+  "categories": [],
+  "members": [],
+  "notifyMembers": true,
+  "pages": [],
+  "allowedInApiProducts": true,
+  "allowMultiJwtOauth2Subscriptions": false,
+  "id": "9773d459-d57f-4360-b3d4-59d57fe360a1",
+  "environmentId": "DEFAULT",
+  "organizationId": "DEFAULT",
+  "crossId": "06f44933-e721-43b0-b449-33e72163b0a2"
+}

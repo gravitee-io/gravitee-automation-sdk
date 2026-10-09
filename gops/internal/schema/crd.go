@@ -56,7 +56,7 @@ func ParseCRD(raw []byte) (*CRD, error) {
 		return nil, fmt.Errorf("parse CRD %s: no versions", crd.Spec.Names.Kind)
 	}
 	v := crd.Spec.Versions[0]
-	root := fromStructural(v.Schema.OpenAPIV3Schema)
+	root := FromStructural(v.Schema.OpenAPIV3Schema)
 	spec := root.Property("spec")
 	if spec == nil {
 		return nil, fmt.Errorf("parse CRD %s: no spec schema", crd.Spec.Names.Kind)
@@ -64,25 +64,32 @@ func ParseCRD(raw []byte) (*CRD, error) {
 	return &CRD{Group: crd.Spec.Group, Version: v.Name, Kind: crd.Spec.Names.Kind, Spec: spec}, nil
 }
 
-// fromStructural converts a structural (CRD) schema: no $ref, no allOf, Kubernetes extensions.
-func fromStructural(m map[string]any) *Schema {
+// FromStructural converts a structural (CRD) schema: no $ref, no allOf, Kubernetes extensions.
+func FromStructural(m map[string]any) *Schema {
 	s := &Schema{Type: typeOf(m)}
 	if p, _ := m["x-kubernetes-preserve-unknown-fields"].(bool); p {
 		s.PreserveUnknown = true
+	}
+	if values, ok := m["enum"].([]any); ok {
+		for _, v := range values {
+			if str, ok := v.(string); ok {
+				s.Enum = append(s.Enum, str)
+			}
+		}
 	}
 	if props, ok := m["properties"].(map[string]any); ok {
 		s.Properties = map[string]*Schema{}
 		for k, v := range props {
 			if vm, ok := v.(map[string]any); ok {
-				s.Properties[k] = fromStructural(vm)
+				s.Properties[k] = FromStructural(vm)
 			}
 		}
 	}
 	if items, ok := m["items"].(map[string]any); ok {
-		s.ItemsSchema = fromStructural(items)
+		s.ItemsSchema = FromStructural(items)
 	}
 	if ap, ok := m["additionalProperties"].(map[string]any); ok {
-		s.AdditionalProperties = fromStructural(ap)
+		s.AdditionalProperties = FromStructural(ap)
 	}
 	return s
 }
