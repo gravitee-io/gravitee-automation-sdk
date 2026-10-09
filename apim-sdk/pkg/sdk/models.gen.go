@@ -6,6 +6,7 @@ package sdk
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/oapi-codegen/runtime"
@@ -1386,7 +1387,8 @@ func (v AimCatalogMcpResourceStatus) WithDefaults() AimCatalogMcpResourceStatus 
 // by this API, and a spec that omits a credential clears the stored one.
 type AimCatalogMcpServerAuth struct {
 	// Type Type of authentication
-	Type AimCatalogMcpServerAuthType `json:"type"`
+	Type                 AimCatalogMcpServerAuthType `json:"type"`
+	AdditionalProperties map[string]interface{}      `json:"-"`
 }
 
 // WithDefaults returns a copy of AimCatalogMcpServerAuth with unset fields set to their OpenAPI defaults.
@@ -1669,7 +1671,8 @@ type AimMcpProxyFlowExecutionMode string
 // AimMcpProxyFlowSelector What a flow applies to, discriminated by `type`; the kinds an MCP proxy accepts
 type AimMcpProxyFlowSelector struct {
 	// Type Kind of selector
-	Type AimMcpProxyFlowSelectorType `json:"type"`
+	Type                 AimMcpProxyFlowSelectorType `json:"type"`
+	AdditionalProperties map[string]interface{}      `json:"-"`
 }
 
 // WithDefaults returns a copy of AimMcpProxyFlowSelector with unset fields set to their OpenAPI defaults.
@@ -1722,7 +1725,8 @@ type AimMcpProxyIdentityProvider struct {
 	Name string `json:"name"`
 
 	// Type Kind of authorization server
-	Type AimMcpProxyIdentityProviderType `json:"type"`
+	Type                 AimMcpProxyIdentityProviderType `json:"type"`
+	AdditionalProperties map[string]interface{}          `json:"-"`
 }
 
 // WithDefaults returns a copy of AimMcpProxyIdentityProvider with unset fields set to their OpenAPI defaults.
@@ -1771,7 +1775,8 @@ func (v AimMcpProxyPlan) WithDefaults() AimMcpProxyPlan {
 // AimMcpProxyPlanSecurity How consumers authenticate against the plan, discriminated by `type`
 type AimMcpProxyPlanSecurity struct {
 	// Type Type of plan security
-	Type AimMcpProxyPlanSecurityType `json:"type"`
+	Type                 AimMcpProxyPlanSecurityType `json:"type"`
+	AdditionalProperties map[string]interface{}      `json:"-"`
 }
 
 // WithDefaults returns a copy of AimMcpProxyPlanSecurity with unset fields set to their OpenAPI defaults.
@@ -2126,7 +2131,8 @@ func (v AimMcpProxyStudioUpstreamAuth) WithDefaults() AimMcpProxyStudioUpstreamA
 // Examples: {"token":"secret://kubernetes/github-mcp:token","type":"BEARER"}
 type AimMcpProxyUpstreamAuth struct {
 	// Type Type of upstream authentication
-	Type AimMcpProxyUpstreamAuthType `json:"type"`
+	Type                 AimMcpProxyUpstreamAuthType `json:"type"`
+	AdditionalProperties map[string]interface{}      `json:"-"`
 }
 
 // WithDefaults returns a copy of AimMcpProxyUpstreamAuth with unset fields set to their OpenAPI defaults.
@@ -5734,6 +5740,349 @@ type UpsertPortalListingJSONRequestBody = PortalListingSpec
 
 // UpsertSharedPolicyGroupJSONRequestBody defines body for UpsertSharedPolicyGroup for application/json ContentType.
 type UpsertSharedPolicyGroupJSONRequestBody = SharedPolicyGroupSpec
+
+// Getter for additional properties for AimCatalogMcpServerAuth. Returns the specified
+// element and whether it was found
+func (a AimCatalogMcpServerAuth) Get(fieldName string) (value interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for AimCatalogMcpServerAuth
+func (a *AimCatalogMcpServerAuth) Set(fieldName string, value interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for AimCatalogMcpServerAuth to handle AdditionalProperties
+func (a *AimCatalogMcpServerAuth) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading 'type': %w", err)
+		}
+		delete(object, "type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for AimCatalogMcpServerAuth to handle AdditionalProperties
+func (a AimCatalogMcpServerAuth) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	object["type"], err = json.Marshal(a.Type)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'type': %w", err)
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for AimMcpProxyFlowSelector. Returns the specified
+// element and whether it was found
+func (a AimMcpProxyFlowSelector) Get(fieldName string) (value interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for AimMcpProxyFlowSelector
+func (a *AimMcpProxyFlowSelector) Set(fieldName string, value interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for AimMcpProxyFlowSelector to handle AdditionalProperties
+func (a *AimMcpProxyFlowSelector) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading 'type': %w", err)
+		}
+		delete(object, "type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for AimMcpProxyFlowSelector to handle AdditionalProperties
+func (a AimMcpProxyFlowSelector) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	object["type"], err = json.Marshal(a.Type)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'type': %w", err)
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for AimMcpProxyIdentityProvider. Returns the specified
+// element and whether it was found
+func (a AimMcpProxyIdentityProvider) Get(fieldName string) (value interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for AimMcpProxyIdentityProvider
+func (a *AimMcpProxyIdentityProvider) Set(fieldName string, value interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for AimMcpProxyIdentityProvider to handle AdditionalProperties
+func (a *AimMcpProxyIdentityProvider) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["name"]; found {
+		err = json.Unmarshal(raw, &a.Name)
+		if err != nil {
+			return fmt.Errorf("error reading 'name': %w", err)
+		}
+		delete(object, "name")
+	}
+
+	if raw, found := object["type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading 'type': %w", err)
+		}
+		delete(object, "type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for AimMcpProxyIdentityProvider to handle AdditionalProperties
+func (a AimMcpProxyIdentityProvider) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	object["name"], err = json.Marshal(a.Name)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'name': %w", err)
+	}
+
+	object["type"], err = json.Marshal(a.Type)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'type': %w", err)
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for AimMcpProxyPlanSecurity. Returns the specified
+// element and whether it was found
+func (a AimMcpProxyPlanSecurity) Get(fieldName string) (value interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for AimMcpProxyPlanSecurity
+func (a *AimMcpProxyPlanSecurity) Set(fieldName string, value interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for AimMcpProxyPlanSecurity to handle AdditionalProperties
+func (a *AimMcpProxyPlanSecurity) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading 'type': %w", err)
+		}
+		delete(object, "type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for AimMcpProxyPlanSecurity to handle AdditionalProperties
+func (a AimMcpProxyPlanSecurity) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	object["type"], err = json.Marshal(a.Type)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'type': %w", err)
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for AimMcpProxyUpstreamAuth. Returns the specified
+// element and whether it was found
+func (a AimMcpProxyUpstreamAuth) Get(fieldName string) (value interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for AimMcpProxyUpstreamAuth
+func (a *AimMcpProxyUpstreamAuth) Set(fieldName string, value interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for AimMcpProxyUpstreamAuth to handle AdditionalProperties
+func (a *AimMcpProxyUpstreamAuth) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading 'type': %w", err)
+		}
+		delete(object, "type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for AimMcpProxyUpstreamAuth to handle AdditionalProperties
+func (a AimMcpProxyUpstreamAuth) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	object["type"], err = json.Marshal(a.Type)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'type': %w", err)
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
 
 // AsHttpDictionaryProvider returns the union data inside the DictionaryProvider as a HttpDictionaryProvider
 func (t DictionaryProvider) AsHttpDictionaryProvider() (HttpDictionaryProvider, error) {
