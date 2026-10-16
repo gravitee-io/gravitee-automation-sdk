@@ -3,6 +3,7 @@ go 1.26.1
 use (
 	./am-sdk
 	./am-mock-server
+	./apim-mock-server
 	./apim-sdk
 	./common
 )
