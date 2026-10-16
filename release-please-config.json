@@ -8,6 +8,11 @@
       "component": "am-sdk",
       "bump-minor-pre-major": true
     },
+    "apim-sdk": {
+      "release-type": "go",
+      "component": "apim-sdk",
+      "bump-minor-pre-major": true
+    },
     "common": {
       "release-type": "go",
       "component": "common",
