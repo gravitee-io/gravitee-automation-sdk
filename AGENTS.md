@@ -24,8 +24,16 @@ If you are an AI agent operating in this repository:
 # Install lint/dev tools (staticcheck, revive, addlicense, goimports)
 make tools
 
-# Sync AM Automation OAS from gravitee-access-management (AM_OAS_BRANCH, default master)
+# Sync AM and APIM Automation OAS (AM_OAS_BRANCH / APIM_OAS_BRANCH, default master)
 make sync-oas
+
+# Sync the AIM fragment from the private gravitee-gamma-module-aim (AIM_OAS_REF); needs a gh login with access
+make sync-aim-oas
+
+# Fail if the committed AIM fragment differs from AIM_OAS_REF. CI runs it in CircleCI (.circleci/config.yml),
+# triggered by the aim-oas GitHub Actions job through hack/scripts/verify-aim-oas.mjs, because only CircleCI
+# holds (in Keeper) the token that reads the private repo
+make verify-aim-oas
 
 # Regenerate all code (overlays + oapi-codegen)
 make generate
@@ -55,7 +63,7 @@ go run ./am-mock-server --port 8080
 
 ### What Is This?
 
-Go SDK clients and a mock server for the Gravitee Access Management (AM) Automation API. The SDK is generated from an OpenAPI spec using `oapi-codegen`, with OpenAPI Overlay files applied to reshape the spec before generation.
+Go SDK clients and mock servers for the Gravitee Access Management (AM) and API Management (APIM) Automation APIs. The SDK is generated from an OpenAPI spec using `oapi-codegen`, with OpenAPI Overlay files applied to reshape the spec before generation.
 
 ### Tech Stack
 
@@ -77,13 +85,13 @@ A Go workspace with four modules:
 | `common` | Shared utilities: `apicontext` (auth + base URL), `response` (status helpers + generic `Payload[T]` extractor), `store` (channel-based in-memory generic store), `errors`, `refs` |
 | `am-sdk` | Generated SDK clients for AM resources (domains, certificates, identity providers, reporters). All resources are generated into the single `am-sdk/pkg/sdk` package |
 | `am-mock-server` | Standalone mock HTTP server implementing the same OpenAPI spec with strict-server codegen. Used for integration-testing the SDK |
-| `apim-sdk` | Placeholder module for a future APIM SDK (empty) |
+| `apim-sdk` | Generated SDK client for the APIM Automation API (core APIM + the AIM fragment) in `apim-sdk/pkg/sdk`, with hand-written `oneof.go` (polymorphic types), `identifiable.go` (list item identities) and `apicontext.go` (`APIContext` with cloud-token resolution) |
 
 ---
 
 ## 3. Code Generation Pipeline
 
-All generated code comes from a single OpenAPI spec at `am-sdk/openapi/openapi.yaml`. Generation is driven by `//go:generate` directives in `generate.go` files and involves two steps:
+AM code comes from the OpenAPI spec at `am-sdk/openapi/openapi.yaml`, APIM code from `apim-sdk/openapi/openapi.yaml`. The APIM spec is itself generated: `common/cmd/mergespec` merges `apim-sdk/openapi/sources/apim.yaml` (core APIM) and `sources/aim.yaml` (AIM) into it (`apim-sdk/openapi/generate.go`), and it is committed. Generation is driven by `//go:generate` directives in `generate.go` files and involves two steps:
 
 1. **Overlay merge** — `common/cmd/mergeoverlay` is a CLI tool that merges multiple YAML overlay files into one. Overlays rename models (strip `Automation` prefix via `x-go-type-name`), standardize operationIds (`get`, `list`, `upsert`, `delete`), and (for SDK clients) rewrite paths to bake `orgId`/`envId` into the server URL.
 2. **oapi-codegen** — Generates typed Go clients or strict servers from the overlaid spec. Configs live under `<module>/gen/` so package directories only hold Go files (the SDK uses `am-sdk/gen/models.cfg.yaml` → `models.gen.go` and `am-sdk/gen/client.cfg.yaml` → `client.gen.go`; the mock server uses `am-mock-server/gen/server/cfg.yaml`). The experimental CRD package keeps its config and overlay in place. Paths inside a config are relative to the package directory, where `go generate` runs.
@@ -92,11 +100,16 @@ All generated code comes from a single OpenAPI spec at `am-sdk/openapi/openapi.y
 
 The overlay chain differs between SDK and mock server:
 
-| Target | Overlays merged (from `am-sdk/overlays/`, into a git-ignored `overlay.gen.yaml` next to the target's config under `gen/`) | What is generated |
+| Target | Overlays merged (from `am-sdk/overlays/` or `apim-sdk/overlays/`, into a git-ignored `overlay.gen.yaml` next to the target's config under `gen/`) | What is generated |
 |--------|----------------|-------------------|
 | SDK (`am-sdk/pkg/sdk/`) | `models.yaml` + `operations.yaml` + `paths.yaml` (bakes org/env into the server URL and strips them from paths) | Client + models (all tags), with `WithDefaults()` from `common/templates/typedef.tmpl` |
 | Mock server (`am-mock-server/server/`) | `models.yaml` + `operations.yaml` | chi strict-server + models (all tags, original paths kept) |
 | CRD models (`am-sdk/pkg/crd/domain/`) | `models.yaml` + `operations.yaml` + its own `overlay.yaml` (experimental) | Models only |
+| APIM SDK (`apim-sdk/pkg/sdk/`) | `models.yaml` + `oneof.yaml` (polymorphic types → hand-written `OneOf*`) + `drift.yaml` (GKO drift tags) + `operations.yaml` + `paths.yaml` | Client + models, with `WithDefaults()` |
+
+`common/templates/typedef.tmpl` (`WithDefaults()`) is shared by every target. It fills unset pointers, nil slices and maps with their defaults, and recurses into named nested types. It never sets non-pointer scalars (zero is indistinguishable from unset) and never recurses into anonymous structs.
+
+In `apim-sdk/pkg/sdk`, `oneof.go` must have one `OneOf<Name>` struct per `x-go-type: OneOf<Name>` in `oneof.yaml`, with a field per variant (`oneof:"<TYPE>"` tag). A new upstream variant needs a new field: unmarshal fails on an unknown `type`.
 
 **Files ending in `.gen.go` are generated — do not edit them.**
 
