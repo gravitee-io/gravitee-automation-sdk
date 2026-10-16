@@ -12,24 +12,27 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
+    strategy:
+      matrix:
+        module: [am-mock-server, apim-mock-server]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
-          go-version-file: am-mock-server/go.mod
+          go-version-file: ${{ matrix.module }}/go.mod
 
-      - name: Find latest am-mock-server tag
+      - name: Find latest ${{ matrix.module }} tag
         id: tag
         run: |
-          TAG=$(git tag -l "am-mock-server/v*" --sort=-version:refname | head -1)
+          TAG=$(git tag -l "${{ matrix.module }}/v*" --sort=-version:refname | head -1)
           [ -z "$TAG" ] && echo "found=false" >> "$GITHUB_OUTPUT" && exit 0
           RELEASE=$(gh release view "$TAG" --json isDraft --jq '.isDraft' 2>/dev/null)
           if [ "$RELEASE" = "false" ] && ! gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null | grep -q '\.tar\.gz$'; then
             echo "found=true" >> "$GITHUB_OUTPUT"
             echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-            echo "version=${TAG#am-mock-server/}" >> "$GITHUB_OUTPUT"
+            echo "version=${TAG#${{ matrix.module }}/}" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
@@ -45,7 +48,7 @@ jobs:
         with:
           distribution: goreleaser
           version: "~> v2"
-          workdir: am-mock-server
+          workdir: ${{ matrix.module }}
           args: release --clean --skip=publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,6 +56,6 @@ jobs:
 
       - name: Upload artifacts to release
         if: steps.tag.outputs.found == 'true'
-        run: gh release upload "${{ steps.tag.outputs.tag }}" am-mock-server/dist/*.tar.gz
+        run: gh release upload "${{ steps.tag.outputs.tag }}" ${{ matrix.module }}/dist/*.tar.gz
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
