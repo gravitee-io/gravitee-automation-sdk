@@ -51,6 +51,7 @@ lint-licenses: ## Check license headers
 	@addlicense -check -f LICENSE_TEMPLATE.txt \
 		-ignore "**/*.gen.go" \
 		-ignore "**/*.gen.yaml" \
+		-ignore "apim-sdk/openapi/sources/aim.yaml" \
 		-ignore ".github/**" \
 		-ignore ".idea/**" \
 		.
@@ -63,6 +64,7 @@ lint-fix: ## Auto-fix linting issues and add license headers
 	@addlicense -f LICENSE_TEMPLATE.txt \
 		-ignore "**/*.gen.go" \
 		-ignore "**/*.gen.yaml" \
+		-ignore "apim-sdk/openapi/sources/aim.yaml" \
 		-ignore ".github/**" \
 		-ignore ".idea/**" \
 		.
