@@ -1,0 +1,143 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Sample mock-server auth. Tokens and passwords are for local use only.
+#
+#   go run ./apim-mock-server --auth-file apim-mock-server/examples/auth.yaml
+#
+# users:
+#   admin    — all permissions (empty list)
+#   readonly — READ on every resource
+#   updater  — UPDATE on every resource
+
+users:
+  admin:
+    password: admin
+    token: admin-token
+    permissions: []
+  readonly:
+    password: readonly
+    token: readonly-token
+    permissions:
+      - API_READ
+      - APPLICATION_READ
+      - GROUP_READ
+      - DICTIONARY_READ
+      - SHARED_POLICY_GROUP_READ
+      - PORTAL_READ
+      - PORTAL_THEME_READ
+      - AIM_CATALOG_MCP_SERVER_READ
+      - AIM_MCP_PROXY_READ
+      - API_SUBSCRIPTION_READ
+      - API_DOCUMENTATION_READ
+      - API_LINK_READ
+      - PORTAL_LISTING_READ
+      - PORTAL_DOCUMENTATION_READ
+      - PORTAL_LINK_READ
+  updater:
+    password: updater
+    token: updater-token
+    permissions:
+      - API_UPDATE
+      - APPLICATION_UPDATE
+      - GROUP_UPDATE
+      - DICTIONARY_UPDATE
+      - SHARED_POLICY_GROUP_UPDATE
+      - PORTAL_UPDATE
+      - PORTAL_THEME_UPDATE
+      - AIM_CATALOG_MCP_SERVER_UPDATE
+      - AIM_MCP_PROXY_UPDATE
+      - API_SUBSCRIPTION_UPDATE
+      - API_DOCUMENTATION_UPDATE
+      - API_LINK_UPDATE
+      - PORTAL_LISTING_UPDATE
+      - PORTAL_DOCUMENTATION_UPDATE
+      - PORTAL_LINK_UPDATE
+
+permissions:
+  - path: /organizations/{orgId}/environments/{envId}/apis
+    put: API_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/apis/{hrid}
+    get: API_READ
+    delete: API_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/applications
+    put: APPLICATION_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/applications/{hrid}
+    get: APPLICATION_READ
+    delete: APPLICATION_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/groups
+    put: GROUP_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/groups/{hrid}
+    get: GROUP_READ
+    delete: GROUP_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/dictionaries
+    put: DICTIONARY_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/dictionaries/{hrid}
+    get: DICTIONARY_READ
+    delete: DICTIONARY_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/shared-policy-groups
+    put: SHARED_POLICY_GROUP_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/shared-policy-groups/{hrid}
+    get: SHARED_POLICY_GROUP_READ
+    delete: SHARED_POLICY_GROUP_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/portals
+    put: PORTAL_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/portals/{hrid}
+    get: PORTAL_READ
+    delete: PORTAL_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/portal-themes
+    put: PORTAL_THEME_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/portal-themes/{hrid}
+    get: PORTAL_THEME_READ
+    delete: PORTAL_THEME_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/aim/catalog/mcp-servers
+    put: AIM_CATALOG_MCP_SERVER_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/aim/catalog/mcp-servers/{hrid}
+    get: AIM_CATALOG_MCP_SERVER_READ
+    delete: AIM_CATALOG_MCP_SERVER_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/aim/mcp-proxies
+    put: AIM_MCP_PROXY_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/aim/mcp-proxies/{hrid}
+    get: AIM_MCP_PROXY_READ
+    delete: AIM_MCP_PROXY_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/subscriptions
+    put: API_SUBSCRIPTION_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/subscriptions/{hrid}
+    get: API_SUBSCRIPTION_READ
+    delete: API_SUBSCRIPTION_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/documentations
+    put: API_DOCUMENTATION_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/documentations/{hrid}
+    get: API_DOCUMENTATION_READ
+    delete: API_DOCUMENTATION_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/links
+    put: API_LINK_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/links/{hrid}
+    get: API_LINK_READ
+    delete: API_LINK_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/portals/{portalHrid}/listings
+    put: PORTAL_LISTING_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/portals/{portalHrid}/listings/{hrid}
+    get: PORTAL_LISTING_READ
+    delete: PORTAL_LISTING_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/portals/{portalHrid}/documentations
+    put: PORTAL_DOCUMENTATION_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/portals/{portalHrid}/documentations/{hrid}
+    get: PORTAL_DOCUMENTATION_READ
+    delete: PORTAL_DOCUMENTATION_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/portals/{portalHrid}/links
+    put: PORTAL_LINK_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/portals/{portalHrid}/links/{hrid}
+    get: PORTAL_LINK_READ
+    delete: PORTAL_LINK_DELETE
