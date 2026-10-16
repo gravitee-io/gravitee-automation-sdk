@@ -1,3 +1,4 @@
 /.idea
 *.gen.yaml
 docs/plans
+node_modules/
