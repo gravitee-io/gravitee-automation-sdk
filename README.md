@@ -11,6 +11,7 @@ common/            shared: API context, errors, response helpers, in-memory stor
 am-sdk/            AM Automation client (generated + thin facade)
 am-mock-server/    in-memory HTTP mock of the same API
 apim-sdk/          APIM Automation client (generated, core APIM + AIM)
+apim-mock-server/  in-memory HTTP mock of the APIM Automation API
 ```
 
 ## AM SDK
@@ -146,6 +147,40 @@ Errors and response helpers are the same as the AM SDK's.
 - **Keep GKO's HTTP client** until the spec declares `hridContainsUUID`.
 - **Pin the SDK release line** matching the branch's APIM minor.
 
+## APIM mock server
+
+```bash
+go run ./apim-mock-server --port 8080
+go run ./apim-mock-server --auth-file apim-mock-server/examples/auth.yaml
+go run ./apim-mock-server --dry-run-reject
+```
+
+Same flags as the AM mock server (`--port`, `--base-path`, `--auth-file`, `--dry-run-reject`); the sample auth file is
+`apim-mock-server/examples/auth.yaml`. It serves every APIM SDK operation, AIM included, at
+`/automation/organizations/{orgId}/environments/{envId}/…`.
+
+Like APIM, a PUT fills unset fields with their OpenAPI defaults and answers the resource State, which the GET then
+returns. Requests are validated against the merged OpenAPI spec, as on the AM mock.
+
+### Differences from AM
+
+- **404 on a missing resource**: GET or DELETE of an unknown hrid answers 404 `HRID [<hrid>] cannot be found.`
+  (the AM mock answers 204 on such a DELETE).
+- **Deterministic ids**: `id` (and `crossId`) are UUIDv5, stable per org, env, kind and hrid, like APIM's. They are
+  not byte-identical to APIM's. A `crossId` sent on an API or shared policy group PUT is kept, as for legacy resources.
+- **PUT returns the State**: the spec with its defaults plus `id`, `organizationId`, `environmentId` and, on
+  sub-resources, `apiHrid`/`portalHrid`. Subscriptions also get `startingAt`, kept across PUTs.
+- **Dry run returns a computed State**, built as for a real PUT, and persists nothing. With `--dry-run-reject`, the
+  message is in `errors.severe` (still `200`). The shared policy group DELETE also supports `dryRun`: `404` if
+  missing, else `204` with nothing deleted.
+- **References**: sub-resources under a missing API (`apiHrid`) or portal (`portalHrid`) answer 404, whatever the
+  method. A subscription PUT answers 404 when its application, or its plan on the API, does not exist.
+- **Cascades**: deleting an API deletes its subscriptions, documentations and links; deleting a portal deletes its
+  listings, documentations and links; deleting an application deletes its subscriptions.
+- `hridContainsUUID`, `ignoreGroups` and `ignoreMembers` are accepted and ignored.
+- **Polymorphic fields** (listeners, selectors, the AIM discriminated objects) are stored as unstructured maps, so
+  every variant field is kept but no defaults are applied inside them.
+
 ## Prerequisites
 
 - Go 1.26+
@@ -153,7 +188,7 @@ Errors and response helpers are the same as the AM SDK's.
 ## Build & Test
 
 ```bash
-go test ./am-sdk/... ./apim-sdk/... ./am-mock-server/... ./common/...
+go test ./am-sdk/... ./apim-sdk/... ./am-mock-server/... ./apim-mock-server/... ./common/...
 go test ./am-mock-server/server/...
 make sync-oas          # AM_OAS_BRANCH / APIM_OAS_BRANCH to override
 make sync-aim-oas      # AIM_OAS_REF to override; needs a gh login with access to gravitee-gamma-module-aim

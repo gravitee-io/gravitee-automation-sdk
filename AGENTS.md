@@ -53,8 +53,9 @@ go test ./am-mock-server/server/...
 # Run a single test
 go test ./am-mock-server/server/... -run TestGetDomain404SDK
 
-# Run the mock server
+# Run the mock servers
 go run ./am-mock-server --port 8080
+go run ./apim-mock-server --port 8080
 ```
 
 ---
@@ -78,7 +79,7 @@ Go SDK clients and mock servers for the Gravitee Access Management (AM) and API 
 
 ### Modules
 
-A Go workspace with four modules:
+A Go workspace with five modules:
 
 | Module | Role |
 |--------|------|
@@ -86,6 +87,7 @@ A Go workspace with four modules:
 | `am-sdk` | Generated SDK clients for AM resources (domains, certificates, identity providers, reporters). All resources are generated into the single `am-sdk/pkg/sdk` package |
 | `am-mock-server` | Standalone mock HTTP server implementing the same OpenAPI spec with strict-server codegen. Used for integration-testing the SDK |
 | `apim-sdk` | Generated SDK client for the APIM Automation API (core APIM + the AIM fragment) in `apim-sdk/pkg/sdk`, with hand-written `oneof.go` (polymorphic types), `identifiable.go` (list item identities) and `apicontext.go` (`APIContext` with cloud-token resolution) |
+| `apim-mock-server` | Standalone mock HTTP server for the APIM Automation API (strict-server codegen from the merged APIM spec). Mirrors real APIM where the AM mock differs: 404 on missing hrids, deterministic ids, PUT returns the State, dry run in the handlers, parent and subscription reference checks, cascades |
 
 ---
 
@@ -106,6 +108,7 @@ The overlay chain differs between SDK and mock server:
 | Mock server (`am-mock-server/server/`) | `models.yaml` + `operations.yaml` | chi strict-server + models (all tags, original paths kept) |
 | CRD models (`am-sdk/pkg/crd/domain/`) | `models.yaml` + `operations.yaml` + its own `overlay.yaml` (experimental) | Models only |
 | APIM SDK (`apim-sdk/pkg/sdk/`) | `models.yaml` + `oneof.yaml` (polymorphic types → hand-written `OneOf*`) + `drift.yaml` (GKO drift tags) + `operations.yaml` + `paths.yaml` | Client + models, with `WithDefaults()` |
+| APIM mock server (`apim-mock-server/server/`) | `models.yaml` + `oneof.yaml` + the mock's own `gen/server/oneof.yaml` (polymorphic types → `unstructured.Unstructured`, so the server does not depend on the SDK's hand-written types) + `operations.yaml` | chi strict-server + models (original paths kept, no drift tags) |
 
 `common/templates/typedef.tmpl` (`WithDefaults()`) is shared by every target. It fills unset pointers, nil slices and maps with their defaults, and recurses into named nested types. It never sets non-pointer scalars (zero is indistinguishable from unset) and never recurses into anonymous structs.
 

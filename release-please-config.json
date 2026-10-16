@@ -22,6 +22,11 @@
       "release-type": "go",
       "component": "am-mock-server",
       "bump-minor-pre-major": true
+    },
+    "apim-mock-server": {
+      "release-type": "go",
+      "component": "apim-mock-server",
+      "bump-minor-pre-major": true
     }
   }
 }
