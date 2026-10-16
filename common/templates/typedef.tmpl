@@ -18,12 +18,8 @@ func (v {{.TypeName}}) WithDefaults() {{.TypeName}} {
 	if v.{{.GoFieldName}} == nil {
 		v.{{.GoFieldName}} = new({{slice .GoTypeDef 1}}({{printf "%#v" $d}}))
 	}
-{{- else}}
-	if v.{{.GoFieldName}} == *new({{.GoTypeDef}}) {
-		v.{{.GoFieldName}} = {{printf "%#v" $d}}
-	}
 {{- end}}
-{{- else if .Schema.OAPISchema.Properties}}
+{{- else if and .Schema.OAPISchema.Properties (ne (slice (printf "%-6s" .Schema.GoType) 0 6) "struct")}}
 {{- if .HasOptionalPointer}}
 	if v.{{.GoFieldName}} != nil {
 		withDefaults := v.{{.GoFieldName}}.WithDefaults()

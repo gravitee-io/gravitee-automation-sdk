@@ -19,6 +19,6 @@ generate:
 output-options:
   prefer-skip-optional-pointer-on-container-types: true
   user-templates:
-    typedef.tmpl: ../../templates/typedef.tmpl
+    typedef.tmpl: ../../../common/templates/typedef.tmpl
   overlay:
     path: ../../gen/overlay.gen.yaml
