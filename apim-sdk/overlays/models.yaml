@@ -1,0 +1,106 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+overlay: 1.1.0
+info:
+  title: Shape generated models (writable crossId, drop the Spec suffix, map free-form configurations, dates as RFC 3339 strings)
+  version: 0.0.1
+actions:
+  # APIM honours crossId on PUT for legacy resources, but the spec only declares it read-only in the status.
+  - target: $.components.schemas['ApiV4Spec','SharedPolicyGroupSpec'].properties
+    update:
+      crossId:
+        type: string
+        description: Cross-environment identifier. APIM honours it on PUT for resources first created with a UUID (legacy mode).
+
+  # Spec types are the desired state: they drop the suffix, State types keep theirs.
+  - target: $.components.schemas.ApiV4Spec
+    update:
+      x-go-type-name: ApiV4
+  - target: $.components.schemas.ApplicationSpec
+    update:
+      x-go-type-name: Application
+  - target: $.components.schemas.GroupSpec
+    update:
+      x-go-type-name: Group
+  - target: $.components.schemas.DictionarySpec
+    update:
+      x-go-type-name: Dictionary
+  - target: $.components.schemas.ManualDictionarySpec
+    update:
+      x-go-type-name: ManualDictionary
+  - target: $.components.schemas.DynamicDictionarySpec
+    update:
+      x-go-type-name: DynamicDictionary
+  - target: $.components.schemas.SubscriptionSpec
+    update:
+      x-go-type-name: Subscription
+  - target: $.components.schemas.ApiKeySpec
+    update:
+      x-go-type-name: ApiKey
+  - target: $.components.schemas.SharedPolicyGroupSpec
+    update:
+      x-go-type-name: SharedPolicyGroup
+  - target: $.components.schemas.PortalSpec
+    update:
+      x-go-type-name: Portal
+  - target: $.components.schemas.PortalListingSpec
+    update:
+      x-go-type-name: PortalListing
+  - target: $.components.schemas.DocumentationSpec
+    update:
+      x-go-type-name: Documentation
+  - target: $.components.schemas.PortalLinkSpec
+    update:
+      x-go-type-name: PortalLink
+  - target: $.components.schemas.PortalThemeSpec
+    update:
+      x-go-type-name: PortalTheme
+  - target: $.components.schemas.AimCatalogMcpServerSpec
+    update:
+      x-go-type-name: AimCatalogMcpServer
+  - target: $.components.schemas.AimMcpProxySpec
+    update:
+      x-go-type-name: AimMcpProxy
+
+  # Free-form plugin configurations: typed as unstructured objects, which GKO's drift compares as such
+  # (a plain map[string]interface{} would make it panic).
+  - target: $.components.schemas['APIResource','BaseStep','EndpointV4','PageSource','PlanSecurity','ServiceV4','AimMcpProxyFlowStep'].properties.configuration
+    update:
+      x-go-type: unstructured.Unstructured
+      x-go-type-import:
+        path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
+  - target: $.components.schemas.EndpointV4.properties.sharedConfigurationOverride
+    update:
+      x-go-type: unstructured.Unstructured
+      x-go-type-import:
+        path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
+  - target: $.components.schemas.EndpointGroupV4.properties.sharedConfiguration
+    update:
+      x-go-type: unstructured.Unstructured
+      x-go-type-import:
+        path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
+  - target: $.components.schemas.SubscriptionConsumerConfiguration.properties.entrypointConfiguration
+    update:
+      x-go-type: unstructured.Unstructured
+      x-go-type-import:
+        path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
+
+  # Dates stay RFC 3339 strings, as GKO compares them (rfc3339 drift tag); format is kept for OAS validation.
+  - target: $.components.schemas.*.properties[?(@.format == "date-time")]
+    update:
+      x-go-type: string
+  - target: $.components.schemas.*.allOf[*].properties[?(@.format == "date-time")]
+    update:
+      x-go-type: string
