@@ -14,5 +14,5 @@
 
 package server
 
-//go:generate go run ../../am-sdk/overlays/mergeoverlay.go ../../am-sdk/overlays/models.yaml ../../am-sdk/overlays/operations.yaml ../gen/server/overlay.gen.yaml
+//go:generate go run ../../common/cmd/mergeoverlay ../../am-sdk/overlays/models.yaml ../../am-sdk/overlays/operations.yaml ../gen/server/overlay.gen.yaml
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config ../gen/server/cfg.yaml ../../am-sdk/openapi/openapi.yaml

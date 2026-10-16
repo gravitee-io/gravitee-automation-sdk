@@ -22,6 +22,6 @@ generate:
   embedded-spec: true
 output-options:
   user-templates:
-    typedef.tmpl: ../../am-sdk/templates/typedef.tmpl
+    typedef.tmpl: ../../common/templates/typedef.tmpl
   overlay:
     path: ../gen/server/overlay.gen.yaml
