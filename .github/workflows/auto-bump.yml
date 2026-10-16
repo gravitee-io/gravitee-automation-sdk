@@ -40,7 +40,7 @@ jobs:
             # Go major versions >= 2 carry a /vN suffix in the module path.
             [ "$MAJOR" -ge 2 ] && MODULE="${MODULE}/v${MAJOR}"
             SOURCE_USED=false
-            for mod in am-sdk apim-sdk am-mock-server; do
+            for mod in am-sdk apim-sdk am-mock-server apim-mock-server; do
               [ "$mod" = "$COMPONENT" ] && continue
               if grep -q "$MODULE" "$mod/go.mod"; then
                 CURRENT=$(sed -n "s|.*${MODULE} \(v[0-9.]*\).*|\1|p" "$mod/go.mod" | head -1)
