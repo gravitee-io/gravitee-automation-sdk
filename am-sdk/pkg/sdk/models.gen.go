@@ -9,6 +9,141 @@ import (
 	"github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured"
 )
 
+// Defines values for AutomationApplicationKind.
+const (
+	AUTONOMOUS      AutomationApplicationKind = "AUTONOMOUS"
+	HOSTEDDELEGATED AutomationApplicationKind = "HOSTED_DELEGATED"
+	USEREMBEDDED    AutomationApplicationKind = "USER_EMBEDDED"
+)
+
+// Valid indicates whether the value is a known member of the AutomationApplicationKind enum.
+func (e AutomationApplicationKind) Valid() bool {
+	switch e {
+	case AUTONOMOUS:
+		return true
+	case HOSTEDDELEGATED:
+		return true
+	case USEREMBEDDED:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationApplicationType.
+const (
+	Agent          AutomationApplicationType = "agent"
+	Browser        AutomationApplicationType = "browser"
+	Native         AutomationApplicationType = "native"
+	ResourceServer AutomationApplicationType = "resource_server"
+	Service        AutomationApplicationType = "service"
+	Web            AutomationApplicationType = "web"
+)
+
+// Valid indicates whether the value is a known member of the AutomationApplicationType enum.
+func (e AutomationApplicationType) Valid() bool {
+	switch e {
+	case Agent:
+		return true
+	case Browser:
+		return true
+	case Native:
+		return true
+	case ResourceServer:
+		return true
+	case Service:
+		return true
+	case Web:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationChallengeSettingsType.
+const (
+	AutomationChallengeSettingsTypeConditional AutomationChallengeSettingsType = "conditional"
+	AutomationChallengeSettingsTypeRequired    AutomationChallengeSettingsType = "required"
+	AutomationChallengeSettingsTypeRiskBased   AutomationChallengeSettingsType = "risk_based"
+)
+
+// Valid indicates whether the value is a known member of the AutomationChallengeSettingsType enum.
+func (e AutomationChallengeSettingsType) Valid() bool {
+	switch e {
+	case AutomationChallengeSettingsTypeConditional:
+		return true
+	case AutomationChallengeSettingsTypeRequired:
+		return true
+	case AutomationChallengeSettingsTypeRiskBased:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationEnrollSettingsType.
+const (
+	AutomationEnrollSettingsTypeConditional AutomationEnrollSettingsType = "conditional"
+	AutomationEnrollSettingsTypeOptional    AutomationEnrollSettingsType = "optional"
+	AutomationEnrollSettingsTypeRequired    AutomationEnrollSettingsType = "required"
+)
+
+// Valid indicates whether the value is a known member of the AutomationEnrollSettingsType enum.
+func (e AutomationEnrollSettingsType) Valid() bool {
+	switch e {
+	case AutomationEnrollSettingsTypeConditional:
+		return true
+	case AutomationEnrollSettingsTypeOptional:
+		return true
+	case AutomationEnrollSettingsTypeRequired:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationTokenClaimTokenType.
+const (
+	AccessToken  AutomationTokenClaimTokenType = "access_token"
+	IdJag        AutomationTokenClaimTokenType = "id_jag"
+	IdToken      AutomationTokenClaimTokenType = "id_token"
+	RefreshToken AutomationTokenClaimTokenType = "refresh_token"
+)
+
+// Valid indicates whether the value is a known member of the AutomationTokenClaimTokenType enum.
+func (e AutomationTokenClaimTokenType) Valid() bool {
+	switch e {
+	case AccessToken:
+		return true
+	case IdJag:
+		return true
+	case IdToken:
+		return true
+	case RefreshToken:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationWorkloadIdentitySettingsSubjectMatchMode.
+const (
+	Exact  AutomationWorkloadIdentitySettingsSubjectMatchMode = "exact"
+	Prefix AutomationWorkloadIdentitySettingsSubjectMatchMode = "prefix"
+)
+
+// Valid indicates whether the value is a known member of the AutomationWorkloadIdentitySettingsSubjectMatchMode enum.
+func (e AutomationWorkloadIdentitySettingsSubjectMatchMode) Valid() bool {
+	switch e {
+	case Exact:
+		return true
+	case Prefix:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for Severity.
 const (
 	SeverityError   Severity = "error"
@@ -141,6 +276,26 @@ func (e XFrameSettingsAction) Valid() bool {
 	}
 }
 
+// ApplicationLightweightJwtSettings Restricts the JWT access token and the ID token returned to the client to the reserved protocol claims and the allowlisted claims.
+type ApplicationLightweightJwtSettings struct {
+	// AllowedAccessTokenClaims Claim names kept in the access and refresh tokens in addition to the reserved claims. A listed claim is kept only if AM issues it. Names must be unique, must not have leading or trailing whitespace and must not contain control characters.
+	AllowedAccessTokenClaims []string `drift:"set" json:"allowedAccessTokenClaims,omitempty"`
+
+	// AllowedIdTokenClaims Claim names kept in the ID token in addition to the reserved claims. A listed claim is kept only if AM issues it. Names must be unique, must not have leading or trailing whitespace and must not contain control characters.
+	AllowedIdTokenClaims []string `drift:"set" json:"allowedIdTokenClaims,omitempty"`
+
+	// Enabled Whether Lightweight JWT is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationLightweightJwtSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationLightweightJwtSettings) WithDefaults() ApplicationLightweightJwtSettings {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
+	}
+	return v
+}
+
 // AutomationAccountSettings User account settings for the domain: brute-force protection, registration, password reset, remember-me, and MFA challenge behavior.
 type AutomationAccountSettings = AccountSettings
 
@@ -160,7 +315,7 @@ type AccountSettings struct {
 	// CompleteRegistrationWhenResetPassword Whether resetting a password also completes a pending registration.
 	CompleteRegistrationWhenResetPassword *bool `json:"completeRegistrationWhenResetPassword,omitempty"`
 
-	// DefaultIdentityProviderForRegistration Key of an identity provider managed under this domain, used as the default for user registration. The reference is not checked against existing identity providers: it can name one created after the domain or since deleted, and resolves whenever an identity provider with that key exists.
+	// DefaultIdentityProviderForRegistration Default identity provider for user registration: the key of an identity provider of the domain, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing identity providers: it can name one created after the domain or since deleted, and resolves whenever that identity provider exists.
 	//
 	// Example: users-idp
 	DefaultIdentityProviderForRegistration *string `json:"defaultIdentityProviderForRegistration,omitempty"`
@@ -290,6 +445,631 @@ func (v AccountSettings) WithDefaults() AccountSettings {
 	return v
 }
 
+// AutomationAdvancedSettings Advanced application settings.
+type AutomationAdvancedSettings = AdvancedSettings
+
+// AdvancedSettings Advanced application settings.
+type AdvancedSettings struct {
+	// FlowsInherited Whether the domain flows are executed for this application in addition to its own flows.
+	FlowsInherited *bool `json:"flowsInherited,omitempty"`
+
+	// SkipConsent Whether the user consent page is skipped: requested scopes are granted without asking the user.
+	SkipConsent *bool `json:"skipConsent,omitempty"`
+}
+
+// WithDefaults returns a copy of AdvancedSettings with unset fields set to their OpenAPI defaults.
+func (v AdvancedSettings) WithDefaults() AdvancedSettings {
+	if v.FlowsInherited == nil {
+		v.FlowsInherited = new(bool(true))
+	}
+	if v.SkipConsent == nil {
+		v.SkipConsent = new(bool(false))
+	}
+	return v
+}
+
+// AutomationApplication An application (OAuth 2.0 / OIDC client) managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
+type AutomationApplication = Application
+
+// AutomationApplicationKind Agent persona. Required when type is agent, rejected otherwise.
+type AutomationApplicationKind string
+
+// AutomationApplicationType Application type. It drives the computed OAuth 2.0 settings. Can be changed, except to or from agent: such a change is rejected with 400 (delete and recreate the application). Changing the type resets grantTypes, responseTypes and tokenEndpointAuthMethod to the new type's defaults before the payload applies.
+//
+// Example: native
+type AutomationApplicationType string
+
+// Application An application (OAuth 2.0 / OIDC client) managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
+type Application struct {
+	// Certificate Certificate signing the tokens: the key of a certificate of the domain, or id:<uuid>. The reference is not checked against existing certificates: it can name one created after the application or since deleted, and resolves whenever that certificate exists.
+	//
+	// Example: signing-cert
+	Certificate string `json:"certificate"`
+
+	// ClientId OAuth 2.0 client identifier. Generated when omitted on creation. Immutable once set: a different value on update is rejected with 400, an omitted one keeps the current value. Must be unique within the domain.
+	//
+	// Example: mobile-app-client
+	ClientId *string `drift:"ignore-remote-default" json:"clientId,omitempty"`
+
+	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
+	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
+
+	// Description Description of the application.
+	//
+	// Example: Customer mobile application
+	Description *string `json:"description,omitempty"`
+
+	// DryRunErrors Validation errors returned when dryRun is true. Absent when validation succeeds.
+	DryRunErrors []DryRunError `drift:"ignore" json:"dryRunErrors,omitempty"`
+
+	// Enabled Whether the application is enabled. Disabling it revokes its tokens.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// IdentityProviders Identity providers users can authenticate with on this application.
+	IdentityProviders []AutomationApplicationIdentityProvider `json:"identityProviders,omitempty"`
+
+	// Key Stable, immutable identifier for the application within its domain. Lowercase alphanumeric and hyphens, starting and ending with an alphanumeric character. Used to identify the application on create-or-update.
+	//
+	// Example: mobile-app
+	Key string `json:"key"`
+
+	// Kind Agent persona. Required when type is agent, rejected otherwise.
+	Kind *AutomationApplicationKind `json:"kind,omitempty"`
+
+	// Metadata Free-form metadata of the application.
+	//
+	// Example: {"team":"mobile"}
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+
+	// Name Human-readable name of the application. Also used as the OAuth 2.0 client name.
+	//
+	// Example: Mobile app
+	Name string `json:"name"`
+
+	// Settings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
+	Settings *AutomationApplicationSettings `json:"settings,omitempty"`
+
+	// Template Whether the application is a registration template for dynamic client registration rather than an active application.
+	Template *bool `json:"template,omitempty"`
+
+	// Type Application type. It drives the computed OAuth 2.0 settings. Can be changed, except to or from agent: such a change is rejected with 400 (delete and recreate the application). Changing the type resets grantTypes, responseTypes and tokenEndpointAuthMethod to the new type's defaults before the payload applies.
+	//
+	// Example: native
+	Type AutomationApplicationType `json:"type"`
+
+	// UpdatedAt Last-update timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
+	UpdatedAt *time.Time `drift:"ignore" json:"updatedAt,omitempty"`
+}
+
+// WithDefaults returns a copy of Application with unset fields set to their OpenAPI defaults.
+func (v Application) WithDefaults() Application {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(true))
+	}
+	if v.Settings != nil {
+		withDefaults := v.Settings.WithDefaults()
+		v.Settings = &withDefaults
+	}
+	if v.Template == nil {
+		v.Template = new(bool(false))
+	}
+	return v
+}
+
+// AutomationApplicationFactorSettings A factor available to the application.
+type AutomationApplicationFactorSettings = ApplicationFactorSettings
+
+// ApplicationFactorSettings A factor available to the application.
+type ApplicationFactorSettings struct {
+	// Id The factor, as id:<uuid> (factors have no Automation API endpoint).
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	Id string `json:"id"`
+
+	// SelectionRule Expression Language rule selecting this factor. When empty, the factor is always available.
+	//
+	// Example: {#context.attributes['user'].roles.contains('admin')}
+	SelectionRule *string `json:"selectionRule,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationFactorSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationFactorSettings) WithDefaults() ApplicationFactorSettings {
+	return v
+}
+
+// AutomationApplicationIdentityProvider An identity provider users can authenticate with on this application.
+type AutomationApplicationIdentityProvider = ApplicationIdentityProvider
+
+// ApplicationIdentityProvider An identity provider users can authenticate with on this application.
+type ApplicationIdentityProvider struct {
+	// Identity Reference to an identity provider of the domain: its key, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing identity providers: it can name one created after the application or since deleted, and resolves whenever that identity provider exists.
+	//
+	// Example: customer-users
+	Identity string `json:"identity"`
+
+	// Priority Evaluation order among the application's identity providers: lowest first; negative values come last.
+	Priority *int32 `json:"priority,omitempty"`
+
+	// SelectionRule Expression Language rule selecting this identity provider for the current request. When empty, the identity provider is always selectable.
+	//
+	// Example: {#request.params['idp'][0] == 'customers'}
+	SelectionRule *string `json:"selectionRule,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationIdentityProvider with unset fields set to their OpenAPI defaults.
+func (v ApplicationIdentityProvider) WithDefaults() ApplicationIdentityProvider {
+	if v.Priority == nil {
+		v.Priority = new(int32(0))
+	}
+	return v
+}
+
+// AutomationApplicationOAuthSettings OAuth 2.0 and OpenID Connect settings of the application. Fields described as computed are filled in by AM when omitted. tokenExchangeOAuthSettings, when omitted, is inherited from the domain.
+type AutomationApplicationOAuthSettings = ApplicationOAuthSettings
+
+// ApplicationOAuthSettings OAuth 2.0 and OpenID Connect settings of the application. Fields described as computed are filled in by AM when omitted. tokenExchangeOAuthSettings, when omitted, is inherited from the domain.
+type ApplicationOAuthSettings struct {
+	// AccessTokenValiditySeconds Access token validity, in seconds. Computed (7200) when omitted.
+	AccessTokenValiditySeconds *int32 `json:"accessTokenValiditySeconds,omitempty"`
+
+	// ApplicationType OIDC application type, computed from the application type: native for native applications, web for web, browser and service applications. Read-only.
+	ApplicationType *string `drift:"ignore" json:"applicationType,omitempty"`
+
+	// AuthorizationEncryptedResponseAlg JWE alg algorithm encrypting the authorization responses (JARM).
+	AuthorizationEncryptedResponseAlg *string `json:"authorizationEncryptedResponseAlg,omitempty"`
+
+	// AuthorizationEncryptedResponseEnc JWE enc algorithm encrypting the authorization responses (JARM).
+	AuthorizationEncryptedResponseEnc *string `json:"authorizationEncryptedResponseEnc,omitempty"`
+
+	// AuthorizationSignedResponseAlg JWS algorithm signing the authorization responses (JARM).
+	AuthorizationSignedResponseAlg *string `json:"authorizationSignedResponseAlg,omitempty"`
+
+	// ClientName Name of the client presented to users. Always the application name. Read-only.
+	ClientName *string `drift:"ignore" json:"clientName,omitempty"`
+
+	// ClientType OAuth 2.0 client type, computed from the application type: confidential for web and service applications, public for browser and native applications and user_embedded agents. Read-only.
+	ClientType *string `drift:"ignore" json:"clientType,omitempty"`
+
+	// ClientUri URL of the application home page.
+	ClientUri *string `json:"clientUri,omitempty"`
+
+	// Contacts Email addresses of the people responsible for the application.
+	//
+	// Example: ["ops@example.com"]
+	Contacts []string `json:"contacts,omitempty"`
+
+	// CrossAppAccessSettings Resource servers this application may request an ID-JAG for.
+	CrossAppAccessSettings *AutomationCrossAppAccessSettings `json:"crossAppAccessSettings,omitempty"`
+
+	// DefaultACRvalues Default requested Authentication Context Class Reference values.
+	DefaultACRvalues []string `json:"defaultACRvalues,omitempty"`
+
+	// DefaultMaxAge Default maximum authentication age, in seconds.
+	//
+	// Example: 3600
+	DefaultMaxAge *int32 `json:"defaultMaxAge,omitempty"`
+
+	// DisableRefreshTokenRotation Whether a refresh token stays valid when used, instead of being replaced by a new one.
+	DisableRefreshTokenRotation *bool `json:"disableRefreshTokenRotation,omitempty"`
+
+	// DpopBoundAccessTokens Whether access tokens must be bound to a DPoP proof (RFC 9449).
+	DpopBoundAccessTokens *bool `json:"dpopBoundAccessTokens,omitempty"`
+
+	// EnhanceScopesWithUserPermissions Whether the permissions of the user roles are added to the scopes of the issued tokens.
+	EnhanceScopesWithUserPermissions *bool `json:"enhanceScopesWithUserPermissions,omitempty"`
+
+	// ForcePKCE Whether the authorization code flow requires PKCE. Computed (true) for browser and native applications created without grantTypes, and for user_embedded agents.
+	ForcePKCE *bool `drift:"ignore-remote-default" json:"forcePKCE,omitempty"`
+
+	// ForceS256CodeChallengeMethod Whether PKCE requires the S256 code challenge method. Computed (true) for browser applications created without grantTypes, and for user_embedded agents.
+	ForceS256CodeChallengeMethod *bool `drift:"ignore-remote-default" json:"forceS256CodeChallengeMethod,omitempty"`
+
+	// GrantTypes OAuth 2.0 grant types the application may use. Computed when omitted, from the application type: web authorization_code and password; browser and native authorization_code; service client_credentials; resource_server adds client_credentials; agent per kind (user_embedded authorization_code; hosted_delegated authorization_code, client_credentials and token exchange; autonomous client_credentials and token exchange).
+	//
+	// Example: ["authorization_code","refresh_token"]
+	GrantTypes []string `drift:"ignore-remote-default" json:"grantTypes,omitempty"`
+
+	// IdJagValiditySeconds Validity, in seconds, of the identity assertion authorization grants (ID-JAG) issued to the application. Computed (300) when omitted.
+	IdJagValiditySeconds *int32 `json:"idJagValiditySeconds,omitempty"`
+
+	// IdTokenEncryptedResponseAlg JWE alg algorithm encrypting the ID tokens issued to the application.
+	IdTokenEncryptedResponseAlg *string `json:"idTokenEncryptedResponseAlg,omitempty"`
+
+	// IdTokenEncryptedResponseEnc JWE enc algorithm encrypting the ID tokens issued to the application.
+	IdTokenEncryptedResponseEnc *string `json:"idTokenEncryptedResponseEnc,omitempty"`
+
+	// IdTokenSignedResponseAlg JWS algorithm signing the ID tokens issued to the application.
+	IdTokenSignedResponseAlg *string `json:"idTokenSignedResponseAlg,omitempty"`
+
+	// IdTokenValiditySeconds ID token validity, in seconds. Computed (14400) when omitted.
+	IdTokenValiditySeconds *int32 `json:"idTokenValiditySeconds,omitempty"`
+
+	// InitiateLoginUri URI, using the https scheme, a third party can use to initiate a login by the application.
+	//
+	// Example: https://app.example.com/login
+	InitiateLoginUri *string `json:"initiateLoginUri,omitempty"`
+
+	// Jwks JSON Web Key Set of the application passed by value (RFC 7517 section 5): an object with a keys array of JWKs. Same use as jwksUri, which it excludes.
+	//
+	// Example: {"keys":[{"e":"AQAB","kid":"app-key","kty":"RSA","n":"0vx7...","use":"sig"}]}
+	Jwks map[string]interface{} `json:"jwks,omitempty"`
+
+	// JwksUri URL of the application JSON Web Key Set, holding the keys used to verify its signatures. Mutually exclusive with jwks.
+	//
+	// Example: https://app.example.com/.well-known/jwks.json
+	JwksUri *string `json:"jwksUri,omitempty"`
+
+	// LightweightJwtSettings Restricts the JWT access token and the ID token returned to the client to the reserved protocol claims and the allowlisted claims.
+	LightweightJwtSettings *ApplicationLightweightJwtSettings `json:"lightweightJwtSettings,omitempty"`
+
+	// LogoUri URL of the application logo, displayed to users.
+	LogoUri *string `json:"logoUri,omitempty"`
+
+	// OptInScopeSelection When true, users must explicitly select each scope on the consent page; when false, all requested scopes are preselected and users can deselect them. Computed (true) when omitted.
+	OptInScopeSelection *bool `json:"optInScopeSelection,omitempty"`
+
+	// PolicyUri URL of the application policy on the use of profile data.
+	PolicyUri *string `json:"policyUri,omitempty"`
+
+	// PostLogoutRedirectUris URLs the user may be redirected to after logout (post_logout_redirect_uri).
+	//
+	// Example: ["https://app.example.com/logged-out"]
+	PostLogoutRedirectUris []string `json:"postLogoutRedirectUris,omitempty"`
+
+	// RedirectUris Redirection URIs. The redirect_uri of an authorization request must match one of them. At least one is required for the authorization_code and implicit grants.
+	//
+	// Example: ["https://app.example.com/callback"]
+	RedirectUris []string `json:"redirectUris,omitempty"`
+
+	// RefreshTokenValiditySeconds Refresh token validity, in seconds. Computed (14400) when omitted.
+	RefreshTokenValiditySeconds *int32 `json:"refreshTokenValiditySeconds,omitempty"`
+
+	// RequestObjectEncryptionAlg JWE alg algorithm the application may encrypt its request objects with.
+	RequestObjectEncryptionAlg *string `json:"requestObjectEncryptionAlg,omitempty"`
+
+	// RequestObjectEncryptionEnc JWE enc algorithm the application may encrypt its request objects with.
+	RequestObjectEncryptionEnc *string `json:"requestObjectEncryptionEnc,omitempty"`
+
+	// RequestObjectSigningAlg JWS algorithm the application signs its request objects with.
+	RequestObjectSigningAlg *string `json:"requestObjectSigningAlg,omitempty"`
+
+	// RequestUris request_uri values pre-registered by the application.
+	RequestUris []string `json:"requestUris,omitempty"`
+
+	// RequireAuthTime Whether the auth_time claim is required in the ID token.
+	RequireAuthTime *bool `json:"requireAuthTime,omitempty"`
+
+	// ResponseTypes OAuth 2.0 / OIDC response types the application may use. Computed from grantTypes when omitted: authorization_code adds code, implicit adds token and id_token.
+	//
+	// Example: ["code"]
+	ResponseTypes []string `drift:"ignore-remote-default" json:"responseTypes,omitempty"`
+
+	// ScopeSettings Scopes the application can request. Each scope must exist in the domain, otherwise the request is rejected with 400. Resource server applications always get the uma_protection scope.
+	ScopeSettings []AutomationScopeSettings `json:"scopeSettings,omitempty"`
+
+	// SectorIdentifierUri URL, using the https scheme, used to compute pairwise subject identifiers.
+	SectorIdentifierUri *string `json:"sectorIdentifierUri,omitempty"`
+
+	// SilentReAuthentication Whether the id_token_hint parameter can be used to re-authenticate the user silently.
+	SilentReAuthentication *bool `json:"silentReAuthentication,omitempty"`
+
+	// SingleSignOut Whether logout also calls the end_session_endpoint of the external OIDC provider the user authenticated with.
+	SingleSignOut *bool `json:"singleSignOut,omitempty"`
+
+	// SubjectType Subject identifier type of the responses: public or pairwise.
+	//
+	// Example: public
+	SubjectType *string `json:"subjectType,omitempty"`
+
+	// TlsClientAuthSanDns Expected dNSName subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanDns *string `json:"tlsClientAuthSanDns,omitempty"`
+
+	// TlsClientAuthSanEmail Expected rfc822Name subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanEmail *string `json:"tlsClientAuthSanEmail,omitempty"`
+
+	// TlsClientAuthSanIp Expected iPAddress subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanIp *string `json:"tlsClientAuthSanIp,omitempty"`
+
+	// TlsClientAuthSanUri Expected uniformResourceIdentifier subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanUri *string `json:"tlsClientAuthSanUri,omitempty"`
+
+	// TlsClientAuthSubjectDn Expected subject distinguished name of the client certificate, for the tls_client_auth method.
+	//
+	// Example: CN=app.example.com
+	TlsClientAuthSubjectDn *string `json:"tlsClientAuthSubjectDn,omitempty"`
+
+	// TlsClientCertificateBoundAccessTokens Whether access tokens are bound to the client certificate (RFC 8705).
+	TlsClientCertificateBoundAccessTokens *bool `json:"tlsClientCertificateBoundAccessTokens,omitempty"`
+
+	// TokenCustomClaims Custom claims added to the issued tokens.
+	TokenCustomClaims []AutomationTokenClaim `json:"tokenCustomClaims,omitempty"`
+
+	// TokenEndpointAuthMethod Client authentication method at the token endpoint: client_secret_basic, client_secret_post, client_secret_jwt, private_key_jwt, tls_client_auth, self_signed_tls_client_auth or none. Computed when omitted: client_secret_basic on creation, none for browser and native applications created without grantTypes, per kind for agents (user_embedded none; hosted_delegated and autonomous private_key_jwt).
+	//
+	// Example: client_secret_basic
+	TokenEndpointAuthMethod *string `drift:"ignore-remote-default" json:"tokenEndpointAuthMethod,omitempty"`
+
+	// TokenEndpointAuthSigningAlg JWS algorithm the application signs its authentication JWT with, for the private_key_jwt and client_secret_jwt methods.
+	//
+	// Example: RS256
+	TokenEndpointAuthSigningAlg *string `json:"tokenEndpointAuthSigningAlg,omitempty"`
+
+	// TokenExchangeOAuthSettings OAuth-specific token-exchange behavior, such as how scopes are handled, with optional inheritance from domain defaults.
+	TokenExchangeOAuthSettings *TokenExchangeOAuthSettings `json:"tokenExchangeOAuthSettings,omitempty"`
+
+	// TosUri URL of the application terms of service.
+	TosUri *string `json:"tosUri,omitempty"`
+
+	// UserinfoCustomClaims Custom claims added to the UserInfo responses.
+	UserinfoCustomClaims []AutomationUserInfoClaim `json:"userinfoCustomClaims,omitempty"`
+
+	// UserinfoEncryptedResponseAlg JWE alg algorithm encrypting the UserInfo responses.
+	UserinfoEncryptedResponseAlg *string `json:"userinfoEncryptedResponseAlg,omitempty"`
+
+	// UserinfoEncryptedResponseEnc JWE enc algorithm encrypting the UserInfo responses.
+	UserinfoEncryptedResponseEnc *string `json:"userinfoEncryptedResponseEnc,omitempty"`
+
+	// UserinfoSignedResponseAlg JWS algorithm signing the UserInfo responses.
+	UserinfoSignedResponseAlg *string `json:"userinfoSignedResponseAlg,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationOAuthSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationOAuthSettings) WithDefaults() ApplicationOAuthSettings {
+	if v.AccessTokenValiditySeconds == nil {
+		v.AccessTokenValiditySeconds = new(int32(7200))
+	}
+	if v.CrossAppAccessSettings != nil {
+		withDefaults := v.CrossAppAccessSettings.WithDefaults()
+		v.CrossAppAccessSettings = &withDefaults
+	}
+	if v.DisableRefreshTokenRotation == nil {
+		v.DisableRefreshTokenRotation = new(bool(false))
+	}
+	if v.DpopBoundAccessTokens == nil {
+		v.DpopBoundAccessTokens = new(bool(false))
+	}
+	if v.EnhanceScopesWithUserPermissions == nil {
+		v.EnhanceScopesWithUserPermissions = new(bool(false))
+	}
+	if v.ForcePKCE == nil {
+		v.ForcePKCE = new(bool(false))
+	}
+	if v.ForceS256CodeChallengeMethod == nil {
+		v.ForceS256CodeChallengeMethod = new(bool(false))
+	}
+	if v.IdJagValiditySeconds == nil {
+		v.IdJagValiditySeconds = new(int32(300))
+	}
+	if v.IdTokenValiditySeconds == nil {
+		v.IdTokenValiditySeconds = new(int32(14400))
+	}
+	if v.LightweightJwtSettings != nil {
+		withDefaults := v.LightweightJwtSettings.WithDefaults()
+		v.LightweightJwtSettings = &withDefaults
+	}
+	if v.OptInScopeSelection == nil {
+		v.OptInScopeSelection = new(bool(true))
+	}
+	if v.RefreshTokenValiditySeconds == nil {
+		v.RefreshTokenValiditySeconds = new(int32(14400))
+	}
+	if v.RequireAuthTime == nil {
+		v.RequireAuthTime = new(bool(false))
+	}
+	if v.SilentReAuthentication == nil {
+		v.SilentReAuthentication = new(bool(false))
+	}
+	if v.SingleSignOut == nil {
+		v.SingleSignOut = new(bool(false))
+	}
+	if v.TlsClientCertificateBoundAccessTokens == nil {
+		v.TlsClientCertificateBoundAccessTokens = new(bool(false))
+	}
+	if v.TokenExchangeOAuthSettings != nil {
+		withDefaults := v.TokenExchangeOAuthSettings.WithDefaults()
+		v.TokenExchangeOAuthSettings = &withDefaults
+	}
+	return v
+}
+
+// AutomationApplicationSAMLSettings Settings of the application acting as a SAML 2.0 service provider (SP).
+type AutomationApplicationSAMLSettings = ApplicationSAMLSettings
+
+// ApplicationSAMLSettings Settings of the application acting as a SAML 2.0 service provider (SP).
+type ApplicationSAMLSettings struct {
+	// AssertionAttributes Custom attributes of the SAML assertion. When not empty, they replace the default attribute set.
+	AssertionAttributes []AutomationSamlAssertionAttribute `json:"assertionAttributes,omitempty"`
+
+	// AssertionValiditySeconds Validity, in seconds, of the issued assertion. When absent, the IdP default applies. Used when includeAssertionConditions is true.
+	//
+	// Example: 300
+	AssertionValiditySeconds *int32 `json:"assertionValiditySeconds,omitempty"`
+
+	// AttributeConsumeServiceUrl SP endpoint the IdP sends SAML responses to (Assertion Consumer Service URL).
+	//
+	// Example: https://app.example.com/saml/acs
+	AttributeConsumeServiceUrl *string `json:"attributeConsumeServiceUrl,omitempty"`
+
+	// Audiences Audience URIs added to the SP entity ID in the AudienceRestriction. Used when includeAssertionConditions is true.
+	Audiences []string `json:"audiences,omitempty"`
+
+	// Certificate The SP's PEM-encoded public key certificate, used by the IdP to verify SAML requests and, when assertions are encrypted, to wrap the symmetric key. Required when wantAssertionsEncrypted is true.
+	Certificate *string `json:"certificate,omitempty"`
+
+	// DataEncryptionAlgorithm Data encryption algorithm URI of encrypted assertions (XML Encryption EncryptedData).
+	//
+	// Example: http://www.w3.org/2009/xmlenc11#aes256-gcm
+	DataEncryptionAlgorithm *string `json:"dataEncryptionAlgorithm,omitempty"`
+
+	// EntityId URL or URN that uniquely identifies the SP (the SAML entity ID).
+	//
+	// Example: https://app.example.com
+	EntityId *string `json:"entityId,omitempty"`
+
+	// IncludeAssertionConditions Whether assertions carry Conditions (validity time bounds and audience restriction), configured by the fields below.
+	IncludeAssertionConditions *bool `json:"includeAssertionConditions,omitempty"`
+
+	// KeyTransportEncryptionAlgorithm Key transport algorithm URI of encrypted assertions (XML Encryption EncryptedKey).
+	//
+	// Example: http://www.w3.org/2009/xmlenc11#rsa-oaep
+	KeyTransportEncryptionAlgorithm *string `json:"keyTransportEncryptionAlgorithm,omitempty"`
+
+	// NameIdMapping Expression Language expression producing the NameID of the SAML response. When empty, the internal user id is used, or the user's email when the SP requests the email format.
+	//
+	// Example: {#context.attributes['user'].username}
+	NameIdMapping *string `json:"nameIdMapping,omitempty"`
+
+	// NotBeforeTimeSkewSeconds Clock skew, in seconds, subtracted from NotBefore.
+	//
+	// Example: 30
+	NotBeforeTimeSkewSeconds *int32 `json:"notBeforeTimeSkewSeconds,omitempty"`
+
+	// NotOnOrAfterTimeSkewSeconds Clock skew, in seconds, added to NotOnOrAfter.
+	//
+	// Example: 30
+	NotOnOrAfterTimeSkewSeconds *int32 `json:"notOnOrAfterTimeSkewSeconds,omitempty"`
+
+	// ResponseBinding Binding used to send SAML responses to the SP. The default answers with the binding of the initial request.
+	ResponseBinding *string `json:"responseBinding,omitempty"`
+
+	// SingleLogoutServiceUrl SP endpoint the IdP redirects to after a single logout.
+	//
+	// Example: https://app.example.com/saml/logout
+	SingleLogoutServiceUrl *string `json:"singleLogoutServiceUrl,omitempty"`
+
+	// WantAssertionsEncrypted Whether the SP requires encrypted SAML assertions.
+	WantAssertionsEncrypted *bool `json:"wantAssertionsEncrypted,omitempty"`
+
+	// WantAssertionsSigned Whether the SP requires signed SAML assertions.
+	WantAssertionsSigned *bool `json:"wantAssertionsSigned,omitempty"`
+
+	// WantResponseSigned Whether the SP requires signed SAML responses.
+	WantResponseSigned *bool `json:"wantResponseSigned,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationSAMLSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationSAMLSettings) WithDefaults() ApplicationSAMLSettings {
+	if v.IncludeAssertionConditions == nil {
+		v.IncludeAssertionConditions = new(bool(false))
+	}
+	if v.ResponseBinding == nil {
+		v.ResponseBinding = new(string("urn:oasis:names:tc:SAML:2.0:bindings:custom:Initial-Request"))
+	}
+	if v.WantAssertionsEncrypted == nil {
+		v.WantAssertionsEncrypted = new(bool(false))
+	}
+	if v.WantAssertionsSigned == nil {
+		v.WantAssertionsSigned = new(bool(false))
+	}
+	if v.WantResponseSigned == nil {
+		v.WantResponseSigned = new(bool(true))
+	}
+	return v
+}
+
+// AutomationApplicationSettings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
+type AutomationApplicationSettings = ApplicationSettings
+
+// ApplicationSettings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
+type ApplicationSettings struct {
+	// Account User account settings for the domain: brute-force protection, registration, password reset, remember-me, and MFA challenge behavior.
+	Account *AutomationAccountSettings `json:"account,omitempty"`
+
+	// Advanced Advanced application settings.
+	Advanced *AutomationAdvancedSettings `json:"advanced,omitempty"`
+
+	// CookieSettings Session cookie settings of the application.
+	CookieSettings *AutomationCookieSettings `json:"cookieSettings,omitempty"`
+
+	// Login Configuration of the domain's login flow and the features offered on the sign-in page.
+	Login *LoginSettings `json:"login,omitempty"`
+
+	// Mfa Multi-factor authentication settings of the application.
+	Mfa *AutomationMfaSettings `json:"mfa,omitempty"`
+
+	// Oauth OAuth 2.0 and OpenID Connect settings of the application. Fields described as computed are filled in by AM when omitted. tokenExchangeOAuthSettings, when omitted, is inherited from the domain.
+	Oauth *AutomationApplicationOAuthSettings `json:"oauth,omitempty"`
+
+	// RiskAssessment Risk assessment of the authentication attempts, used by risk-based MFA. Effective only with the Enterprise Edition risk assessment plugin.
+	RiskAssessment *AutomationRiskAssessmentSettings `json:"riskAssessment,omitempty"`
+
+	// Saml Settings of the application acting as a SAML 2.0 service provider (SP).
+	Saml *AutomationApplicationSAMLSettings `json:"saml,omitempty"`
+
+	// SecretExpirationSettings Controls whether client secrets in the domain expire and after how long.
+	SecretExpirationSettings *SecretExpirationSettings `json:"secretExpirationSettings,omitempty"`
+
+	// WorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
+	WorkloadIdentitySettings *AutomationWorkloadIdentitySettings `json:"workloadIdentitySettings,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationSettings) WithDefaults() ApplicationSettings {
+	if v.Account != nil {
+		withDefaults := v.Account.WithDefaults()
+		v.Account = &withDefaults
+	}
+	if v.Advanced != nil {
+		withDefaults := v.Advanced.WithDefaults()
+		v.Advanced = &withDefaults
+	}
+	if v.CookieSettings != nil {
+		withDefaults := v.CookieSettings.WithDefaults()
+		v.CookieSettings = &withDefaults
+	}
+	if v.Login != nil {
+		withDefaults := v.Login.WithDefaults()
+		v.Login = &withDefaults
+	}
+	if v.Mfa != nil {
+		withDefaults := v.Mfa.WithDefaults()
+		v.Mfa = &withDefaults
+	}
+	if v.Oauth != nil {
+		withDefaults := v.Oauth.WithDefaults()
+		v.Oauth = &withDefaults
+	}
+	if v.RiskAssessment != nil {
+		withDefaults := v.RiskAssessment.WithDefaults()
+		v.RiskAssessment = &withDefaults
+	}
+	if v.Saml != nil {
+		withDefaults := v.Saml.WithDefaults()
+		v.Saml = &withDefaults
+	}
+	if v.SecretExpirationSettings != nil {
+		withDefaults := v.SecretExpirationSettings.WithDefaults()
+		v.SecretExpirationSettings = &withDefaults
+	}
+	if v.WorkloadIdentitySettings != nil {
+		withDefaults := v.WorkloadIdentitySettings.WithDefaults()
+		v.WorkloadIdentitySettings = &withDefaults
+	}
+	return v
+}
+
+// AutomationAssessmentSettings Settings of one risk assessment.
+type AutomationAssessmentSettings = AssessmentSettings
+
+// AssessmentSettings Settings of one risk assessment.
+type AssessmentSettings struct {
+	// Enabled Whether this assessment is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Thresholds Score threshold of each risk level: an assessment scoring at or above a threshold reaches that level.
+	//
+	// Example: {"HIGH":1}
+	Thresholds map[string]float64 `json:"thresholds,omitempty"`
+}
+
+// WithDefaults returns a copy of AssessmentSettings with unset fields set to their OpenAPI defaults.
+func (v AssessmentSettings) WithDefaults() AssessmentSettings {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
+	}
+	return v
+}
+
 // AutomationCIBASettings Client-Initiated Backchannel Authentication (CIBA) settings for the domain. CIBA lets a relying party initiate end-user authentication from a separate consumption device, without redirecting the user through the browser. Authentication device notifiers are not managed by the Automation API and are not exposed here.
 type AutomationCIBASettings = CIBASettings
 
@@ -379,7 +1159,7 @@ type AutomationCertificateSettings = CertificateSettings
 
 // CertificateSettings Domain-level certificate settings.
 type CertificateSettings struct {
-	// FallbackCertificate Key of a certificate managed under this domain, used as the fallback certificate when a client does not specify one. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever a certificate with that key exists.
+	// FallbackCertificate Fallback certificate used when a client does not specify one: the key of a certificate of the domain, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever that certificate exists.
 	//
 	// Example: default
 	FallbackCertificate *string `json:"fallbackCertificate,omitempty"`
@@ -387,6 +1167,38 @@ type CertificateSettings struct {
 
 // WithDefaults returns a copy of CertificateSettings with unset fields set to their OpenAPI defaults.
 func (v CertificateSettings) WithDefaults() CertificateSettings {
+	return v
+}
+
+// AutomationChallengeSettings When users are challenged for a second factor.
+type AutomationChallengeSettings = ChallengeSettings
+
+// AutomationChallengeSettingsType required: always challenge. conditional: challenge unless challengeRule evaluates to true. risk_based: challenge according to the risk assessment.
+//
+// Example: required
+type AutomationChallengeSettingsType string
+
+// ChallengeSettings When users are challenged for a second factor.
+type ChallengeSettings struct {
+	// Active Whether users are challenged for a second factor.
+	Active *bool `json:"active,omitempty"`
+
+	// ChallengeRule Expression Language rule of a conditional challenge: when it evaluates to true, the challenge is skipped.
+	//
+	// Example: {#context.attributes['geoip']['country_iso_code'] == 'FR'}
+	ChallengeRule *string `json:"challengeRule,omitempty"`
+
+	// Type required: always challenge. conditional: challenge unless challengeRule evaluates to true. risk_based: challenge according to the risk assessment.
+	//
+	// Example: required
+	Type *AutomationChallengeSettingsType `json:"type,omitempty"`
+}
+
+// WithDefaults returns a copy of ChallengeSettings with unset fields set to their OpenAPI defaults.
+func (v ChallengeSettings) WithDefaults() ChallengeSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
 	return v
 }
 
@@ -451,6 +1263,76 @@ func (v ClientRegistrationSettings) WithDefaults() ClientRegistrationSettings {
 	}
 	if v.OpenDynamicClientRegistrationEnabled == nil {
 		v.OpenDynamicClientRegistrationEnabled = new(bool(false))
+	}
+	return v
+}
+
+// AutomationCookieSettings Session cookie settings of the application.
+type AutomationCookieSettings = CookieSettings
+
+// CookieSettings Session cookie settings of the application.
+type CookieSettings struct {
+	// Inherited Whether the cookie settings are inherited from the domain. When true, the other fields are ignored.
+	Inherited *bool `json:"inherited,omitempty"`
+
+	// Session Session cookie settings.
+	Session *AutomationSessionSettings `json:"session,omitempty"`
+}
+
+// WithDefaults returns a copy of CookieSettings with unset fields set to their OpenAPI defaults.
+func (v CookieSettings) WithDefaults() CookieSettings {
+	if v.Inherited == nil {
+		v.Inherited = new(bool(true))
+	}
+	if v.Session != nil {
+		withDefaults := v.Session.WithDefaults()
+		v.Session = &withDefaults
+	}
+	return v
+}
+
+// AutomationCrossAppAccessResourceServer A resource server this application may request an ID-JAG for.
+type AutomationCrossAppAccessResourceServer = CrossAppAccessResourceServer
+
+// CrossAppAccessResourceServer A resource server this application may request an ID-JAG for.
+type CrossAppAccessResourceServer struct {
+	// ClientId Identifier this application is registered with at the resource authorization server.
+	//
+	// Example: acme-calendar-client
+	ClientId *string `json:"clientId,omitempty"`
+
+	// ResourceServerId Resource server of the trusted domain, as id:<uuid> (a key is rejected with 400).
+	//
+	// Example: id:7a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d
+	ResourceServerId *string `json:"resourceServerId,omitempty"`
+
+	// TrustDomainId Trusted domain the resource server belongs to, as id:<uuid> (a key is rejected with 400). A hint used to resolve the resource server; the resource server reference remains authoritative.
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	TrustDomainId *string `json:"trustDomainId,omitempty"`
+}
+
+// WithDefaults returns a copy of CrossAppAccessResourceServer with unset fields set to their OpenAPI defaults.
+func (v CrossAppAccessResourceServer) WithDefaults() CrossAppAccessResourceServer {
+	return v
+}
+
+// AutomationCrossAppAccessSettings Resource servers this application may request an ID-JAG for.
+type AutomationCrossAppAccessSettings = CrossAppAccessSettings
+
+// CrossAppAccessSettings Resource servers this application may request an ID-JAG for.
+type CrossAppAccessSettings struct {
+	// Enabled Whether this application participates in Cross App Access.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// ResourceServers Resource servers this application may reach, one entry per resource server.
+	ResourceServers []AutomationCrossAppAccessResourceServer `json:"resourceServers,omitempty"`
+}
+
+// WithDefaults returns a copy of CrossAppAccessSettings with unset fields set to their OpenAPI defaults.
+func (v CrossAppAccessSettings) WithDefaults() CrossAppAccessSettings {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
 	}
 	return v
 }
@@ -699,6 +1581,95 @@ func (v Domain) WithDefaults() Domain {
 	return v
 }
 
+// AutomationEnrollSettings When users are asked to enroll a factor.
+type AutomationEnrollSettings = EnrollSettings
+
+// AutomationEnrollSettingsType optional: users can skip the enrollment. required: users must enroll. conditional: enrollment required unless enrollmentRule evaluates to true.
+//
+// Example: required
+type AutomationEnrollSettingsType string
+
+// EnrollSettings When users are asked to enroll a factor.
+type EnrollSettings struct {
+	// Active Whether users are asked to enroll a factor.
+	Active *bool `json:"active,omitempty"`
+
+	// EnrollmentRule Expression Language rule of a conditional enrollment: when it evaluates to true, the enrollment is skipped.
+	//
+	// Example: {#context.attributes['user'].roles.contains('guest')}
+	EnrollmentRule *string `json:"enrollmentRule,omitempty"`
+
+	// EnrollmentSkipActive Whether users can skip the enrollment.
+	EnrollmentSkipActive *bool `json:"enrollmentSkipActive,omitempty"`
+
+	// EnrollmentSkipRule Expression Language rule: when it evaluates to true, users can skip the enrollment.
+	EnrollmentSkipRule *string `json:"enrollmentSkipRule,omitempty"`
+
+	// ForceEnrollment Whether users must enroll a factor.
+	ForceEnrollment *bool `json:"forceEnrollment,omitempty"`
+
+	// SkipTimeSeconds Duration, in seconds, during which a skipped enrollment is not asked again.
+	//
+	// Example: 36000
+	SkipTimeSeconds *int64 `json:"skipTimeSeconds,omitempty"`
+
+	// Type optional: users can skip the enrollment. required: users must enroll. conditional: enrollment required unless enrollmentRule evaluates to true.
+	//
+	// Example: required
+	Type *AutomationEnrollSettingsType `json:"type,omitempty"`
+}
+
+// WithDefaults returns a copy of EnrollSettings with unset fields set to their OpenAPI defaults.
+func (v EnrollSettings) WithDefaults() EnrollSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
+	if v.EnrollmentSkipActive == nil {
+		v.EnrollmentSkipActive = new(bool(false))
+	}
+	return v
+}
+
+// AutomationEnrollmentSettings Deprecated: use enroll. Legacy enrollment settings.
+type AutomationEnrollmentSettings = EnrollmentSettings
+
+// EnrollmentSettings Deprecated: use enroll. Legacy enrollment settings.
+//
+// Deprecated: this type has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+type EnrollmentSettings struct {
+	// ForceEnrollment Whether users must enroll a factor.
+	ForceEnrollment *bool `json:"forceEnrollment,omitempty"`
+
+	// SkipTimeSeconds Duration, in seconds, during which users can skip the enrollment.
+	//
+	// Example: 36000
+	SkipTimeSeconds *int64 `json:"skipTimeSeconds,omitempty"`
+}
+
+// WithDefaults returns a copy of EnrollmentSettings with unset fields set to their OpenAPI defaults.
+func (v EnrollmentSettings) WithDefaults() EnrollmentSettings {
+	return v
+}
+
+// AutomationFactorSettings Factors offered to the users of the application.
+type AutomationFactorSettings = FactorSettings
+
+// FactorSettings Factors offered to the users of the application.
+type FactorSettings struct {
+	// ApplicationFactors Factors available to the application.
+	ApplicationFactors []AutomationApplicationFactorSettings `json:"applicationFactors,omitempty"`
+
+	// DefaultFactorId Factor proposed first, as id:<uuid> (factors have no Automation API endpoint).
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	DefaultFactorId *string `json:"defaultFactorId,omitempty"`
+}
+
+// WithDefaults returns a copy of FactorSettings with unset fields set to their OpenAPI defaults.
+func (v FactorSettings) WithDefaults() FactorSettings {
+	return v
+}
+
 // AutomationIdentityProvider An identity provider managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
 type AutomationIdentityProvider = IdentityProvider
 
@@ -777,6 +1748,71 @@ func (v IdentityProvider) WithDefaults() IdentityProvider {
 	return v
 }
 
+// AutomationMfaSettings Multi-factor authentication settings of the application.
+type AutomationMfaSettings = MfaSettings
+
+// MfaSettings Multi-factor authentication settings of the application.
+type MfaSettings struct {
+	// AdaptiveAuthenticationRule Deprecated: use challenge.challengeRule. Expression Language rule of the adaptive authentication.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	AdaptiveAuthenticationRule *string `json:"adaptiveAuthenticationRule,omitempty"`
+
+	// Challenge When users are challenged for a second factor.
+	Challenge *AutomationChallengeSettings `json:"challenge,omitempty"`
+
+	// Enroll When users are asked to enroll a factor.
+	Enroll *AutomationEnrollSettings `json:"enroll,omitempty"`
+
+	// Enrollment Deprecated: use enroll. Legacy enrollment settings.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Enrollment *AutomationEnrollmentSettings `json:"enrollment,omitempty"`
+
+	// Factor Factors offered to the users of the application.
+	Factor *AutomationFactorSettings `json:"factor,omitempty"`
+
+	// LoginRule Legacy MFA login rule, kept for round-trip fidelity. Use challenge and enroll to configure when MFA applies.
+	LoginRule *string `json:"loginRule,omitempty"`
+
+	// RememberDevice Remember device: skips the MFA challenge on a device already used to authenticate.
+	RememberDevice *AutomationRememberDeviceSettings `json:"rememberDevice,omitempty"`
+
+	// StepUpAuthentication Step-up authentication: asks for MFA again during a session when its rule matches.
+	StepUpAuthentication *AutomationStepUpAuthenticationSettings `json:"stepUpAuthentication,omitempty"`
+
+	// StepUpAuthenticationRule Deprecated: use stepUpAuthentication. Expression Language rule triggering step-up authentication.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	StepUpAuthenticationRule *string `json:"stepUpAuthenticationRule,omitempty"`
+}
+
+// WithDefaults returns a copy of MfaSettings with unset fields set to their OpenAPI defaults.
+func (v MfaSettings) WithDefaults() MfaSettings {
+	if v.Challenge != nil {
+		withDefaults := v.Challenge.WithDefaults()
+		v.Challenge = &withDefaults
+	}
+	if v.Enroll != nil {
+		withDefaults := v.Enroll.WithDefaults()
+		v.Enroll = &withDefaults
+	}
+	if v.Enrollment != nil {
+		withDefaults := v.Enrollment.WithDefaults()
+		v.Enrollment = &withDefaults
+	}
+	if v.Factor != nil {
+		withDefaults := v.Factor.WithDefaults()
+		v.Factor = &withDefaults
+	}
+	if v.RememberDevice != nil {
+		withDefaults := v.RememberDevice.WithDefaults()
+		v.RememberDevice = &withDefaults
+	}
+	if v.StepUpAuthentication != nil {
+		withDefaults := v.StepUpAuthentication.WithDefaults()
+		v.StepUpAuthentication = &withDefaults
+	}
+	return v
+}
+
 // AutomationOidcSettings OpenID Connect settings for the domain. CIMD (client identity metadata document) settings are not exposed by the Automation API and are reset on update.
 type AutomationOidcSettings = OidcSettings
 
@@ -824,6 +1860,39 @@ func (v OidcSettings) WithDefaults() OidcSettings {
 	if v.WorkloadIdentitySettings != nil {
 		withDefaults := v.WorkloadIdentitySettings.WithDefaults()
 		v.WorkloadIdentitySettings = &withDefaults
+	}
+	return v
+}
+
+// AutomationRememberDeviceSettings Remember device: skips the MFA challenge on a device already used to authenticate.
+type AutomationRememberDeviceSettings = RememberDeviceSettings
+
+// RememberDeviceSettings Remember device: skips the MFA challenge on a device already used to authenticate.
+type RememberDeviceSettings struct {
+	// Active Whether remember device is enabled.
+	Active *bool `json:"active,omitempty"`
+
+	// DeviceIdentifierId Device identifier used to recognize devices, as id:<uuid> (device identifiers have no Automation API endpoint).
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	DeviceIdentifierId *string `json:"deviceIdentifierId,omitempty"`
+
+	// ExpirationTimeSeconds Duration, in seconds, for which a device is remembered.
+	//
+	// Example: 36000
+	ExpirationTimeSeconds *int64 `json:"expirationTimeSeconds,omitempty"`
+
+	// SkipRememberDevice Only used with a conditional MFA challenge: when true, remember device is not applied when the MFA condition evaluates to no risk.
+	SkipRememberDevice *bool `json:"skipRememberDevice,omitempty"`
+}
+
+// WithDefaults returns a copy of RememberDeviceSettings with unset fields set to their OpenAPI defaults.
+func (v RememberDeviceSettings) WithDefaults() RememberDeviceSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
+	if v.SkipRememberDevice == nil {
+		v.SkipRememberDevice = new(bool(false))
 	}
 	return v
 }
@@ -889,12 +1958,71 @@ func (v Reporter) WithDefaults() Reporter {
 	return v
 }
 
+// AutomationRiskAssessmentSettings Risk assessment of the authentication attempts, used by risk-based MFA. Effective only with the Enterprise Edition risk assessment plugin.
+type AutomationRiskAssessmentSettings = RiskAssessmentSettings
+
+// RiskAssessmentSettings Risk assessment of the authentication attempts, used by risk-based MFA. Effective only with the Enterprise Edition risk assessment plugin.
+type RiskAssessmentSettings struct {
+	// DeviceAssessment Settings of one risk assessment.
+	DeviceAssessment *AutomationAssessmentSettings `json:"deviceAssessment,omitempty"`
+
+	// Enabled Whether risk assessment is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// GeoVelocityAssessment Settings of one risk assessment.
+	GeoVelocityAssessment *AutomationAssessmentSettings `json:"geoVelocityAssessment,omitempty"`
+
+	// IpReputationAssessment Settings of one risk assessment.
+	IpReputationAssessment *AutomationAssessmentSettings `json:"ipReputationAssessment,omitempty"`
+}
+
+// WithDefaults returns a copy of RiskAssessmentSettings with unset fields set to their OpenAPI defaults.
+func (v RiskAssessmentSettings) WithDefaults() RiskAssessmentSettings {
+	if v.DeviceAssessment != nil {
+		withDefaults := v.DeviceAssessment.WithDefaults()
+		v.DeviceAssessment = &withDefaults
+	}
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
+	}
+	if v.GeoVelocityAssessment != nil {
+		withDefaults := v.GeoVelocityAssessment.WithDefaults()
+		v.GeoVelocityAssessment = &withDefaults
+	}
+	if v.IpReputationAssessment != nil {
+		withDefaults := v.IpReputationAssessment.WithDefaults()
+		v.IpReputationAssessment = &withDefaults
+	}
+	return v
+}
+
+// AutomationSamlAssertionAttribute A custom attribute of the SAML assertion.
+type AutomationSamlAssertionAttribute = SamlAssertionAttribute
+
+// SamlAssertionAttribute A custom attribute of the SAML assertion.
+type SamlAssertionAttribute struct {
+	// Name Name of the SAML attribute.
+	//
+	// Example: email
+	Name string `json:"name"`
+
+	// Value Expression Language expression resolved to the attribute value.
+	//
+	// Example: {#context.attributes['user'].email}
+	Value string `json:"value"`
+}
+
+// WithDefaults returns a copy of SamlAssertionAttribute with unset fields set to their OpenAPI defaults.
+func (v SamlAssertionAttribute) WithDefaults() SamlAssertionAttribute {
+	return v
+}
+
 // AutomationSamlSettings Settings for the domain acting as a SAML 2.0 identity provider (IdP).
 type AutomationSamlSettings = SamlSettings
 
 // SamlSettings Settings for the domain acting as a SAML 2.0 identity provider (IdP).
 type SamlSettings struct {
-	// Certificate Key of a certificate managed under this domain, used to sign SAML responses. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever a certificate with that key exists.
+	// Certificate Certificate signing SAML responses: the key of a certificate of the domain, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever that certificate exists.
 	//
 	// Example: signing-cert
 	Certificate *string `json:"certificate,omitempty"`
@@ -912,6 +2040,160 @@ type SamlSettings struct {
 func (v SamlSettings) WithDefaults() SamlSettings {
 	if v.Enabled == nil {
 		v.Enabled = new(bool(false))
+	}
+	return v
+}
+
+// AutomationScopeSettings A scope the application can request, with its settings.
+type AutomationScopeSettings = ScopeSettings
+
+// ScopeSettings A scope the application can request, with its settings.
+type ScopeSettings struct {
+	// DefaultScope Whether the scope is granted when the authorization request carries no scope parameter.
+	DefaultScope *bool `json:"defaultScope,omitempty"`
+
+	// RequiredScope Whether the user cannot deselect this scope on the consent page.
+	RequiredScope *bool `json:"requiredScope,omitempty"`
+
+	// Scope Key of a scope of the domain. The scope must exist, otherwise the request is rejected with 400.
+	//
+	// Example: openid
+	Scope string `json:"scope"`
+
+	// ScopeApproval Duration, in seconds, of the user consent to this scope. When absent, the domain scope setting applies.
+	//
+	// Example: 86400
+	ScopeApproval *int32 `json:"scopeApproval,omitempty"`
+}
+
+// WithDefaults returns a copy of ScopeSettings with unset fields set to their OpenAPI defaults.
+func (v ScopeSettings) WithDefaults() ScopeSettings {
+	if v.DefaultScope == nil {
+		v.DefaultScope = new(bool(false))
+	}
+	if v.RequiredScope == nil {
+		v.RequiredScope = new(bool(false))
+	}
+	return v
+}
+
+// AutomationSessionSettings Session cookie settings.
+type AutomationSessionSettings = SessionSettings
+
+// SessionSettings Session cookie settings.
+type SessionSettings struct {
+	// Persistent Whether the session cookie is persistent (kept after the browser is closed) rather than a session cookie.
+	Persistent *bool `json:"persistent,omitempty"`
+}
+
+// WithDefaults returns a copy of SessionSettings with unset fields set to their OpenAPI defaults.
+func (v SessionSettings) WithDefaults() SessionSettings {
+	if v.Persistent == nil {
+		v.Persistent = new(bool(false))
+	}
+	return v
+}
+
+// AutomationStepUpAuthenticationSettings Step-up authentication: asks for MFA again during a session when its rule matches.
+type AutomationStepUpAuthenticationSettings = StepUpAuthenticationSettings
+
+// StepUpAuthenticationSettings Step-up authentication: asks for MFA again during a session when its rule matches.
+type StepUpAuthenticationSettings struct {
+	// Active Whether step-up authentication is enabled.
+	Active *bool `json:"active,omitempty"`
+
+	// StepUpAuthenticationRule Expression Language rule: when it evaluates to true, the user is challenged again.
+	//
+	// Example: {#request.params['scope'][0].contains('write')}
+	StepUpAuthenticationRule *string `json:"stepUpAuthenticationRule,omitempty"`
+}
+
+// WithDefaults returns a copy of StepUpAuthenticationSettings with unset fields set to their OpenAPI defaults.
+func (v StepUpAuthenticationSettings) WithDefaults() StepUpAuthenticationSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
+	return v
+}
+
+// AutomationTokenClaim A custom claim added to the tokens issued to the application.
+type AutomationTokenClaim = TokenClaim
+
+// AutomationTokenClaimTokenType Token the claim is added to.
+//
+// Example: access_token
+type AutomationTokenClaimTokenType string
+
+// TokenClaim A custom claim added to the tokens issued to the application.
+type TokenClaim struct {
+	// ClaimName Name of the claim.
+	//
+	// Example: department
+	ClaimName string `json:"claimName"`
+
+	// ClaimValue Value of the claim: a literal or an Expression Language expression.
+	//
+	// Example: {#context.attributes['user']['additionalInformation']['department']}
+	ClaimValue string `json:"claimValue"`
+
+	// TokenType Token the claim is added to.
+	//
+	// Example: access_token
+	TokenType AutomationTokenClaimTokenType `json:"tokenType"`
+}
+
+// WithDefaults returns a copy of TokenClaim with unset fields set to their OpenAPI defaults.
+func (v TokenClaim) WithDefaults() TokenClaim {
+	return v
+}
+
+// AutomationUserInfoClaim A custom claim added to the UserInfo responses of the application.
+type AutomationUserInfoClaim = UserInfoClaim
+
+// UserInfoClaim A custom claim added to the UserInfo responses of the application.
+type UserInfoClaim struct {
+	// ClaimName Name of the claim.
+	//
+	// Example: department
+	ClaimName string `json:"claimName"`
+
+	// ClaimValue Value of the claim: a literal or an Expression Language expression.
+	//
+	// Example: {#context.attributes['user']['additionalInformation']['department']}
+	ClaimValue string `json:"claimValue"`
+}
+
+// WithDefaults returns a copy of UserInfoClaim with unset fields set to their OpenAPI defaults.
+func (v UserInfoClaim) WithDefaults() UserInfoClaim {
+	return v
+}
+
+// AutomationWorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
+type AutomationWorkloadIdentitySettings = WorkloadIdentitySettings
+
+// AutomationWorkloadIdentitySettingsSubjectMatchMode How subject is matched against the SVID sub claim. exact (default) requires equality. prefix is only allowed for hosted_delegated or autonomous agent applications: subject must end with / and the SVID sub is accepted when it starts with subject; the full SVID SPIFFE ID then becomes the per-instance act.sub in minted tokens.
+type AutomationWorkloadIdentitySettingsSubjectMatchMode string
+
+// WorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
+type WorkloadIdentitySettings struct {
+	// Subject SPIFFE ID expected in the SVID sub claim, interpreted per subjectMatchMode.
+	//
+	// Example: spiffe://prod.example.org/ns/payments/sa/api
+	Subject *string `json:"subject,omitempty"`
+
+	// SubjectMatchMode How subject is matched against the SVID sub claim. exact (default) requires equality. prefix is only allowed for hosted_delegated or autonomous agent applications: subject must end with / and the SVID sub is accepted when it starts with subject; the full SVID SPIFFE ID then becomes the per-instance act.sub in minted tokens.
+	SubjectMatchMode *AutomationWorkloadIdentitySettingsSubjectMatchMode `json:"subjectMatchMode,omitempty"`
+
+	// TrustDomain Name of the trusted domain this application authenticates against.
+	//
+	// Example: prod.example.org
+	TrustDomain *string `json:"trustDomain,omitempty"`
+}
+
+// WithDefaults returns a copy of WorkloadIdentitySettings with unset fields set to their OpenAPI defaults.
+func (v WorkloadIdentitySettings) WithDefaults() WorkloadIdentitySettings {
+	if v.SubjectMatchMode == nil {
+		v.SubjectMatchMode = new(AutomationWorkloadIdentitySettingsSubjectMatchMode("exact"))
 	}
 	return v
 }
@@ -1774,6 +3056,12 @@ type UpsertDomainParams struct {
 	DryRun *bool `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
+// UpsertApplicationParams defines parameters for UpsertApplication.
+type UpsertApplicationParams struct {
+	// DryRun When true, validates the payload without persisting. The returned application includes a dryRunErrors field.
+	DryRun *bool `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
 // UpsertCertificateParams defines parameters for UpsertCertificate.
 type UpsertCertificateParams struct {
 	// DryRun When true, validates the payload without persisting. The returned certificate includes a dryRunErrors field.
@@ -1797,6 +3085,9 @@ type UpsertDataPlaneJSONRequestBody = AutomationDataPlane
 
 // UpsertDomainJSONRequestBody defines body for UpsertDomain for application/json ContentType.
 type UpsertDomainJSONRequestBody = AutomationDomain
+
+// UpsertApplicationJSONRequestBody defines body for UpsertApplication for application/json ContentType.
+type UpsertApplicationJSONRequestBody = AutomationApplication
 
 // UpsertCertificateJSONRequestBody defines body for UpsertCertificate for application/json ContentType.
 type UpsertCertificateJSONRequestBody = AutomationCertificate
