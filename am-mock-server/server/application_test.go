@@ -143,3 +143,20 @@ func TestUpsertApplicationAcceptsTypeChangeBetweenNonAgentTypes(t *testing.T) {
 
 	assert.Equal(t, "native", got["type"])
 }
+
+func TestUpsertApplicationRejectsTypeChangeFromAgent(t *testing.T) {
+	_, srv := createAMServerWithDomain(t)
+	putJSON(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "agent", "kind": "AUTONOMOUS", "certificate": "cert"})
+
+	assertPut400(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "web", "certificate": "cert"}, "to or from agent")
+}
+
+func TestUpsertApplicationAcceptsSameClientIdInAnotherDomain(t *testing.T) {
+	am, srv := createAMServerWithDomain(t)
+	defaultTenant(am).Domains.Put(Domain{Key: "other", Name: "Other"})
+	putJSON(t, applicationsURL(srv), jsonObject{"key": "first", "name": "First", "type": "web", "certificate": "cert", "clientId": "shared"})
+
+	got := putJSON(t, collectionURL(srv, "/domains/other/applications"), jsonObject{"key": "second", "name": "Second", "type": "web", "certificate": "cert", "clientId": "shared"})
+
+	assert.Equal(t, "shared", got["clientId"])
+}

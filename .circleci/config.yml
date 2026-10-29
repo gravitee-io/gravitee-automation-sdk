@@ -13,7 +13,8 @@
 # limitations under the License.
 
 # Daily OAS check: a CircleCI scheduled trigger (project settings, main, trigger=check_oas)
-# runs make check-oas and posts to Slack when it fails (OAS behind upstream, or download error).
+# runs make check-oas and posts to Slack when it fails. The message reports drift, the usual cause:
+# a download error only shows in the job log, linked from the message.
 version: 2.1
 
 orbs:
