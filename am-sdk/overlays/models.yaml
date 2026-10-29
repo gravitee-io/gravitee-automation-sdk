@@ -20,6 +20,30 @@ actions:
   - target: $.components.schemas.AutomationAccountSettings
     update:
       x-go-type-name: AccountSettings
+  - target: $.components.schemas.AutomationAdvancedSettings
+    update:
+      x-go-type-name: AdvancedSettings
+  - target: $.components.schemas.AutomationApplication
+    update:
+      x-go-type-name: Application
+  - target: $.components.schemas.AutomationApplicationFactorSettings
+    update:
+      x-go-type-name: ApplicationFactorSettings
+  - target: $.components.schemas.AutomationApplicationIdentityProvider
+    update:
+      x-go-type-name: ApplicationIdentityProvider
+  - target: $.components.schemas.AutomationApplicationOAuthSettings
+    update:
+      x-go-type-name: ApplicationOAuthSettings
+  - target: $.components.schemas.AutomationApplicationSAMLSettings
+    update:
+      x-go-type-name: ApplicationSAMLSettings
+  - target: $.components.schemas.AutomationApplicationSettings
+    update:
+      x-go-type-name: ApplicationSettings
+  - target: $.components.schemas.AutomationAssessmentSettings
+    update:
+      x-go-type-name: AssessmentSettings
   - target: $.components.schemas.AutomationCIBASettings
     update:
       x-go-type-name: CIBASettings
@@ -29,27 +53,86 @@ actions:
   - target: $.components.schemas.AutomationCertificateSettings
     update:
       x-go-type-name: CertificateSettings
+  - target: $.components.schemas.AutomationChallengeSettings
+    update:
+      x-go-type-name: ChallengeSettings
   - target: $.components.schemas.AutomationClientRegistrationSettings
     update:
       x-go-type-name: ClientRegistrationSettings
+  - target: $.components.schemas.AutomationCookieSettings
+    update:
+      x-go-type-name: CookieSettings
+  - target: $.components.schemas.AutomationCrossAppAccessResourceServer
+    update:
+      x-go-type-name: CrossAppAccessResourceServer
+  - target: $.components.schemas.AutomationCrossAppAccessSettings
+    update:
+      x-go-type-name: CrossAppAccessSettings
   - target: $.components.schemas.AutomationDataPlane
     update:
       x-go-type-name: DataPlane
   - target: $.components.schemas.AutomationDomain
     update:
       x-go-type-name: Domain
+  - target: $.components.schemas.AutomationEnrollSettings
+    update:
+      x-go-type-name: EnrollSettings
+  - target: $.components.schemas.AutomationEnrollmentSettings
+    update:
+      x-go-type-name: EnrollmentSettings
+  - target: $.components.schemas.AutomationFactorSettings
+    update:
+      x-go-type-name: FactorSettings
   - target: $.components.schemas.AutomationIdentityProvider
     update:
       x-go-type-name: IdentityProvider
+  - target: $.components.schemas.AutomationMfaSettings
+    update:
+      x-go-type-name: MfaSettings
   - target: $.components.schemas.AutomationOidcSettings
     update:
       x-go-type-name: OidcSettings
+  - target: $.components.schemas.AutomationRememberDeviceSettings
+    update:
+      x-go-type-name: RememberDeviceSettings
   - target: $.components.schemas.AutomationReporter
     update:
       x-go-type-name: Reporter
+  - target: $.components.schemas.AutomationRiskAssessmentSettings
+    update:
+      x-go-type-name: RiskAssessmentSettings
+  - target: $.components.schemas.AutomationSamlAssertionAttribute
+    update:
+      x-go-type-name: SamlAssertionAttribute
   - target: $.components.schemas.AutomationSamlSettings
     update:
       x-go-type-name: SamlSettings
+  - target: $.components.schemas.AutomationScopeSettings
+    update:
+      x-go-type-name: ScopeSettings
+  - target: $.components.schemas.AutomationSessionSettings
+    update:
+      x-go-type-name: SessionSettings
+  - target: $.components.schemas.AutomationStepUpAuthenticationSettings
+    update:
+      x-go-type-name: StepUpAuthenticationSettings
+  - target: $.components.schemas.AutomationTokenClaim
+    update:
+      x-go-type-name: TokenClaim
+  - target: $.components.schemas.AutomationUserInfoClaim
+    update:
+      x-go-type-name: UserInfoClaim
+  - target: $.components.schemas.AutomationWorkloadIdentitySettings
+    update:
+      x-go-type-name: WorkloadIdentitySettings
+
+  # Enum values shared with WebAuthnSettings.userVerification: named explicitly so its constants keep their short names.
+  - target: $.components.schemas.AutomationChallengeSettings.properties.type
+    update:
+      x-enum-varnames: [AutomationChallengeSettingsTypeRequired, AutomationChallengeSettingsTypeConditional, AutomationChallengeSettingsTypeRiskBased]
+  - target: $.components.schemas.AutomationEnrollSettings.properties.type
+    update:
+      x-enum-varnames: [AutomationEnrollSettingsTypeOptional, AutomationEnrollSettingsTypeRequired, AutomationEnrollSettingsTypeConditional]
 
   # Free-form plugin configurations: typed as unstructured objects.
   - target: $.components.schemas.AutomationCertificate.properties.configuration

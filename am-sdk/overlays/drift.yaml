@@ -22,6 +22,30 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplication.properties.clientId
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.forcePKCE
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.forceS256CodeChallengeMethod
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.grantTypes
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.responseTypes
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.tokenEndpointAuthMethod
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
   - target: $.components.schemas.SpiffeDomainSettings.properties.defaultAllowedAlgorithms
     update:
       x-oapi-codegen-extra-tags:

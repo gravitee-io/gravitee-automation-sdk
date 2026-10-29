@@ -43,6 +43,19 @@ actions:
     update:
       operationId: deleteDomain
 
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications"].get
+    update:
+      operationId: listApplications
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications"].put
+    update:
+      operationId: upsertApplication
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}"].get
+    update:
+      operationId: getApplication
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}"].delete
+    update:
+      operationId: deleteApplication
+
   - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates"].get
     update:
       operationId: listCertificates
