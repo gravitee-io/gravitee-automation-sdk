@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Daily OAS check: a CircleCI scheduled trigger (project settings, main, trigger=check_oas)
-# runs make check-oas and posts to Slack when the committed OAS lags behind upstream.
+# runs make check-oas and posts to Slack when it fails (OAS behind upstream, or download error).
 version: 2.1
 
 orbs:

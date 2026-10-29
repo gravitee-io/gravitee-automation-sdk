@@ -9,135 +9,135 @@ import (
 	"github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured"
 )
 
-// Defines values for AutomationApplicationKind.
+// Defines values for ApplicationKind.
 const (
-	AUTONOMOUS      AutomationApplicationKind = "AUTONOMOUS"
-	HOSTEDDELEGATED AutomationApplicationKind = "HOSTED_DELEGATED"
-	USEREMBEDDED    AutomationApplicationKind = "USER_EMBEDDED"
+	ApplicationKindAutonomous      ApplicationKind = "AUTONOMOUS"
+	ApplicationKindHostedDelegated ApplicationKind = "HOSTED_DELEGATED"
+	ApplicationKindUserEmbedded    ApplicationKind = "USER_EMBEDDED"
 )
 
-// Valid indicates whether the value is a known member of the AutomationApplicationKind enum.
-func (e AutomationApplicationKind) Valid() bool {
+// Valid indicates whether the value is a known member of the ApplicationKind enum.
+func (e ApplicationKind) Valid() bool {
 	switch e {
-	case AUTONOMOUS:
+	case ApplicationKindAutonomous:
 		return true
-	case HOSTEDDELEGATED:
+	case ApplicationKindHostedDelegated:
 		return true
-	case USEREMBEDDED:
+	case ApplicationKindUserEmbedded:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for AutomationApplicationType.
+// Defines values for ApplicationType.
 const (
-	Agent          AutomationApplicationType = "agent"
-	Browser        AutomationApplicationType = "browser"
-	Native         AutomationApplicationType = "native"
-	ResourceServer AutomationApplicationType = "resource_server"
-	Service        AutomationApplicationType = "service"
-	Web            AutomationApplicationType = "web"
+	ApplicationTypeAgent          ApplicationType = "agent"
+	ApplicationTypeBrowser        ApplicationType = "browser"
+	ApplicationTypeNative         ApplicationType = "native"
+	ApplicationTypeResourceServer ApplicationType = "resource_server"
+	ApplicationTypeService        ApplicationType = "service"
+	ApplicationTypeWeb            ApplicationType = "web"
 )
 
-// Valid indicates whether the value is a known member of the AutomationApplicationType enum.
-func (e AutomationApplicationType) Valid() bool {
+// Valid indicates whether the value is a known member of the ApplicationType enum.
+func (e ApplicationType) Valid() bool {
 	switch e {
-	case Agent:
+	case ApplicationTypeAgent:
 		return true
-	case Browser:
+	case ApplicationTypeBrowser:
 		return true
-	case Native:
+	case ApplicationTypeNative:
 		return true
-	case ResourceServer:
+	case ApplicationTypeResourceServer:
 		return true
-	case Service:
+	case ApplicationTypeService:
 		return true
-	case Web:
+	case ApplicationTypeWeb:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for AutomationChallengeSettingsType.
+// Defines values for ChallengeSettingsType.
 const (
-	AutomationChallengeSettingsTypeConditional AutomationChallengeSettingsType = "conditional"
-	AutomationChallengeSettingsTypeRequired    AutomationChallengeSettingsType = "required"
-	AutomationChallengeSettingsTypeRiskBased   AutomationChallengeSettingsType = "risk_based"
+	ChallengeSettingsTypeConditional ChallengeSettingsType = "conditional"
+	ChallengeSettingsTypeRequired    ChallengeSettingsType = "required"
+	ChallengeSettingsTypeRiskBased   ChallengeSettingsType = "risk_based"
 )
 
-// Valid indicates whether the value is a known member of the AutomationChallengeSettingsType enum.
-func (e AutomationChallengeSettingsType) Valid() bool {
+// Valid indicates whether the value is a known member of the ChallengeSettingsType enum.
+func (e ChallengeSettingsType) Valid() bool {
 	switch e {
-	case AutomationChallengeSettingsTypeConditional:
+	case ChallengeSettingsTypeConditional:
 		return true
-	case AutomationChallengeSettingsTypeRequired:
+	case ChallengeSettingsTypeRequired:
 		return true
-	case AutomationChallengeSettingsTypeRiskBased:
+	case ChallengeSettingsTypeRiskBased:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for AutomationEnrollSettingsType.
+// Defines values for EnrollSettingsType.
 const (
-	AutomationEnrollSettingsTypeConditional AutomationEnrollSettingsType = "conditional"
-	AutomationEnrollSettingsTypeOptional    AutomationEnrollSettingsType = "optional"
-	AutomationEnrollSettingsTypeRequired    AutomationEnrollSettingsType = "required"
+	EnrollSettingsTypeConditional EnrollSettingsType = "conditional"
+	EnrollSettingsTypeOptional    EnrollSettingsType = "optional"
+	EnrollSettingsTypeRequired    EnrollSettingsType = "required"
 )
 
-// Valid indicates whether the value is a known member of the AutomationEnrollSettingsType enum.
-func (e AutomationEnrollSettingsType) Valid() bool {
+// Valid indicates whether the value is a known member of the EnrollSettingsType enum.
+func (e EnrollSettingsType) Valid() bool {
 	switch e {
-	case AutomationEnrollSettingsTypeConditional:
+	case EnrollSettingsTypeConditional:
 		return true
-	case AutomationEnrollSettingsTypeOptional:
+	case EnrollSettingsTypeOptional:
 		return true
-	case AutomationEnrollSettingsTypeRequired:
+	case EnrollSettingsTypeRequired:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for AutomationTokenClaimTokenType.
+// Defines values for TokenClaimTokenType.
 const (
-	AccessToken  AutomationTokenClaimTokenType = "access_token"
-	IdJag        AutomationTokenClaimTokenType = "id_jag"
-	IdToken      AutomationTokenClaimTokenType = "id_token"
-	RefreshToken AutomationTokenClaimTokenType = "refresh_token"
+	TokenClaimTokenTypeAccessToken  TokenClaimTokenType = "access_token"
+	TokenClaimTokenTypeIdJag        TokenClaimTokenType = "id_jag"
+	TokenClaimTokenTypeIdToken      TokenClaimTokenType = "id_token"
+	TokenClaimTokenTypeRefreshToken TokenClaimTokenType = "refresh_token"
 )
 
-// Valid indicates whether the value is a known member of the AutomationTokenClaimTokenType enum.
-func (e AutomationTokenClaimTokenType) Valid() bool {
+// Valid indicates whether the value is a known member of the TokenClaimTokenType enum.
+func (e TokenClaimTokenType) Valid() bool {
 	switch e {
-	case AccessToken:
+	case TokenClaimTokenTypeAccessToken:
 		return true
-	case IdJag:
+	case TokenClaimTokenTypeIdJag:
 		return true
-	case IdToken:
+	case TokenClaimTokenTypeIdToken:
 		return true
-	case RefreshToken:
+	case TokenClaimTokenTypeRefreshToken:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for AutomationWorkloadIdentitySettingsSubjectMatchMode.
+// Defines values for WorkloadIdentitySettingsSubjectMatchMode.
 const (
-	Exact  AutomationWorkloadIdentitySettingsSubjectMatchMode = "exact"
-	Prefix AutomationWorkloadIdentitySettingsSubjectMatchMode = "prefix"
+	WorkloadIdentitySettingsSubjectMatchModeExact  WorkloadIdentitySettingsSubjectMatchMode = "exact"
+	WorkloadIdentitySettingsSubjectMatchModePrefix WorkloadIdentitySettingsSubjectMatchMode = "prefix"
 )
 
-// Valid indicates whether the value is a known member of the AutomationWorkloadIdentitySettingsSubjectMatchMode enum.
-func (e AutomationWorkloadIdentitySettingsSubjectMatchMode) Valid() bool {
+// Valid indicates whether the value is a known member of the WorkloadIdentitySettingsSubjectMatchMode enum.
+func (e WorkloadIdentitySettingsSubjectMatchMode) Valid() bool {
 	switch e {
-	case Exact:
+	case WorkloadIdentitySettingsSubjectMatchModeExact:
 		return true
-	case Prefix:
+	case WorkloadIdentitySettingsSubjectMatchModePrefix:
 		return true
 	default:
 		return false
@@ -471,13 +471,13 @@ func (v AdvancedSettings) WithDefaults() AdvancedSettings {
 // AutomationApplication An application (OAuth 2.0 / OIDC client) managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
 type AutomationApplication = Application
 
-// AutomationApplicationKind Agent persona. Required when type is agent, rejected otherwise.
-type AutomationApplicationKind string
+// ApplicationKind Agent persona. Required when type is agent, rejected otherwise.
+type ApplicationKind string
 
-// AutomationApplicationType Application type. It drives the computed OAuth 2.0 settings. Can be changed, except to or from agent: such a change is rejected with 400 (delete and recreate the application). Changing the type resets grantTypes, responseTypes and tokenEndpointAuthMethod to the new type's defaults before the payload applies.
+// ApplicationType Application type. It drives the computed OAuth 2.0 settings. Can be changed, except to or from agent: such a change is rejected with 400 (delete and recreate the application). Changing the type resets grantTypes, responseTypes and tokenEndpointAuthMethod to the new type's defaults before the payload applies.
 //
 // Example: native
-type AutomationApplicationType string
+type ApplicationType string
 
 // Application An application (OAuth 2.0 / OIDC client) managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
 type Application struct {
@@ -514,7 +514,7 @@ type Application struct {
 	Key string `json:"key"`
 
 	// Kind Agent persona. Required when type is agent, rejected otherwise.
-	Kind *AutomationApplicationKind `json:"kind,omitempty"`
+	Kind *ApplicationKind `json:"kind,omitempty"`
 
 	// Metadata Free-form metadata of the application.
 	//
@@ -535,7 +535,7 @@ type Application struct {
 	// Type Application type. It drives the computed OAuth 2.0 settings. Can be changed, except to or from agent: such a change is rejected with 400 (delete and recreate the application). Changing the type resets grantTypes, responseTypes and tokenEndpointAuthMethod to the new type's defaults before the payload applies.
 	//
 	// Example: native
-	Type AutomationApplicationType `json:"type"`
+	Type ApplicationType `json:"type"`
 
 	// UpdatedAt Last-update timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	UpdatedAt *time.Time `drift:"ignore" json:"updatedAt,omitempty"`
@@ -830,12 +830,6 @@ func (v ApplicationOAuthSettings) WithDefaults() ApplicationOAuthSettings {
 	}
 	if v.EnhanceScopesWithUserPermissions == nil {
 		v.EnhanceScopesWithUserPermissions = new(bool(false))
-	}
-	if v.ForcePKCE == nil {
-		v.ForcePKCE = new(bool(false))
-	}
-	if v.ForceS256CodeChallengeMethod == nil {
-		v.ForceS256CodeChallengeMethod = new(bool(false))
 	}
 	if v.IdJagValiditySeconds == nil {
 		v.IdJagValiditySeconds = new(int32(300))
@@ -1173,10 +1167,10 @@ func (v CertificateSettings) WithDefaults() CertificateSettings {
 // AutomationChallengeSettings When users are challenged for a second factor.
 type AutomationChallengeSettings = ChallengeSettings
 
-// AutomationChallengeSettingsType required: always challenge. conditional: challenge unless challengeRule evaluates to true. risk_based: challenge according to the risk assessment.
+// ChallengeSettingsType required: always challenge. conditional: challenge unless challengeRule evaluates to true. risk_based: challenge according to the risk assessment.
 //
 // Example: required
-type AutomationChallengeSettingsType string
+type ChallengeSettingsType string
 
 // ChallengeSettings When users are challenged for a second factor.
 type ChallengeSettings struct {
@@ -1191,7 +1185,7 @@ type ChallengeSettings struct {
 	// Type required: always challenge. conditional: challenge unless challengeRule evaluates to true. risk_based: challenge according to the risk assessment.
 	//
 	// Example: required
-	Type *AutomationChallengeSettingsType `json:"type,omitempty"`
+	Type *ChallengeSettingsType `json:"type,omitempty"`
 }
 
 // WithDefaults returns a copy of ChallengeSettings with unset fields set to their OpenAPI defaults.
@@ -1584,10 +1578,10 @@ func (v Domain) WithDefaults() Domain {
 // AutomationEnrollSettings When users are asked to enroll a factor.
 type AutomationEnrollSettings = EnrollSettings
 
-// AutomationEnrollSettingsType optional: users can skip the enrollment. required: users must enroll. conditional: enrollment required unless enrollmentRule evaluates to true.
+// EnrollSettingsType optional: users can skip the enrollment. required: users must enroll. conditional: enrollment required unless enrollmentRule evaluates to true.
 //
 // Example: required
-type AutomationEnrollSettingsType string
+type EnrollSettingsType string
 
 // EnrollSettings When users are asked to enroll a factor.
 type EnrollSettings struct {
@@ -1616,7 +1610,7 @@ type EnrollSettings struct {
 	// Type optional: users can skip the enrollment. required: users must enroll. conditional: enrollment required unless enrollmentRule evaluates to true.
 	//
 	// Example: required
-	Type *AutomationEnrollSettingsType `json:"type,omitempty"`
+	Type *EnrollSettingsType `json:"type,omitempty"`
 }
 
 // WithDefaults returns a copy of EnrollSettings with unset fields set to their OpenAPI defaults.
@@ -2119,10 +2113,10 @@ func (v StepUpAuthenticationSettings) WithDefaults() StepUpAuthenticationSetting
 // AutomationTokenClaim A custom claim added to the tokens issued to the application.
 type AutomationTokenClaim = TokenClaim
 
-// AutomationTokenClaimTokenType Token the claim is added to.
+// TokenClaimTokenType Token the claim is added to.
 //
 // Example: access_token
-type AutomationTokenClaimTokenType string
+type TokenClaimTokenType string
 
 // TokenClaim A custom claim added to the tokens issued to the application.
 type TokenClaim struct {
@@ -2139,7 +2133,7 @@ type TokenClaim struct {
 	// TokenType Token the claim is added to.
 	//
 	// Example: access_token
-	TokenType AutomationTokenClaimTokenType `json:"tokenType"`
+	TokenType TokenClaimTokenType `json:"tokenType"`
 }
 
 // WithDefaults returns a copy of TokenClaim with unset fields set to their OpenAPI defaults.
@@ -2171,8 +2165,8 @@ func (v UserInfoClaim) WithDefaults() UserInfoClaim {
 // AutomationWorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
 type AutomationWorkloadIdentitySettings = WorkloadIdentitySettings
 
-// AutomationWorkloadIdentitySettingsSubjectMatchMode How subject is matched against the SVID sub claim. exact (default) requires equality. prefix is only allowed for hosted_delegated or autonomous agent applications: subject must end with / and the SVID sub is accepted when it starts with subject; the full SVID SPIFFE ID then becomes the per-instance act.sub in minted tokens.
-type AutomationWorkloadIdentitySettingsSubjectMatchMode string
+// WorkloadIdentitySettingsSubjectMatchMode How subject is matched against the SVID sub claim. exact (default) requires equality. prefix is only allowed for hosted_delegated or autonomous agent applications: subject must end with / and the SVID sub is accepted when it starts with subject; the full SVID SPIFFE ID then becomes the per-instance act.sub in minted tokens.
+type WorkloadIdentitySettingsSubjectMatchMode string
 
 // WorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
 type WorkloadIdentitySettings struct {
@@ -2182,7 +2176,7 @@ type WorkloadIdentitySettings struct {
 	Subject *string `json:"subject,omitempty"`
 
 	// SubjectMatchMode How subject is matched against the SVID sub claim. exact (default) requires equality. prefix is only allowed for hosted_delegated or autonomous agent applications: subject must end with / and the SVID sub is accepted when it starts with subject; the full SVID SPIFFE ID then becomes the per-instance act.sub in minted tokens.
-	SubjectMatchMode *AutomationWorkloadIdentitySettingsSubjectMatchMode `json:"subjectMatchMode,omitempty"`
+	SubjectMatchMode *WorkloadIdentitySettingsSubjectMatchMode `json:"subjectMatchMode,omitempty"`
 
 	// TrustDomain Name of the trusted domain this application authenticates against.
 	//
@@ -2193,7 +2187,7 @@ type WorkloadIdentitySettings struct {
 // WithDefaults returns a copy of WorkloadIdentitySettings with unset fields set to their OpenAPI defaults.
 func (v WorkloadIdentitySettings) WithDefaults() WorkloadIdentitySettings {
 	if v.SubjectMatchMode == nil {
-		v.SubjectMatchMode = new(AutomationWorkloadIdentitySettingsSubjectMatchMode("exact"))
+		v.SubjectMatchMode = new(WorkloadIdentitySettingsSubjectMatchMode("exact"))
 	}
 	return v
 }

@@ -18,14 +18,15 @@ import (
 	"testing"
 
 	"github.com/gravitee-io/gravitee-automation-sdk/am-sdk/v2/pkg/sdk"
+	"github.com/stretchr/testify/assert"
 )
 
 func testApplication() Application {
-	return Application{Key: "test", Name: "Test application", Type: Web, Certificate: "cert", ClientId: new("test-client")}.WithDefaults()
+	return Application{Key: "test", Name: "Test application", Type: ApplicationTypeWeb, Certificate: "cert", ClientId: new("test-client")}.WithDefaults()
 }
 
 func testApplicationSDK() sdk.Application {
-	return sdk.Application{Key: "test", Name: "Test application", Type: sdk.Web, Certificate: "cert", ClientId: new("test-client")}.WithDefaults()
+	return sdk.Application{Key: "test", Name: "Test application", Type: sdk.ApplicationTypeWeb, Certificate: "cert", ClientId: new("test-client")}.WithDefaults()
 }
 
 func TestListApplications(t *testing.T) {
@@ -111,4 +112,34 @@ func TestDeleteApplicationSDK(t *testing.T) {
 
 	get, err := client.GetApplicationWithResponse(t.Context(), defaultDomainKey, "test")
 	assertSDK404(t, get, err)
+}
+
+func TestUpsertApplicationRejectsClientIdChange(t *testing.T) {
+	_, srv := createAMServerWithDomain(t)
+	putJSON(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "web", "certificate": "cert", "clientId": "first"})
+
+	assertPut400(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "web", "certificate": "cert", "clientId": "second"}, "clientId cannot be changed")
+}
+
+func TestUpsertApplicationRejectsClientIdOfAnotherApplication(t *testing.T) {
+	_, srv := createAMServerWithDomain(t)
+	putJSON(t, applicationsURL(srv), jsonObject{"key": "first", "name": "First", "type": "web", "certificate": "cert", "clientId": "shared"})
+
+	assertPut400(t, applicationsURL(srv), jsonObject{"key": "second", "name": "Second", "type": "web", "certificate": "cert", "clientId": "shared"}, "already used by application [first]")
+}
+
+func TestUpsertApplicationRejectsTypeChangeToAgent(t *testing.T) {
+	_, srv := createAMServerWithDomain(t)
+	putJSON(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "web", "certificate": "cert"})
+
+	assertPut400(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "agent", "kind": "AUTONOMOUS", "certificate": "cert"}, "to or from agent")
+}
+
+func TestUpsertApplicationAcceptsTypeChangeBetweenNonAgentTypes(t *testing.T) {
+	_, srv := createAMServerWithDomain(t)
+	putJSON(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "web", "certificate": "cert"})
+
+	got := putJSON(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "native", "certificate": "cert"})
+
+	assert.Equal(t, "native", got["type"])
 }

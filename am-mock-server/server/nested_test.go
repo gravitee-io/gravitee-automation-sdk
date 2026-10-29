@@ -64,7 +64,7 @@ func TestNested_DeleteDomainCascades(t *testing.T) {
 	certDrop := sdk.Certificate{Key: "cd", Name: new("drop cert")}.WithDefaults()
 	idpDrop := sdk.IdentityProvider{Key: "id", Name: new("drop idp")}.WithDefaults()
 	repDrop := sdk.Reporter{Key: "rd", Name: new("drop reporter")}.WithDefaults()
-	appDrop := sdk.Application{Key: "ad", Name: "drop app", Type: sdk.Web, Certificate: "cd", ClientId: new("ad")}.WithDefaults()
+	appDrop := sdk.Application{Key: "ad", Name: "drop app", Type: sdk.ApplicationTypeWeb, Certificate: "cd", ClientId: new("ad")}.WithDefaults()
 
 	up, err := client.UpsertCertificateWithResponse(t.Context(), "keep", nil, certKeep)
 	assertSDKOK(t, up, err, certKeep)
