@@ -64,6 +64,7 @@ func TestNested_DeleteDomainCascades(t *testing.T) {
 	certDrop := sdk.Certificate{Key: "cd", Name: new("drop cert")}.WithDefaults()
 	idpDrop := sdk.IdentityProvider{Key: "id", Name: new("drop idp")}.WithDefaults()
 	repDrop := sdk.Reporter{Key: "rd", Name: new("drop reporter")}.WithDefaults()
+	appDrop := sdk.Application{Key: "ad", Name: "drop app", Type: sdk.Web, Certificate: "cd", ClientId: new("ad")}.WithDefaults()
 
 	up, err := client.UpsertCertificateWithResponse(t.Context(), "keep", nil, certKeep)
 	assertSDKOK(t, up, err, certKeep)
@@ -73,6 +74,8 @@ func TestNested_DeleteDomainCascades(t *testing.T) {
 	assertSDKOK(t, idp, err, idpDrop)
 	rep, err := client.UpsertReporterWithResponse(t.Context(), "drop", nil, repDrop)
 	assertSDKOK(t, rep, err, repDrop)
+	app, err := client.UpsertApplicationWithResponse(t.Context(), "drop", nil, appDrop)
+	assertSDKOK(t, app, err, appDrop)
 
 	del, err := client.DeleteDomainWithResponse(t.Context(), "drop")
 	assertSDKNoContent(t, del, err)
@@ -83,6 +86,8 @@ func TestNested_DeleteDomainCascades(t *testing.T) {
 	assertSDK404(t, goneIDP, err)
 	goneRep, err := client.GetReporterWithResponse(t.Context(), "drop", "rd")
 	assertSDK404(t, goneRep, err)
+	goneApp, err := client.GetApplicationWithResponse(t.Context(), "drop", "ad")
+	assertSDK404(t, goneApp, err)
 
 	still, err := client.GetCertificateWithResponse(t.Context(), "keep", "ck")
 	assertSDKOK(t, still, err, certKeep)

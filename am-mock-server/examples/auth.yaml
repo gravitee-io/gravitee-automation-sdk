@@ -35,6 +35,8 @@ users:
       - DOMAIN_READ
       - DATA_PLANE_LIST
       - DATA_PLANE_READ
+      - APPLICATION_LIST
+      - APPLICATION_READ
       - DOMAIN_CERTIFICATE_LIST
       - DOMAIN_CERTIFICATE_READ
       - DOMAIN_IDENTITY_PROVIDER_LIST
@@ -47,6 +49,7 @@ users:
     permissions:
       - DOMAIN_UPDATE
       - DATA_PLANE_UPDATE
+      - APPLICATION_UPDATE
       - DOMAIN_CERTIFICATE_UPDATE
       - DOMAIN_IDENTITY_PROVIDER_UPDATE
       - DOMAIN_REPORTER_UPDATE
@@ -62,6 +65,10 @@ users:
       - DATA_PLANE_READ
       - DATA_PLANE_UPDATE
       - DATA_PLANE_DELETE
+      - APPLICATION_LIST
+      - APPLICATION_READ
+      - APPLICATION_UPDATE
+      - APPLICATION_DELETE
       - DOMAIN_CERTIFICATE_LIST
       - DOMAIN_CERTIFICATE_READ
       - DOMAIN_CERTIFICATE_UPDATE
@@ -88,6 +95,12 @@ permissions:
   - path: /organizations/{orgId}/environments/{envId}/dataplanes/{dataPlaneId}
     get: DATA_PLANE_READ
     delete: DATA_PLANE_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications
+    get: APPLICATION_LIST
+    put: APPLICATION_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}
+    get: APPLICATION_READ
+    delete: APPLICATION_DELETE
   - path: /organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates
     get: DOMAIN_CERTIFICATE_LIST
     put: DOMAIN_CERTIFICATE_UPDATE

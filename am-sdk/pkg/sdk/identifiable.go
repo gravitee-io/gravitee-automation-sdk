@@ -14,6 +14,10 @@
 
 package sdk
 
+func (a Application) Identity() string {
+	return a.Key
+}
+
 func (c Certificate) Identity() string {
 	return c.Key
 }

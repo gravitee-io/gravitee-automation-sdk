@@ -90,6 +90,7 @@ var nestedDryRunCases = []struct {
 	body   any
 	stored func(*MockAM) int
 }{
+	{"application", applicationsURL, testApplication(), func(am *MockAM) int { return len(defaultTenant(am).Applications.GetAll()) }},
 	{"certificate", certificatesURL, testCertificate(), func(am *MockAM) int { return len(defaultTenant(am).Certificates.GetAll()) }},
 	{"identity provider", identitiesURL, testIdentityProvider(), func(am *MockAM) int { return len(defaultTenant(am).IdentityProviders.GetAll()) }},
 	{"reporter", reportersURL, testReporter(), func(am *MockAM) int { return len(defaultTenant(am).Reporters.GetAll()) }},
@@ -149,6 +150,10 @@ func TestDryRunPut_SDKNestedReturnsDryRunErrors(t *testing.T) {
 	client := newAMClient(t, srv)
 	dryRun := new(true)
 
+	app, err := client.UpsertApplicationWithResponse(t.Context(), defaultDomainKey, &sdk.UpsertApplicationParams{DryRun: dryRun}, testApplicationSDK())
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, app.StatusCode())
+	assert.Len(t, app.JSON200.DryRunErrors, 1)
 	cert, err := client.UpsertCertificateWithResponse(t.Context(), defaultDomainKey, &sdk.UpsertCertificateParams{DryRun: dryRun}, testCertificateSDK())
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, cert.StatusCode())

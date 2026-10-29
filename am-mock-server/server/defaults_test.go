@@ -78,6 +78,25 @@ func TestUpsertReporterReturnsDefaults(t *testing.T) {
 	assert.Equal(t, false, got["system"])
 }
 
+func TestUpsertApplicationGeneratesClientId(t *testing.T) {
+	_, srv := createAMServerWithDomain(t)
+	app := jsonObject{"key": "test", "name": "Test", "type": "web", "certificate": "cert"}
+
+	created := putJSON(t, applicationsURL(srv), app)
+	updated := putJSON(t, applicationsURL(srv), app)
+
+	assert.NotEmpty(t, created["clientId"])
+	assert.Equal(t, created["clientId"], updated["clientId"], "an omitted clientId keeps the current value")
+}
+
+func TestUpsertApplicationKeepsExplicitClientId(t *testing.T) {
+	_, srv := createAMServerWithDomain(t)
+
+	got := putJSON(t, applicationsURL(srv), jsonObject{"key": "test", "name": "Test", "type": "web", "certificate": "cert", "clientId": "my-client"})
+
+	assert.Equal(t, "my-client", got["clientId"])
+}
+
 func TestUpsertDomainSetsTimestamps(t *testing.T) {
 	_, srv := createAMServer(t)
 

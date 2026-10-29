@@ -27,6 +27,7 @@ Import the facade as `am`:
 |----------|--------|
 | Domains | environment |
 | Data planes | environment |
+| Applications | domain |
 | Certificates | domain |
 | Identity providers | domain |
 | Reporters | domain |
