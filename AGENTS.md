@@ -75,7 +75,7 @@ A Go workspace with four modules:
 | Module | Role |
 |--------|------|
 | `common` | Shared utilities: `apicontext` (auth + base URL), `response` (status helpers + generic `Payload[T]` extractor), `store` (channel-based in-memory generic store), `errors`, `refs` |
-| `am-sdk` | Generated SDK clients for AM resources (domains, certificates, identity providers, reporters). All resources are generated into the single `am-sdk/pkg/sdk` package |
+| `am-sdk` | Generated SDK clients for AM resources (domains, data planes, applications, certificates, identity providers, reporters). All resources are generated into the single `am-sdk/pkg/sdk` package |
 | `am-mock-server` | Standalone mock HTTP server implementing the same OpenAPI spec with strict-server codegen. Used for integration-testing the SDK |
 | `apim-sdk` | Placeholder module for a future APIM SDK (empty) |
 

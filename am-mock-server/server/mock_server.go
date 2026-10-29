@@ -16,6 +16,7 @@ package server
 
 import (
 	"context"
+	"crypto/rand"
 	"net/http"
 	"sync"
 	"time"
@@ -41,6 +42,7 @@ func (m Child[T]) Identity() string {
 type tenant struct {
 	Domains           *store.Store[Domain]
 	DataPlanes        *store.Store[DataPlane]
+	Applications      *store.Store[Child[Application]]
 	Certificates      *store.Store[Child[Certificate]]
 	IdentityProviders *store.Store[Child[IdentityProvider]]
 	Reporters         *store.Store[Child[Reporter]]
@@ -50,6 +52,7 @@ func newTenant() *tenant {
 	return &tenant{
 		Domains:           store.NewStore[Domain](),
 		DataPlanes:        store.NewStore[DataPlane](),
+		Applications:      store.NewStore[Child[Application]](),
 		Certificates:      store.NewStore[Child[Certificate]](),
 		IdentityProviders: store.NewStore[Child[IdentityProvider]](),
 		Reporters:         store.NewStore[Child[Reporter]](),
@@ -108,6 +111,7 @@ func (m *MockAM) DeleteDomain(_ context.Context, req DeleteDomainRequestObject) 
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	tenant.Domains.DeleteByKey(req.DomainKey)
+	deleteChildren(tenant.Applications, req.DomainKey)
 	deleteChildren(tenant.Certificates, req.DomainKey)
 	deleteChildren(tenant.IdentityProviders, req.DomainKey)
 	deleteChildren(tenant.Reporters, req.DomainKey)
@@ -156,6 +160,42 @@ func (m *MockAM) GetDataPlane(_ context.Context, req GetDataPlaneRequestObject) 
 		return GetDataPlane200JSONResponse(dataPlane), nil
 	}
 	return GetDataPlane404JSONResponse(notFoundError("DataPlane", req.DataPlaneId)), nil
+}
+
+func (m *MockAM) ListApplications(_ context.Context, req ListApplicationsRequestObject) (ListApplicationsResponseObject, error) {
+	return ListApplications200JSONResponse(asSelves(ofParent(m.getTenant(req).Applications.GetAll(), req.DomainKey))), nil
+}
+
+// UpsertApplication generates the clientId on creation when omitted and keeps the stored one when omitted on update, like AM.
+func (m *MockAM) UpsertApplication(_ context.Context, req UpsertApplicationRequestObject) (UpsertApplicationResponseObject, error) {
+	if req.Body != nil {
+		tenant := m.getTenant(req)
+		body := req.Body.WithDefaults()
+		stored, _ := isChildOf(tenant.Applications, req.DomainKey, body.Key)
+		body.CreatedAt, body.UpdatedAt = timestamps(stored.Self.CreatedAt)
+		if body.ClientId == nil {
+			body.ClientId = stored.Self.ClientId
+		}
+		if body.ClientId == nil {
+			body.ClientId = new(rand.Text())
+		}
+		tenant.Applications.Put(newChild(body, req.DomainKey))
+		return UpsertApplication200JSONResponse(body), nil
+	}
+	return UpsertApplication400JSONResponse(emptyBodyError()), nil
+}
+
+func (m *MockAM) DeleteApplication(_ context.Context, req DeleteApplicationRequestObject) (DeleteApplicationResponseObject, error) {
+	deleteChild(m.getTenant(req).Applications, req.DomainKey, req.ApplicationKey)
+	return DeleteApplication204Response{}, nil
+}
+
+func (m *MockAM) GetApplication(_ context.Context, req GetApplicationRequestObject) (GetApplicationResponseObject, error) {
+	app, ok := isChildOf(m.getTenant(req).Applications, req.DomainKey, req.ApplicationKey)
+	if ok {
+		return GetApplication200JSONResponse(app.Self), nil
+	}
+	return GetApplication404JSONResponse(notFoundError("Application", req.ApplicationKey)), nil
 }
 
 func (m *MockAM) ListCertificates(_ context.Context, req ListCertificatesRequestObject) (ListCertificatesResponseObject, error) {
