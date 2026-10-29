@@ -172,17 +172,36 @@ func (m *MockAM) UpsertApplication(_ context.Context, req UpsertApplicationReque
 		tenant := m.getTenant(req)
 		body := req.Body.WithDefaults()
 		stored, _ := isChildOf(tenant.Applications, req.DomainKey, body.Key)
-		body.CreatedAt, body.UpdatedAt = timestamps(stored.Self.CreatedAt)
 		if body.ClientId == nil {
 			body.ClientId = stored.Self.ClientId
 		}
 		if body.ClientId == nil {
 			body.ClientId = new(rand.Text())
 		}
+		if reason := applicationRejection(tenant.Applications, req.DomainKey, stored.Self, body); reason != "" {
+			return UpsertApplication400JSONResponse(badRequestError(reason)), nil
+		}
+		body.CreatedAt, body.UpdatedAt = timestamps(stored.Self.CreatedAt)
 		tenant.Applications.Put(newChild(body, req.DomainKey))
 		return UpsertApplication200JSONResponse(body), nil
 	}
 	return UpsertApplication400JSONResponse(emptyBodyError()), nil
+}
+
+// applicationRejection returns why AM rejects replacing stored (zero value on creation) with next, or "" when it accepts it.
+func applicationRejection(apps *store.Store[Child[Application]], domainKey string, stored, next Application) string {
+	if stored.ClientId != nil && *stored.ClientId != *next.ClientId {
+		return "clientId cannot be changed"
+	}
+	if stored.Type != "" && stored.Type != next.Type && (stored.Type == ApplicationTypeAgent || next.Type == ApplicationTypeAgent) {
+		return "type cannot be changed to or from agent"
+	}
+	for _, app := range ofParent(apps.GetAll(), domainKey) {
+		if app.Self.Key != next.Key && *app.Self.ClientId == *next.ClientId {
+			return "clientId [" + *next.ClientId + "] is already used by application [" + app.Self.Key + "]"
+		}
+	}
+	return ""
 }
 
 func (m *MockAM) DeleteApplication(_ context.Context, req DeleteApplicationRequestObject) (DeleteApplicationResponseObject, error) {
@@ -296,9 +315,13 @@ func timestamps(storedCreatedAt *time.Time) (createdAt, updatedAt *time.Time) {
 }
 
 func emptyBodyError() Error {
+	return badRequestError("Empty body")
+}
+
+func badRequestError(message string) Error {
 	return Error{
 		HttpStatus: new(int32(http.StatusBadRequest)),
-		Message:    new("Empty body"),
+		Message:    new(message),
 	}
 }
 

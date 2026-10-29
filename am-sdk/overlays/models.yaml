@@ -126,13 +126,37 @@ actions:
     update:
       x-go-type-name: WorkloadIdentitySettings
 
-  # Enum values shared with WebAuthnSettings.userVerification: named explicitly so its constants keep their short names.
+  # Enums: type-prefixed constants, so a later enum sharing a value (e.g. "required") can't rename existing constants.
+  - target: $.components.schemas.AutomationApplication.properties.kind
+    update:
+      x-go-type-name: ApplicationKind
+      x-enum-varnames: [ApplicationKindUserEmbedded, ApplicationKindHostedDelegated, ApplicationKindAutonomous]
+  - target: $.components.schemas.AutomationApplication.properties.type
+    update:
+      x-go-type-name: ApplicationType
+      x-enum-varnames: [ApplicationTypeWeb, ApplicationTypeNative, ApplicationTypeBrowser, ApplicationTypeService, ApplicationTypeResourceServer, ApplicationTypeAgent]
   - target: $.components.schemas.AutomationChallengeSettings.properties.type
     update:
-      x-enum-varnames: [AutomationChallengeSettingsTypeRequired, AutomationChallengeSettingsTypeConditional, AutomationChallengeSettingsTypeRiskBased]
+      x-go-type-name: ChallengeSettingsType
+      x-enum-varnames: [ChallengeSettingsTypeRequired, ChallengeSettingsTypeConditional, ChallengeSettingsTypeRiskBased]
   - target: $.components.schemas.AutomationEnrollSettings.properties.type
     update:
-      x-enum-varnames: [AutomationEnrollSettingsTypeOptional, AutomationEnrollSettingsTypeRequired, AutomationEnrollSettingsTypeConditional]
+      x-go-type-name: EnrollSettingsType
+      x-enum-varnames: [EnrollSettingsTypeOptional, EnrollSettingsTypeRequired, EnrollSettingsTypeConditional]
+  - target: $.components.schemas.AutomationTokenClaim.properties.tokenType
+    update:
+      x-go-type-name: TokenClaimTokenType
+      x-enum-varnames: [TokenClaimTokenTypeAccessToken, TokenClaimTokenTypeRefreshToken, TokenClaimTokenTypeIdToken, TokenClaimTokenTypeIdJag]
+  - target: $.components.schemas.AutomationWorkloadIdentitySettings.properties.subjectMatchMode
+    update:
+      x-go-type-name: WorkloadIdentitySettingsSubjectMatchMode
+      x-enum-varnames: [WorkloadIdentitySettingsSubjectMatchModeExact, WorkloadIdentitySettingsSubjectMatchModePrefix]
+
+  # AM computes these per application type when omitted: no default, so WithDefaults leaves them unset.
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.forcePKCE.default
+    remove: true
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.forceS256CodeChallengeMethod.default
+    remove: true
 
   # Free-form plugin configurations: typed as unstructured objects.
   - target: $.components.schemas.AutomationCertificate.properties.configuration
