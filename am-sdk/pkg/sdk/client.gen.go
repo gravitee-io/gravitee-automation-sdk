@@ -202,6 +202,45 @@ type ClientInterface interface {
 	// Corresponds with GET /domains/{domainKey} (the `GetDomain` operationId).
 	GetDomain(ctx context.Context, domainKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ListApplications List a domain's applications
+	//
+	// Returns all applications managed by the Automation API under the domain. Applications created outside the Automation API are not returned. Client secrets are never returned.
+	//
+	// Corresponds with GET /domains/{domainKey}/applications (the `ListApplications` operationId).
+	ListApplications(ctx context.Context, domainKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertApplicationWithBody Create or update an application
+	//
+	// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+	UpsertApplicationWithBody(ctx context.Context, domainKey string, params *UpsertApplicationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertApplication Create or update an application
+	//
+	// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+	UpsertApplication(ctx context.Context, domainKey string, params *UpsertApplicationParams, body UpsertApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteApplication Delete an application
+	//
+	// Deletes an Automation-managed application by its key, or any application of the domain by id:<uuid>. Deleting an application that does not exist also returns 204.
+	//
+	// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey} (the `DeleteApplication` operationId).
+	DeleteApplication(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetApplication Get an application
+	//
+	// Retrieves a single Automation-managed application by its key, or any application of the domain by id:<uuid>. Client secrets are never returned.
+	//
+	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey} (the `GetApplication` operationId).
+	GetApplication(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListCertificates List a domain's certificates
 	//
 	// Returns all certificates managed by the Automation API under the domain. Certificates created outside the Automation API are not returned.
@@ -488,6 +527,95 @@ func (c *Client) DeleteDomain(ctx context.Context, domainKey string, reqEditors 
 // Corresponds with GET /domains/{domainKey} (the `GetDomain` operationId).
 func (c *Client) GetDomain(ctx context.Context, domainKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDomainRequest(c.Server, domainKey)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListApplications List a domain's applications
+//
+// Returns all applications managed by the Automation API under the domain. Applications created outside the Automation API are not returned. Client secrets are never returned.
+//
+// Corresponds with GET /domains/{domainKey}/applications (the `ListApplications` operationId).
+func (c *Client) ListApplications(ctx context.Context, domainKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListApplicationsRequest(c.Server, domainKey)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertApplicationWithBody Create or update an application
+//
+// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+func (c *Client) UpsertApplicationWithBody(ctx context.Context, domainKey string, params *UpsertApplicationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertApplicationRequestWithBody(c.Server, domainKey, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertApplication Create or update an application
+//
+// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+func (c *Client) UpsertApplication(ctx context.Context, domainKey string, params *UpsertApplicationParams, body UpsertApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertApplicationRequest(c.Server, domainKey, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteApplication Delete an application
+//
+// Deletes an Automation-managed application by its key, or any application of the domain by id:<uuid>. Deleting an application that does not exist also returns 204.
+//
+// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey} (the `DeleteApplication` operationId).
+func (c *Client) DeleteApplication(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteApplicationRequest(c.Server, domainKey, applicationKey)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetApplication Get an application
+//
+// Retrieves a single Automation-managed application by its key, or any application of the domain by id:<uuid>. Client secrets are never returned.
+//
+// Corresponds with GET /domains/{domainKey}/applications/{applicationKey} (the `GetApplication` operationId).
+func (c *Client) GetApplication(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApplicationRequest(c.Server, domainKey, applicationKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1045,6 +1173,196 @@ func NewGetDomainRequest(server string, domainKey string) (*http.Request, error)
 	}
 
 	operationPath := fmt.Sprintf("/domains/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewListApplicationsRequest constructs an http.Request for the ListApplications method
+func NewListApplicationsRequest(server string, domainKey string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpsertApplicationRequest calls the generic UpsertApplication builder with application/json body
+func NewUpsertApplicationRequest(server string, domainKey string, params *UpsertApplicationParams, body UpsertApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpsertApplicationRequestWithBody(server, domainKey, params, "application/json", bodyReader)
+}
+
+// NewUpsertApplicationRequestWithBody constructs an http.Request for the UpsertApplication method, with any body, and a specified content type
+func NewUpsertApplicationRequestWithBody(server string, domainKey string, params *UpsertApplicationParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteApplicationRequest constructs an http.Request for the DeleteApplication method
+func NewDeleteApplicationRequest(server string, domainKey string, applicationKey string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "applicationKey", applicationKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetApplicationRequest constructs an http.Request for the GetApplication method
+func NewGetApplicationRequest(server string, domainKey string, applicationKey string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "applicationKey", applicationKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications/%s", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1766,6 +2084,51 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with GET /domains/{domainKey} (the `GetDomain` operationId).
 	GetDomainWithResponse(ctx context.Context, domainKey string, reqEditors ...RequestEditorFn) (*GetDomainResponse, error)
 
+	// ListApplicationsWithResponse List a domain's applications
+	//
+	// Returns all applications managed by the Automation API under the domain. Applications created outside the Automation API are not returned. Client secrets are never returned.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /domains/{domainKey}/applications (the `ListApplications` operationId).
+	ListApplicationsWithResponse(ctx context.Context, domainKey string, reqEditors ...RequestEditorFn) (*ListApplicationsResponse, error)
+
+	// UpsertApplicationWithBodyWithResponse Create or update an application
+	//
+	// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+	UpsertApplicationWithBodyWithResponse(ctx context.Context, domainKey string, params *UpsertApplicationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertApplicationResponse, error)
+
+	// UpsertApplicationWithResponse Create or update an application
+	//
+	// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+	UpsertApplicationWithResponse(ctx context.Context, domainKey string, params *UpsertApplicationParams, body UpsertApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertApplicationResponse, error)
+
+	// DeleteApplicationWithResponse Delete an application
+	//
+	// Deletes an Automation-managed application by its key, or any application of the domain by id:<uuid>. Deleting an application that does not exist also returns 204.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey} (the `DeleteApplication` operationId).
+	DeleteApplicationWithResponse(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*DeleteApplicationResponse, error)
+
+	// GetApplicationWithResponse Get an application
+	//
+	// Retrieves a single Automation-managed application by its key, or any application of the domain by id:<uuid>. Client secrets are never returned.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey} (the `GetApplication` operationId).
+	GetApplicationWithResponse(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*GetApplicationResponse, error)
+
 	// ListCertificatesWithResponse List a domain's certificates
 	//
 	// Returns all certificates managed by the Automation API under the domain. Certificates created outside the Automation API are not returned.
@@ -2336,6 +2699,226 @@ func (r GetDomainResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r GetDomainResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ListApplicationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *[]AutomationApplication
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *Error
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ListApplicationsResponse) GetJSON200() *[]AutomationApplication {
+	return r.JSON200
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r ListApplicationsResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r ListApplicationsResponse) GetJSON404() *Error {
+	return r.JSON404
+}
+
+// GetBody returns the raw response body bytes
+func (r ListApplicationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ListApplicationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListApplicationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ListApplicationsResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpsertApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AutomationApplication
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *Error
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *Error
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpsertApplicationResponse) GetJSON200() *AutomationApplication {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r UpsertApplicationResponse) GetJSON400() *Error {
+	return r.JSON400
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r UpsertApplicationResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r UpsertApplicationResponse) GetJSON404() *Error {
+	return r.JSON404
+}
+
+// GetBody returns the raw response body bytes
+func (r UpsertApplicationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpsertApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpsertApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpsertApplicationResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *Error
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r DeleteApplicationResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r DeleteApplicationResponse) GetJSONDefault() *Error {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteApplicationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteApplicationResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AutomationApplication
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *Error
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetApplicationResponse) GetJSON200() *AutomationApplication {
+	return r.JSON200
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r GetApplicationResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r GetApplicationResponse) GetJSON404() *Error {
+	return r.JSON404
+}
+
+// GetBody returns the raw response body bytes
+func (r GetApplicationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetApplicationResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -3152,6 +3735,81 @@ func (c *ClientWithResponses) GetDomainWithResponse(ctx context.Context, domainK
 	return ParseGetDomainResponse(rsp)
 }
 
+// ListApplicationsWithResponse List a domain's applications
+//
+// Returns all applications managed by the Automation API under the domain. Applications created outside the Automation API are not returned. Client secrets are never returned.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /domains/{domainKey}/applications (the `ListApplications` operationId).
+func (c *ClientWithResponses) ListApplicationsWithResponse(ctx context.Context, domainKey string, reqEditors ...RequestEditorFn) (*ListApplicationsResponse, error) {
+	rsp, err := c.ListApplications(ctx, domainKey, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListApplicationsResponse(rsp)
+}
+
+// UpsertApplicationWithBodyWithResponse Create or update an application
+//
+// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+func (c *ClientWithResponses) UpsertApplicationWithBodyWithResponse(ctx context.Context, domainKey string, params *UpsertApplicationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertApplicationResponse, error) {
+	rsp, err := c.UpsertApplicationWithBody(ctx, domainKey, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertApplicationResponse(rsp)
+}
+
+// UpsertApplicationWithResponse Create or update an application
+//
+// Idempotent create-or-update. Uses the key field in the body to identify the application within the domain. On first apply the application is created; subsequent applies update it to the desired state: omitted fields are reset, and computed fields are computed again. No client secret is ever generated nor returned. The certificate and the identity providers are references (key or id:<uuid>) that are not checked for existence; the scopes must exist in the domain. The clientId is immutable once set. The type can be changed, except to or from agent. Disabling the application revokes its tokens. When dryRun is true, the endpoint validates the payload without persisting; the returned application carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /domains/{domainKey}/applications (the `UpsertApplication` operationId).
+func (c *ClientWithResponses) UpsertApplicationWithResponse(ctx context.Context, domainKey string, params *UpsertApplicationParams, body UpsertApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertApplicationResponse, error) {
+	rsp, err := c.UpsertApplication(ctx, domainKey, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertApplicationResponse(rsp)
+}
+
+// DeleteApplicationWithResponse Delete an application
+//
+// Deletes an Automation-managed application by its key, or any application of the domain by id:<uuid>. Deleting an application that does not exist also returns 204.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey} (the `DeleteApplication` operationId).
+func (c *ClientWithResponses) DeleteApplicationWithResponse(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*DeleteApplicationResponse, error) {
+	rsp, err := c.DeleteApplication(ctx, domainKey, applicationKey, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteApplicationResponse(rsp)
+}
+
+// GetApplicationWithResponse Get an application
+//
+// Retrieves a single Automation-managed application by its key, or any application of the domain by id:<uuid>. Client secrets are never returned.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /domains/{domainKey}/applications/{applicationKey} (the `GetApplication` operationId).
+func (c *ClientWithResponses) GetApplicationWithResponse(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*GetApplicationResponse, error) {
+	rsp, err := c.GetApplication(ctx, domainKey, applicationKey, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApplicationResponse(rsp)
+}
+
 // ListCertificatesWithResponse List a domain's certificates
 //
 // Returns all certificates managed by the Automation API under the domain. Certificates created outside the Automation API are not returned.
@@ -3679,6 +4337,169 @@ func ParseGetDomainResponse(rsp *http.Response) (*GetDomainResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest AutomationDomain
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListApplicationsResponse parses an HTTP response from a ListApplicationsWithResponse call
+func ParseListApplicationsResponse(rsp *http.Response) (*ListApplicationsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListApplicationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []AutomationApplication
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpsertApplicationResponse parses an HTTP response from a UpsertApplicationWithResponse call
+func ParseUpsertApplicationResponse(rsp *http.Response) (*UpsertApplicationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpsertApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AutomationApplication
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteApplicationResponse parses an HTTP response from a DeleteApplicationWithResponse call
+func ParseDeleteApplicationResponse(rsp *http.Response) (*DeleteApplicationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case rsp.StatusCode == 204:
+		break // No content-type
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetApplicationResponse parses an HTTP response from a GetApplicationWithResponse call
+func ParseGetApplicationResponse(rsp *http.Response) (*GetApplicationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AutomationApplication
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

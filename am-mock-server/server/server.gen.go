@@ -23,6 +23,141 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+// Defines values for AutomationApplicationKind.
+const (
+	AUTONOMOUS      AutomationApplicationKind = "AUTONOMOUS"
+	HOSTEDDELEGATED AutomationApplicationKind = "HOSTED_DELEGATED"
+	USEREMBEDDED    AutomationApplicationKind = "USER_EMBEDDED"
+)
+
+// Valid indicates whether the value is a known member of the AutomationApplicationKind enum.
+func (e AutomationApplicationKind) Valid() bool {
+	switch e {
+	case AUTONOMOUS:
+		return true
+	case HOSTEDDELEGATED:
+		return true
+	case USEREMBEDDED:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationApplicationType.
+const (
+	Agent          AutomationApplicationType = "agent"
+	Browser        AutomationApplicationType = "browser"
+	Native         AutomationApplicationType = "native"
+	ResourceServer AutomationApplicationType = "resource_server"
+	Service        AutomationApplicationType = "service"
+	Web            AutomationApplicationType = "web"
+)
+
+// Valid indicates whether the value is a known member of the AutomationApplicationType enum.
+func (e AutomationApplicationType) Valid() bool {
+	switch e {
+	case Agent:
+		return true
+	case Browser:
+		return true
+	case Native:
+		return true
+	case ResourceServer:
+		return true
+	case Service:
+		return true
+	case Web:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationChallengeSettingsType.
+const (
+	AutomationChallengeSettingsTypeConditional AutomationChallengeSettingsType = "conditional"
+	AutomationChallengeSettingsTypeRequired    AutomationChallengeSettingsType = "required"
+	AutomationChallengeSettingsTypeRiskBased   AutomationChallengeSettingsType = "risk_based"
+)
+
+// Valid indicates whether the value is a known member of the AutomationChallengeSettingsType enum.
+func (e AutomationChallengeSettingsType) Valid() bool {
+	switch e {
+	case AutomationChallengeSettingsTypeConditional:
+		return true
+	case AutomationChallengeSettingsTypeRequired:
+		return true
+	case AutomationChallengeSettingsTypeRiskBased:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationEnrollSettingsType.
+const (
+	AutomationEnrollSettingsTypeConditional AutomationEnrollSettingsType = "conditional"
+	AutomationEnrollSettingsTypeOptional    AutomationEnrollSettingsType = "optional"
+	AutomationEnrollSettingsTypeRequired    AutomationEnrollSettingsType = "required"
+)
+
+// Valid indicates whether the value is a known member of the AutomationEnrollSettingsType enum.
+func (e AutomationEnrollSettingsType) Valid() bool {
+	switch e {
+	case AutomationEnrollSettingsTypeConditional:
+		return true
+	case AutomationEnrollSettingsTypeOptional:
+		return true
+	case AutomationEnrollSettingsTypeRequired:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationTokenClaimTokenType.
+const (
+	AccessToken  AutomationTokenClaimTokenType = "access_token"
+	IdJag        AutomationTokenClaimTokenType = "id_jag"
+	IdToken      AutomationTokenClaimTokenType = "id_token"
+	RefreshToken AutomationTokenClaimTokenType = "refresh_token"
+)
+
+// Valid indicates whether the value is a known member of the AutomationTokenClaimTokenType enum.
+func (e AutomationTokenClaimTokenType) Valid() bool {
+	switch e {
+	case AccessToken:
+		return true
+	case IdJag:
+		return true
+	case IdToken:
+		return true
+	case RefreshToken:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationWorkloadIdentitySettingsSubjectMatchMode.
+const (
+	Exact  AutomationWorkloadIdentitySettingsSubjectMatchMode = "exact"
+	Prefix AutomationWorkloadIdentitySettingsSubjectMatchMode = "prefix"
+)
+
+// Valid indicates whether the value is a known member of the AutomationWorkloadIdentitySettingsSubjectMatchMode enum.
+func (e AutomationWorkloadIdentitySettingsSubjectMatchMode) Valid() bool {
+	switch e {
+	case Exact:
+		return true
+	case Prefix:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for Severity.
 const (
 	SeverityError   Severity = "error"
@@ -155,6 +290,26 @@ func (e XFrameSettingsAction) Valid() bool {
 	}
 }
 
+// ApplicationLightweightJwtSettings Restricts the JWT access token and the ID token returned to the client to the reserved protocol claims and the allowlisted claims.
+type ApplicationLightweightJwtSettings struct {
+	// AllowedAccessTokenClaims Claim names kept in the access and refresh tokens in addition to the reserved claims. A listed claim is kept only if AM issues it. Names must be unique, must not have leading or trailing whitespace and must not contain control characters.
+	AllowedAccessTokenClaims *[]string `json:"allowedAccessTokenClaims,omitempty"`
+
+	// AllowedIdTokenClaims Claim names kept in the ID token in addition to the reserved claims. A listed claim is kept only if AM issues it. Names must be unique, must not have leading or trailing whitespace and must not contain control characters.
+	AllowedIdTokenClaims *[]string `json:"allowedIdTokenClaims,omitempty"`
+
+	// Enabled Whether Lightweight JWT is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationLightweightJwtSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationLightweightJwtSettings) WithDefaults() ApplicationLightweightJwtSettings {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
+	}
+	return v
+}
+
 // AutomationAccountSettings User account settings for the domain: brute-force protection, registration, password reset, remember-me, and MFA challenge behavior.
 type AutomationAccountSettings = AccountSettings
 
@@ -174,7 +329,7 @@ type AccountSettings struct {
 	// CompleteRegistrationWhenResetPassword Whether resetting a password also completes a pending registration.
 	CompleteRegistrationWhenResetPassword *bool `json:"completeRegistrationWhenResetPassword,omitempty"`
 
-	// DefaultIdentityProviderForRegistration Key of an identity provider managed under this domain, used as the default for user registration. The reference is not checked against existing identity providers: it can name one created after the domain or since deleted, and resolves whenever an identity provider with that key exists.
+	// DefaultIdentityProviderForRegistration Default identity provider for user registration: the key of an identity provider of the domain, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing identity providers: it can name one created after the domain or since deleted, and resolves whenever that identity provider exists.
 	//
 	// Example: users-idp
 	DefaultIdentityProviderForRegistration *string `json:"defaultIdentityProviderForRegistration,omitempty"`
@@ -304,6 +459,631 @@ func (v AccountSettings) WithDefaults() AccountSettings {
 	return v
 }
 
+// AutomationAdvancedSettings Advanced application settings.
+type AutomationAdvancedSettings = AdvancedSettings
+
+// AdvancedSettings Advanced application settings.
+type AdvancedSettings struct {
+	// FlowsInherited Whether the domain flows are executed for this application in addition to its own flows.
+	FlowsInherited *bool `json:"flowsInherited,omitempty"`
+
+	// SkipConsent Whether the user consent page is skipped: requested scopes are granted without asking the user.
+	SkipConsent *bool `json:"skipConsent,omitempty"`
+}
+
+// WithDefaults returns a copy of AdvancedSettings with unset fields set to their OpenAPI defaults.
+func (v AdvancedSettings) WithDefaults() AdvancedSettings {
+	if v.FlowsInherited == nil {
+		v.FlowsInherited = new(bool(true))
+	}
+	if v.SkipConsent == nil {
+		v.SkipConsent = new(bool(false))
+	}
+	return v
+}
+
+// AutomationApplication An application (OAuth 2.0 / OIDC client) managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
+type AutomationApplication = Application
+
+// AutomationApplicationKind Agent persona. Required when type is agent, rejected otherwise.
+type AutomationApplicationKind string
+
+// AutomationApplicationType Application type. It drives the computed OAuth 2.0 settings. Can be changed, except to or from agent: such a change is rejected with 400 (delete and recreate the application). Changing the type resets grantTypes, responseTypes and tokenEndpointAuthMethod to the new type's defaults before the payload applies.
+//
+// Example: native
+type AutomationApplicationType string
+
+// Application An application (OAuth 2.0 / OIDC client) managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
+type Application struct {
+	// Certificate Certificate signing the tokens: the key of a certificate of the domain, or id:<uuid>. The reference is not checked against existing certificates: it can name one created after the application or since deleted, and resolves whenever that certificate exists.
+	//
+	// Example: signing-cert
+	Certificate string `json:"certificate"`
+
+	// ClientId OAuth 2.0 client identifier. Generated when omitted on creation. Immutable once set: a different value on update is rejected with 400, an omitted one keeps the current value. Must be unique within the domain.
+	//
+	// Example: mobile-app-client
+	ClientId *string `json:"clientId,omitempty"`
+
+	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Description Description of the application.
+	//
+	// Example: Customer mobile application
+	Description *string `json:"description,omitempty"`
+
+	// DryRunErrors Validation errors returned when dryRun is true. Absent when validation succeeds.
+	DryRunErrors *[]DryRunError `json:"dryRunErrors,omitempty"`
+
+	// Enabled Whether the application is enabled. Disabling it revokes its tokens.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// IdentityProviders Identity providers users can authenticate with on this application.
+	IdentityProviders *[]AutomationApplicationIdentityProvider `json:"identityProviders,omitempty"`
+
+	// Key Stable, immutable identifier for the application within its domain. Lowercase alphanumeric and hyphens, starting and ending with an alphanumeric character. Used to identify the application on create-or-update.
+	//
+	// Example: mobile-app
+	Key string `json:"key"`
+
+	// Kind Agent persona. Required when type is agent, rejected otherwise.
+	Kind *AutomationApplicationKind `json:"kind,omitempty"`
+
+	// Metadata Free-form metadata of the application.
+	//
+	// Example: {"team":"mobile"}
+	Metadata *map[string]interface{} `json:"metadata,omitempty"`
+
+	// Name Human-readable name of the application. Also used as the OAuth 2.0 client name.
+	//
+	// Example: Mobile app
+	Name string `json:"name"`
+
+	// Settings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
+	Settings *AutomationApplicationSettings `json:"settings,omitempty"`
+
+	// Template Whether the application is a registration template for dynamic client registration rather than an active application.
+	Template *bool `json:"template,omitempty"`
+
+	// Type Application type. It drives the computed OAuth 2.0 settings. Can be changed, except to or from agent: such a change is rejected with 400 (delete and recreate the application). Changing the type resets grantTypes, responseTypes and tokenEndpointAuthMethod to the new type's defaults before the payload applies.
+	//
+	// Example: native
+	Type AutomationApplicationType `json:"type"`
+
+	// UpdatedAt Last-update timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// WithDefaults returns a copy of Application with unset fields set to their OpenAPI defaults.
+func (v Application) WithDefaults() Application {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(true))
+	}
+	if v.Settings != nil {
+		withDefaults := v.Settings.WithDefaults()
+		v.Settings = &withDefaults
+	}
+	if v.Template == nil {
+		v.Template = new(bool(false))
+	}
+	return v
+}
+
+// AutomationApplicationFactorSettings A factor available to the application.
+type AutomationApplicationFactorSettings = ApplicationFactorSettings
+
+// ApplicationFactorSettings A factor available to the application.
+type ApplicationFactorSettings struct {
+	// Id The factor, as id:<uuid> (factors have no Automation API endpoint).
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	Id string `json:"id"`
+
+	// SelectionRule Expression Language rule selecting this factor. When empty, the factor is always available.
+	//
+	// Example: {#context.attributes['user'].roles.contains('admin')}
+	SelectionRule *string `json:"selectionRule,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationFactorSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationFactorSettings) WithDefaults() ApplicationFactorSettings {
+	return v
+}
+
+// AutomationApplicationIdentityProvider An identity provider users can authenticate with on this application.
+type AutomationApplicationIdentityProvider = ApplicationIdentityProvider
+
+// ApplicationIdentityProvider An identity provider users can authenticate with on this application.
+type ApplicationIdentityProvider struct {
+	// Identity Reference to an identity provider of the domain: its key, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing identity providers: it can name one created after the application or since deleted, and resolves whenever that identity provider exists.
+	//
+	// Example: customer-users
+	Identity string `json:"identity"`
+
+	// Priority Evaluation order among the application's identity providers: lowest first; negative values come last.
+	Priority *int32 `json:"priority,omitempty"`
+
+	// SelectionRule Expression Language rule selecting this identity provider for the current request. When empty, the identity provider is always selectable.
+	//
+	// Example: {#request.params['idp'][0] == 'customers'}
+	SelectionRule *string `json:"selectionRule,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationIdentityProvider with unset fields set to their OpenAPI defaults.
+func (v ApplicationIdentityProvider) WithDefaults() ApplicationIdentityProvider {
+	if v.Priority == nil {
+		v.Priority = new(int32(0))
+	}
+	return v
+}
+
+// AutomationApplicationOAuthSettings OAuth 2.0 and OpenID Connect settings of the application. Fields described as computed are filled in by AM when omitted. tokenExchangeOAuthSettings, when omitted, is inherited from the domain.
+type AutomationApplicationOAuthSettings = ApplicationOAuthSettings
+
+// ApplicationOAuthSettings OAuth 2.0 and OpenID Connect settings of the application. Fields described as computed are filled in by AM when omitted. tokenExchangeOAuthSettings, when omitted, is inherited from the domain.
+type ApplicationOAuthSettings struct {
+	// AccessTokenValiditySeconds Access token validity, in seconds. Computed (7200) when omitted.
+	AccessTokenValiditySeconds *int32 `json:"accessTokenValiditySeconds,omitempty"`
+
+	// ApplicationType OIDC application type, computed from the application type: native for native applications, web for web, browser and service applications. Read-only.
+	ApplicationType *string `json:"applicationType,omitempty"`
+
+	// AuthorizationEncryptedResponseAlg JWE alg algorithm encrypting the authorization responses (JARM).
+	AuthorizationEncryptedResponseAlg *string `json:"authorizationEncryptedResponseAlg,omitempty"`
+
+	// AuthorizationEncryptedResponseEnc JWE enc algorithm encrypting the authorization responses (JARM).
+	AuthorizationEncryptedResponseEnc *string `json:"authorizationEncryptedResponseEnc,omitempty"`
+
+	// AuthorizationSignedResponseAlg JWS algorithm signing the authorization responses (JARM).
+	AuthorizationSignedResponseAlg *string `json:"authorizationSignedResponseAlg,omitempty"`
+
+	// ClientName Name of the client presented to users. Always the application name. Read-only.
+	ClientName *string `json:"clientName,omitempty"`
+
+	// ClientType OAuth 2.0 client type, computed from the application type: confidential for web and service applications, public for browser and native applications and user_embedded agents. Read-only.
+	ClientType *string `json:"clientType,omitempty"`
+
+	// ClientUri URL of the application home page.
+	ClientUri *string `json:"clientUri,omitempty"`
+
+	// Contacts Email addresses of the people responsible for the application.
+	//
+	// Example: ["ops@example.com"]
+	Contacts *[]string `json:"contacts,omitempty"`
+
+	// CrossAppAccessSettings Resource servers this application may request an ID-JAG for.
+	CrossAppAccessSettings *AutomationCrossAppAccessSettings `json:"crossAppAccessSettings,omitempty"`
+
+	// DefaultACRvalues Default requested Authentication Context Class Reference values.
+	DefaultACRvalues *[]string `json:"defaultACRvalues,omitempty"`
+
+	// DefaultMaxAge Default maximum authentication age, in seconds.
+	//
+	// Example: 3600
+	DefaultMaxAge *int32 `json:"defaultMaxAge,omitempty"`
+
+	// DisableRefreshTokenRotation Whether a refresh token stays valid when used, instead of being replaced by a new one.
+	DisableRefreshTokenRotation *bool `json:"disableRefreshTokenRotation,omitempty"`
+
+	// DpopBoundAccessTokens Whether access tokens must be bound to a DPoP proof (RFC 9449).
+	DpopBoundAccessTokens *bool `json:"dpopBoundAccessTokens,omitempty"`
+
+	// EnhanceScopesWithUserPermissions Whether the permissions of the user roles are added to the scopes of the issued tokens.
+	EnhanceScopesWithUserPermissions *bool `json:"enhanceScopesWithUserPermissions,omitempty"`
+
+	// ForcePKCE Whether the authorization code flow requires PKCE. Computed (true) for browser and native applications created without grantTypes, and for user_embedded agents.
+	ForcePKCE *bool `json:"forcePKCE,omitempty"`
+
+	// ForceS256CodeChallengeMethod Whether PKCE requires the S256 code challenge method. Computed (true) for browser applications created without grantTypes, and for user_embedded agents.
+	ForceS256CodeChallengeMethod *bool `json:"forceS256CodeChallengeMethod,omitempty"`
+
+	// GrantTypes OAuth 2.0 grant types the application may use. Computed when omitted, from the application type: web authorization_code and password; browser and native authorization_code; service client_credentials; resource_server adds client_credentials; agent per kind (user_embedded authorization_code; hosted_delegated authorization_code, client_credentials and token exchange; autonomous client_credentials and token exchange).
+	//
+	// Example: ["authorization_code","refresh_token"]
+	GrantTypes *[]string `json:"grantTypes,omitempty"`
+
+	// IdJagValiditySeconds Validity, in seconds, of the identity assertion authorization grants (ID-JAG) issued to the application. Computed (300) when omitted.
+	IdJagValiditySeconds *int32 `json:"idJagValiditySeconds,omitempty"`
+
+	// IdTokenEncryptedResponseAlg JWE alg algorithm encrypting the ID tokens issued to the application.
+	IdTokenEncryptedResponseAlg *string `json:"idTokenEncryptedResponseAlg,omitempty"`
+
+	// IdTokenEncryptedResponseEnc JWE enc algorithm encrypting the ID tokens issued to the application.
+	IdTokenEncryptedResponseEnc *string `json:"idTokenEncryptedResponseEnc,omitempty"`
+
+	// IdTokenSignedResponseAlg JWS algorithm signing the ID tokens issued to the application.
+	IdTokenSignedResponseAlg *string `json:"idTokenSignedResponseAlg,omitempty"`
+
+	// IdTokenValiditySeconds ID token validity, in seconds. Computed (14400) when omitted.
+	IdTokenValiditySeconds *int32 `json:"idTokenValiditySeconds,omitempty"`
+
+	// InitiateLoginUri URI, using the https scheme, a third party can use to initiate a login by the application.
+	//
+	// Example: https://app.example.com/login
+	InitiateLoginUri *string `json:"initiateLoginUri,omitempty"`
+
+	// Jwks JSON Web Key Set of the application passed by value (RFC 7517 section 5): an object with a keys array of JWKs. Same use as jwksUri, which it excludes.
+	//
+	// Example: {"keys":[{"e":"AQAB","kid":"app-key","kty":"RSA","n":"0vx7...","use":"sig"}]}
+	Jwks *map[string]interface{} `json:"jwks,omitempty"`
+
+	// JwksUri URL of the application JSON Web Key Set, holding the keys used to verify its signatures. Mutually exclusive with jwks.
+	//
+	// Example: https://app.example.com/.well-known/jwks.json
+	JwksUri *string `json:"jwksUri,omitempty"`
+
+	// LightweightJwtSettings Restricts the JWT access token and the ID token returned to the client to the reserved protocol claims and the allowlisted claims.
+	LightweightJwtSettings *ApplicationLightweightJwtSettings `json:"lightweightJwtSettings,omitempty"`
+
+	// LogoUri URL of the application logo, displayed to users.
+	LogoUri *string `json:"logoUri,omitempty"`
+
+	// OptInScopeSelection When true, users must explicitly select each scope on the consent page; when false, all requested scopes are preselected and users can deselect them. Computed (true) when omitted.
+	OptInScopeSelection *bool `json:"optInScopeSelection,omitempty"`
+
+	// PolicyUri URL of the application policy on the use of profile data.
+	PolicyUri *string `json:"policyUri,omitempty"`
+
+	// PostLogoutRedirectUris URLs the user may be redirected to after logout (post_logout_redirect_uri).
+	//
+	// Example: ["https://app.example.com/logged-out"]
+	PostLogoutRedirectUris *[]string `json:"postLogoutRedirectUris,omitempty"`
+
+	// RedirectUris Redirection URIs. The redirect_uri of an authorization request must match one of them. At least one is required for the authorization_code and implicit grants.
+	//
+	// Example: ["https://app.example.com/callback"]
+	RedirectUris *[]string `json:"redirectUris,omitempty"`
+
+	// RefreshTokenValiditySeconds Refresh token validity, in seconds. Computed (14400) when omitted.
+	RefreshTokenValiditySeconds *int32 `json:"refreshTokenValiditySeconds,omitempty"`
+
+	// RequestObjectEncryptionAlg JWE alg algorithm the application may encrypt its request objects with.
+	RequestObjectEncryptionAlg *string `json:"requestObjectEncryptionAlg,omitempty"`
+
+	// RequestObjectEncryptionEnc JWE enc algorithm the application may encrypt its request objects with.
+	RequestObjectEncryptionEnc *string `json:"requestObjectEncryptionEnc,omitempty"`
+
+	// RequestObjectSigningAlg JWS algorithm the application signs its request objects with.
+	RequestObjectSigningAlg *string `json:"requestObjectSigningAlg,omitempty"`
+
+	// RequestUris request_uri values pre-registered by the application.
+	RequestUris *[]string `json:"requestUris,omitempty"`
+
+	// RequireAuthTime Whether the auth_time claim is required in the ID token.
+	RequireAuthTime *bool `json:"requireAuthTime,omitempty"`
+
+	// ResponseTypes OAuth 2.0 / OIDC response types the application may use. Computed from grantTypes when omitted: authorization_code adds code, implicit adds token and id_token.
+	//
+	// Example: ["code"]
+	ResponseTypes *[]string `json:"responseTypes,omitempty"`
+
+	// ScopeSettings Scopes the application can request. Each scope must exist in the domain, otherwise the request is rejected with 400. Resource server applications always get the uma_protection scope.
+	ScopeSettings *[]AutomationScopeSettings `json:"scopeSettings,omitempty"`
+
+	// SectorIdentifierUri URL, using the https scheme, used to compute pairwise subject identifiers.
+	SectorIdentifierUri *string `json:"sectorIdentifierUri,omitempty"`
+
+	// SilentReAuthentication Whether the id_token_hint parameter can be used to re-authenticate the user silently.
+	SilentReAuthentication *bool `json:"silentReAuthentication,omitempty"`
+
+	// SingleSignOut Whether logout also calls the end_session_endpoint of the external OIDC provider the user authenticated with.
+	SingleSignOut *bool `json:"singleSignOut,omitempty"`
+
+	// SubjectType Subject identifier type of the responses: public or pairwise.
+	//
+	// Example: public
+	SubjectType *string `json:"subjectType,omitempty"`
+
+	// TlsClientAuthSanDns Expected dNSName subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanDns *string `json:"tlsClientAuthSanDns,omitempty"`
+
+	// TlsClientAuthSanEmail Expected rfc822Name subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanEmail *string `json:"tlsClientAuthSanEmail,omitempty"`
+
+	// TlsClientAuthSanIp Expected iPAddress subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanIp *string `json:"tlsClientAuthSanIp,omitempty"`
+
+	// TlsClientAuthSanUri Expected uniformResourceIdentifier subject alternative name of the client certificate, for the tls_client_auth method.
+	TlsClientAuthSanUri *string `json:"tlsClientAuthSanUri,omitempty"`
+
+	// TlsClientAuthSubjectDn Expected subject distinguished name of the client certificate, for the tls_client_auth method.
+	//
+	// Example: CN=app.example.com
+	TlsClientAuthSubjectDn *string `json:"tlsClientAuthSubjectDn,omitempty"`
+
+	// TlsClientCertificateBoundAccessTokens Whether access tokens are bound to the client certificate (RFC 8705).
+	TlsClientCertificateBoundAccessTokens *bool `json:"tlsClientCertificateBoundAccessTokens,omitempty"`
+
+	// TokenCustomClaims Custom claims added to the issued tokens.
+	TokenCustomClaims *[]AutomationTokenClaim `json:"tokenCustomClaims,omitempty"`
+
+	// TokenEndpointAuthMethod Client authentication method at the token endpoint: client_secret_basic, client_secret_post, client_secret_jwt, private_key_jwt, tls_client_auth, self_signed_tls_client_auth or none. Computed when omitted: client_secret_basic on creation, none for browser and native applications created without grantTypes, per kind for agents (user_embedded none; hosted_delegated and autonomous private_key_jwt).
+	//
+	// Example: client_secret_basic
+	TokenEndpointAuthMethod *string `json:"tokenEndpointAuthMethod,omitempty"`
+
+	// TokenEndpointAuthSigningAlg JWS algorithm the application signs its authentication JWT with, for the private_key_jwt and client_secret_jwt methods.
+	//
+	// Example: RS256
+	TokenEndpointAuthSigningAlg *string `json:"tokenEndpointAuthSigningAlg,omitempty"`
+
+	// TokenExchangeOAuthSettings OAuth-specific token-exchange behavior, such as how scopes are handled, with optional inheritance from domain defaults.
+	TokenExchangeOAuthSettings *TokenExchangeOAuthSettings `json:"tokenExchangeOAuthSettings,omitempty"`
+
+	// TosUri URL of the application terms of service.
+	TosUri *string `json:"tosUri,omitempty"`
+
+	// UserinfoCustomClaims Custom claims added to the UserInfo responses.
+	UserinfoCustomClaims *[]AutomationUserInfoClaim `json:"userinfoCustomClaims,omitempty"`
+
+	// UserinfoEncryptedResponseAlg JWE alg algorithm encrypting the UserInfo responses.
+	UserinfoEncryptedResponseAlg *string `json:"userinfoEncryptedResponseAlg,omitempty"`
+
+	// UserinfoEncryptedResponseEnc JWE enc algorithm encrypting the UserInfo responses.
+	UserinfoEncryptedResponseEnc *string `json:"userinfoEncryptedResponseEnc,omitempty"`
+
+	// UserinfoSignedResponseAlg JWS algorithm signing the UserInfo responses.
+	UserinfoSignedResponseAlg *string `json:"userinfoSignedResponseAlg,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationOAuthSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationOAuthSettings) WithDefaults() ApplicationOAuthSettings {
+	if v.AccessTokenValiditySeconds == nil {
+		v.AccessTokenValiditySeconds = new(int32(7200))
+	}
+	if v.CrossAppAccessSettings != nil {
+		withDefaults := v.CrossAppAccessSettings.WithDefaults()
+		v.CrossAppAccessSettings = &withDefaults
+	}
+	if v.DisableRefreshTokenRotation == nil {
+		v.DisableRefreshTokenRotation = new(bool(false))
+	}
+	if v.DpopBoundAccessTokens == nil {
+		v.DpopBoundAccessTokens = new(bool(false))
+	}
+	if v.EnhanceScopesWithUserPermissions == nil {
+		v.EnhanceScopesWithUserPermissions = new(bool(false))
+	}
+	if v.ForcePKCE == nil {
+		v.ForcePKCE = new(bool(false))
+	}
+	if v.ForceS256CodeChallengeMethod == nil {
+		v.ForceS256CodeChallengeMethod = new(bool(false))
+	}
+	if v.IdJagValiditySeconds == nil {
+		v.IdJagValiditySeconds = new(int32(300))
+	}
+	if v.IdTokenValiditySeconds == nil {
+		v.IdTokenValiditySeconds = new(int32(14400))
+	}
+	if v.LightweightJwtSettings != nil {
+		withDefaults := v.LightweightJwtSettings.WithDefaults()
+		v.LightweightJwtSettings = &withDefaults
+	}
+	if v.OptInScopeSelection == nil {
+		v.OptInScopeSelection = new(bool(true))
+	}
+	if v.RefreshTokenValiditySeconds == nil {
+		v.RefreshTokenValiditySeconds = new(int32(14400))
+	}
+	if v.RequireAuthTime == nil {
+		v.RequireAuthTime = new(bool(false))
+	}
+	if v.SilentReAuthentication == nil {
+		v.SilentReAuthentication = new(bool(false))
+	}
+	if v.SingleSignOut == nil {
+		v.SingleSignOut = new(bool(false))
+	}
+	if v.TlsClientCertificateBoundAccessTokens == nil {
+		v.TlsClientCertificateBoundAccessTokens = new(bool(false))
+	}
+	if v.TokenExchangeOAuthSettings != nil {
+		withDefaults := v.TokenExchangeOAuthSettings.WithDefaults()
+		v.TokenExchangeOAuthSettings = &withDefaults
+	}
+	return v
+}
+
+// AutomationApplicationSAMLSettings Settings of the application acting as a SAML 2.0 service provider (SP).
+type AutomationApplicationSAMLSettings = ApplicationSAMLSettings
+
+// ApplicationSAMLSettings Settings of the application acting as a SAML 2.0 service provider (SP).
+type ApplicationSAMLSettings struct {
+	// AssertionAttributes Custom attributes of the SAML assertion. When not empty, they replace the default attribute set.
+	AssertionAttributes *[]AutomationSamlAssertionAttribute `json:"assertionAttributes,omitempty"`
+
+	// AssertionValiditySeconds Validity, in seconds, of the issued assertion. When absent, the IdP default applies. Used when includeAssertionConditions is true.
+	//
+	// Example: 300
+	AssertionValiditySeconds *int32 `json:"assertionValiditySeconds,omitempty"`
+
+	// AttributeConsumeServiceUrl SP endpoint the IdP sends SAML responses to (Assertion Consumer Service URL).
+	//
+	// Example: https://app.example.com/saml/acs
+	AttributeConsumeServiceUrl *string `json:"attributeConsumeServiceUrl,omitempty"`
+
+	// Audiences Audience URIs added to the SP entity ID in the AudienceRestriction. Used when includeAssertionConditions is true.
+	Audiences *[]string `json:"audiences,omitempty"`
+
+	// Certificate The SP's PEM-encoded public key certificate, used by the IdP to verify SAML requests and, when assertions are encrypted, to wrap the symmetric key. Required when wantAssertionsEncrypted is true.
+	Certificate *string `json:"certificate,omitempty"`
+
+	// DataEncryptionAlgorithm Data encryption algorithm URI of encrypted assertions (XML Encryption EncryptedData).
+	//
+	// Example: http://www.w3.org/2009/xmlenc11#aes256-gcm
+	DataEncryptionAlgorithm *string `json:"dataEncryptionAlgorithm,omitempty"`
+
+	// EntityId URL or URN that uniquely identifies the SP (the SAML entity ID).
+	//
+	// Example: https://app.example.com
+	EntityId *string `json:"entityId,omitempty"`
+
+	// IncludeAssertionConditions Whether assertions carry Conditions (validity time bounds and audience restriction), configured by the fields below.
+	IncludeAssertionConditions *bool `json:"includeAssertionConditions,omitempty"`
+
+	// KeyTransportEncryptionAlgorithm Key transport algorithm URI of encrypted assertions (XML Encryption EncryptedKey).
+	//
+	// Example: http://www.w3.org/2009/xmlenc11#rsa-oaep
+	KeyTransportEncryptionAlgorithm *string `json:"keyTransportEncryptionAlgorithm,omitempty"`
+
+	// NameIdMapping Expression Language expression producing the NameID of the SAML response. When empty, the internal user id is used, or the user's email when the SP requests the email format.
+	//
+	// Example: {#context.attributes['user'].username}
+	NameIdMapping *string `json:"nameIdMapping,omitempty"`
+
+	// NotBeforeTimeSkewSeconds Clock skew, in seconds, subtracted from NotBefore.
+	//
+	// Example: 30
+	NotBeforeTimeSkewSeconds *int32 `json:"notBeforeTimeSkewSeconds,omitempty"`
+
+	// NotOnOrAfterTimeSkewSeconds Clock skew, in seconds, added to NotOnOrAfter.
+	//
+	// Example: 30
+	NotOnOrAfterTimeSkewSeconds *int32 `json:"notOnOrAfterTimeSkewSeconds,omitempty"`
+
+	// ResponseBinding Binding used to send SAML responses to the SP. The default answers with the binding of the initial request.
+	ResponseBinding *string `json:"responseBinding,omitempty"`
+
+	// SingleLogoutServiceUrl SP endpoint the IdP redirects to after a single logout.
+	//
+	// Example: https://app.example.com/saml/logout
+	SingleLogoutServiceUrl *string `json:"singleLogoutServiceUrl,omitempty"`
+
+	// WantAssertionsEncrypted Whether the SP requires encrypted SAML assertions.
+	WantAssertionsEncrypted *bool `json:"wantAssertionsEncrypted,omitempty"`
+
+	// WantAssertionsSigned Whether the SP requires signed SAML assertions.
+	WantAssertionsSigned *bool `json:"wantAssertionsSigned,omitempty"`
+
+	// WantResponseSigned Whether the SP requires signed SAML responses.
+	WantResponseSigned *bool `json:"wantResponseSigned,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationSAMLSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationSAMLSettings) WithDefaults() ApplicationSAMLSettings {
+	if v.IncludeAssertionConditions == nil {
+		v.IncludeAssertionConditions = new(bool(false))
+	}
+	if v.ResponseBinding == nil {
+		v.ResponseBinding = new(string("urn:oasis:names:tc:SAML:2.0:bindings:custom:Initial-Request"))
+	}
+	if v.WantAssertionsEncrypted == nil {
+		v.WantAssertionsEncrypted = new(bool(false))
+	}
+	if v.WantAssertionsSigned == nil {
+		v.WantAssertionsSigned = new(bool(false))
+	}
+	if v.WantResponseSigned == nil {
+		v.WantResponseSigned = new(bool(true))
+	}
+	return v
+}
+
+// AutomationApplicationSettings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
+type AutomationApplicationSettings = ApplicationSettings
+
+// ApplicationSettings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
+type ApplicationSettings struct {
+	// Account User account settings for the domain: brute-force protection, registration, password reset, remember-me, and MFA challenge behavior.
+	Account *AutomationAccountSettings `json:"account,omitempty"`
+
+	// Advanced Advanced application settings.
+	Advanced *AutomationAdvancedSettings `json:"advanced,omitempty"`
+
+	// CookieSettings Session cookie settings of the application.
+	CookieSettings *AutomationCookieSettings `json:"cookieSettings,omitempty"`
+
+	// Login Configuration of the domain's login flow and the features offered on the sign-in page.
+	Login *LoginSettings `json:"login,omitempty"`
+
+	// Mfa Multi-factor authentication settings of the application.
+	Mfa *AutomationMfaSettings `json:"mfa,omitempty"`
+
+	// Oauth OAuth 2.0 and OpenID Connect settings of the application. Fields described as computed are filled in by AM when omitted. tokenExchangeOAuthSettings, when omitted, is inherited from the domain.
+	Oauth *AutomationApplicationOAuthSettings `json:"oauth,omitempty"`
+
+	// RiskAssessment Risk assessment of the authentication attempts, used by risk-based MFA. Effective only with the Enterprise Edition risk assessment plugin.
+	RiskAssessment *AutomationRiskAssessmentSettings `json:"riskAssessment,omitempty"`
+
+	// Saml Settings of the application acting as a SAML 2.0 service provider (SP).
+	Saml *AutomationApplicationSAMLSettings `json:"saml,omitempty"`
+
+	// SecretExpirationSettings Controls whether client secrets in the domain expire and after how long.
+	SecretExpirationSettings *SecretExpirationSettings `json:"secretExpirationSettings,omitempty"`
+
+	// WorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
+	WorkloadIdentitySettings *AutomationWorkloadIdentitySettings `json:"workloadIdentitySettings,omitempty"`
+}
+
+// WithDefaults returns a copy of ApplicationSettings with unset fields set to their OpenAPI defaults.
+func (v ApplicationSettings) WithDefaults() ApplicationSettings {
+	if v.Account != nil {
+		withDefaults := v.Account.WithDefaults()
+		v.Account = &withDefaults
+	}
+	if v.Advanced != nil {
+		withDefaults := v.Advanced.WithDefaults()
+		v.Advanced = &withDefaults
+	}
+	if v.CookieSettings != nil {
+		withDefaults := v.CookieSettings.WithDefaults()
+		v.CookieSettings = &withDefaults
+	}
+	if v.Login != nil {
+		withDefaults := v.Login.WithDefaults()
+		v.Login = &withDefaults
+	}
+	if v.Mfa != nil {
+		withDefaults := v.Mfa.WithDefaults()
+		v.Mfa = &withDefaults
+	}
+	if v.Oauth != nil {
+		withDefaults := v.Oauth.WithDefaults()
+		v.Oauth = &withDefaults
+	}
+	if v.RiskAssessment != nil {
+		withDefaults := v.RiskAssessment.WithDefaults()
+		v.RiskAssessment = &withDefaults
+	}
+	if v.Saml != nil {
+		withDefaults := v.Saml.WithDefaults()
+		v.Saml = &withDefaults
+	}
+	if v.SecretExpirationSettings != nil {
+		withDefaults := v.SecretExpirationSettings.WithDefaults()
+		v.SecretExpirationSettings = &withDefaults
+	}
+	if v.WorkloadIdentitySettings != nil {
+		withDefaults := v.WorkloadIdentitySettings.WithDefaults()
+		v.WorkloadIdentitySettings = &withDefaults
+	}
+	return v
+}
+
+// AutomationAssessmentSettings Settings of one risk assessment.
+type AutomationAssessmentSettings = AssessmentSettings
+
+// AssessmentSettings Settings of one risk assessment.
+type AssessmentSettings struct {
+	// Enabled Whether this assessment is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Thresholds Score threshold of each risk level: an assessment scoring at or above a threshold reaches that level.
+	//
+	// Example: {"HIGH":1}
+	Thresholds *map[string]float64 `json:"thresholds,omitempty"`
+}
+
+// WithDefaults returns a copy of AssessmentSettings with unset fields set to their OpenAPI defaults.
+func (v AssessmentSettings) WithDefaults() AssessmentSettings {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
+	}
+	return v
+}
+
 // AutomationCIBASettings Client-Initiated Backchannel Authentication (CIBA) settings for the domain. CIBA lets a relying party initiate end-user authentication from a separate consumption device, without redirecting the user through the browser. Authentication device notifiers are not managed by the Automation API and are not exposed here.
 type AutomationCIBASettings = CIBASettings
 
@@ -393,7 +1173,7 @@ type AutomationCertificateSettings = CertificateSettings
 
 // CertificateSettings Domain-level certificate settings.
 type CertificateSettings struct {
-	// FallbackCertificate Key of a certificate managed under this domain, used as the fallback certificate when a client does not specify one. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever a certificate with that key exists.
+	// FallbackCertificate Fallback certificate used when a client does not specify one: the key of a certificate of the domain, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever that certificate exists.
 	//
 	// Example: default
 	FallbackCertificate *string `json:"fallbackCertificate,omitempty"`
@@ -401,6 +1181,38 @@ type CertificateSettings struct {
 
 // WithDefaults returns a copy of CertificateSettings with unset fields set to their OpenAPI defaults.
 func (v CertificateSettings) WithDefaults() CertificateSettings {
+	return v
+}
+
+// AutomationChallengeSettings When users are challenged for a second factor.
+type AutomationChallengeSettings = ChallengeSettings
+
+// AutomationChallengeSettingsType required: always challenge. conditional: challenge unless challengeRule evaluates to true. risk_based: challenge according to the risk assessment.
+//
+// Example: required
+type AutomationChallengeSettingsType string
+
+// ChallengeSettings When users are challenged for a second factor.
+type ChallengeSettings struct {
+	// Active Whether users are challenged for a second factor.
+	Active *bool `json:"active,omitempty"`
+
+	// ChallengeRule Expression Language rule of a conditional challenge: when it evaluates to true, the challenge is skipped.
+	//
+	// Example: {#context.attributes['geoip']['country_iso_code'] == 'FR'}
+	ChallengeRule *string `json:"challengeRule,omitempty"`
+
+	// Type required: always challenge. conditional: challenge unless challengeRule evaluates to true. risk_based: challenge according to the risk assessment.
+	//
+	// Example: required
+	Type *AutomationChallengeSettingsType `json:"type,omitempty"`
+}
+
+// WithDefaults returns a copy of ChallengeSettings with unset fields set to their OpenAPI defaults.
+func (v ChallengeSettings) WithDefaults() ChallengeSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
 	return v
 }
 
@@ -465,6 +1277,76 @@ func (v ClientRegistrationSettings) WithDefaults() ClientRegistrationSettings {
 	}
 	if v.OpenDynamicClientRegistrationEnabled == nil {
 		v.OpenDynamicClientRegistrationEnabled = new(bool(false))
+	}
+	return v
+}
+
+// AutomationCookieSettings Session cookie settings of the application.
+type AutomationCookieSettings = CookieSettings
+
+// CookieSettings Session cookie settings of the application.
+type CookieSettings struct {
+	// Inherited Whether the cookie settings are inherited from the domain. When true, the other fields are ignored.
+	Inherited *bool `json:"inherited,omitempty"`
+
+	// Session Session cookie settings.
+	Session *AutomationSessionSettings `json:"session,omitempty"`
+}
+
+// WithDefaults returns a copy of CookieSettings with unset fields set to their OpenAPI defaults.
+func (v CookieSettings) WithDefaults() CookieSettings {
+	if v.Inherited == nil {
+		v.Inherited = new(bool(true))
+	}
+	if v.Session != nil {
+		withDefaults := v.Session.WithDefaults()
+		v.Session = &withDefaults
+	}
+	return v
+}
+
+// AutomationCrossAppAccessResourceServer A resource server this application may request an ID-JAG for.
+type AutomationCrossAppAccessResourceServer = CrossAppAccessResourceServer
+
+// CrossAppAccessResourceServer A resource server this application may request an ID-JAG for.
+type CrossAppAccessResourceServer struct {
+	// ClientId Identifier this application is registered with at the resource authorization server.
+	//
+	// Example: acme-calendar-client
+	ClientId *string `json:"clientId,omitempty"`
+
+	// ResourceServerId Resource server of the trusted domain, as id:<uuid> (a key is rejected with 400).
+	//
+	// Example: id:7a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d
+	ResourceServerId *string `json:"resourceServerId,omitempty"`
+
+	// TrustDomainId Trusted domain the resource server belongs to, as id:<uuid> (a key is rejected with 400). A hint used to resolve the resource server; the resource server reference remains authoritative.
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	TrustDomainId *string `json:"trustDomainId,omitempty"`
+}
+
+// WithDefaults returns a copy of CrossAppAccessResourceServer with unset fields set to their OpenAPI defaults.
+func (v CrossAppAccessResourceServer) WithDefaults() CrossAppAccessResourceServer {
+	return v
+}
+
+// AutomationCrossAppAccessSettings Resource servers this application may request an ID-JAG for.
+type AutomationCrossAppAccessSettings = CrossAppAccessSettings
+
+// CrossAppAccessSettings Resource servers this application may request an ID-JAG for.
+type CrossAppAccessSettings struct {
+	// Enabled Whether this application participates in Cross App Access.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// ResourceServers Resource servers this application may reach, one entry per resource server.
+	ResourceServers *[]AutomationCrossAppAccessResourceServer `json:"resourceServers,omitempty"`
+}
+
+// WithDefaults returns a copy of CrossAppAccessSettings with unset fields set to their OpenAPI defaults.
+func (v CrossAppAccessSettings) WithDefaults() CrossAppAccessSettings {
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
 	}
 	return v
 }
@@ -713,6 +1595,95 @@ func (v Domain) WithDefaults() Domain {
 	return v
 }
 
+// AutomationEnrollSettings When users are asked to enroll a factor.
+type AutomationEnrollSettings = EnrollSettings
+
+// AutomationEnrollSettingsType optional: users can skip the enrollment. required: users must enroll. conditional: enrollment required unless enrollmentRule evaluates to true.
+//
+// Example: required
+type AutomationEnrollSettingsType string
+
+// EnrollSettings When users are asked to enroll a factor.
+type EnrollSettings struct {
+	// Active Whether users are asked to enroll a factor.
+	Active *bool `json:"active,omitempty"`
+
+	// EnrollmentRule Expression Language rule of a conditional enrollment: when it evaluates to true, the enrollment is skipped.
+	//
+	// Example: {#context.attributes['user'].roles.contains('guest')}
+	EnrollmentRule *string `json:"enrollmentRule,omitempty"`
+
+	// EnrollmentSkipActive Whether users can skip the enrollment.
+	EnrollmentSkipActive *bool `json:"enrollmentSkipActive,omitempty"`
+
+	// EnrollmentSkipRule Expression Language rule: when it evaluates to true, users can skip the enrollment.
+	EnrollmentSkipRule *string `json:"enrollmentSkipRule,omitempty"`
+
+	// ForceEnrollment Whether users must enroll a factor.
+	ForceEnrollment *bool `json:"forceEnrollment,omitempty"`
+
+	// SkipTimeSeconds Duration, in seconds, during which a skipped enrollment is not asked again.
+	//
+	// Example: 36000
+	SkipTimeSeconds *int64 `json:"skipTimeSeconds,omitempty"`
+
+	// Type optional: users can skip the enrollment. required: users must enroll. conditional: enrollment required unless enrollmentRule evaluates to true.
+	//
+	// Example: required
+	Type *AutomationEnrollSettingsType `json:"type,omitempty"`
+}
+
+// WithDefaults returns a copy of EnrollSettings with unset fields set to their OpenAPI defaults.
+func (v EnrollSettings) WithDefaults() EnrollSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
+	if v.EnrollmentSkipActive == nil {
+		v.EnrollmentSkipActive = new(bool(false))
+	}
+	return v
+}
+
+// AutomationEnrollmentSettings Deprecated: use enroll. Legacy enrollment settings.
+type AutomationEnrollmentSettings = EnrollmentSettings
+
+// EnrollmentSettings Deprecated: use enroll. Legacy enrollment settings.
+//
+// Deprecated: this type has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+type EnrollmentSettings struct {
+	// ForceEnrollment Whether users must enroll a factor.
+	ForceEnrollment *bool `json:"forceEnrollment,omitempty"`
+
+	// SkipTimeSeconds Duration, in seconds, during which users can skip the enrollment.
+	//
+	// Example: 36000
+	SkipTimeSeconds *int64 `json:"skipTimeSeconds,omitempty"`
+}
+
+// WithDefaults returns a copy of EnrollmentSettings with unset fields set to their OpenAPI defaults.
+func (v EnrollmentSettings) WithDefaults() EnrollmentSettings {
+	return v
+}
+
+// AutomationFactorSettings Factors offered to the users of the application.
+type AutomationFactorSettings = FactorSettings
+
+// FactorSettings Factors offered to the users of the application.
+type FactorSettings struct {
+	// ApplicationFactors Factors available to the application.
+	ApplicationFactors *[]AutomationApplicationFactorSettings `json:"applicationFactors,omitempty"`
+
+	// DefaultFactorId Factor proposed first, as id:<uuid> (factors have no Automation API endpoint).
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	DefaultFactorId *string `json:"defaultFactorId,omitempty"`
+}
+
+// WithDefaults returns a copy of FactorSettings with unset fields set to their OpenAPI defaults.
+func (v FactorSettings) WithDefaults() FactorSettings {
+	return v
+}
+
 // AutomationIdentityProvider An identity provider managed under a domain by the Automation API. The key field is the stable, immutable identity used for idempotent create-or-update.
 type AutomationIdentityProvider = IdentityProvider
 
@@ -791,6 +1762,71 @@ func (v IdentityProvider) WithDefaults() IdentityProvider {
 	return v
 }
 
+// AutomationMfaSettings Multi-factor authentication settings of the application.
+type AutomationMfaSettings = MfaSettings
+
+// MfaSettings Multi-factor authentication settings of the application.
+type MfaSettings struct {
+	// AdaptiveAuthenticationRule Deprecated: use challenge.challengeRule. Expression Language rule of the adaptive authentication.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	AdaptiveAuthenticationRule *string `json:"adaptiveAuthenticationRule,omitempty"`
+
+	// Challenge When users are challenged for a second factor.
+	Challenge *AutomationChallengeSettings `json:"challenge,omitempty"`
+
+	// Enroll When users are asked to enroll a factor.
+	Enroll *AutomationEnrollSettings `json:"enroll,omitempty"`
+
+	// Enrollment Deprecated: use enroll. Legacy enrollment settings.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Enrollment *AutomationEnrollmentSettings `json:"enrollment,omitempty"`
+
+	// Factor Factors offered to the users of the application.
+	Factor *AutomationFactorSettings `json:"factor,omitempty"`
+
+	// LoginRule Legacy MFA login rule, kept for round-trip fidelity. Use challenge and enroll to configure when MFA applies.
+	LoginRule *string `json:"loginRule,omitempty"`
+
+	// RememberDevice Remember device: skips the MFA challenge on a device already used to authenticate.
+	RememberDevice *AutomationRememberDeviceSettings `json:"rememberDevice,omitempty"`
+
+	// StepUpAuthentication Step-up authentication: asks for MFA again during a session when its rule matches.
+	StepUpAuthentication *AutomationStepUpAuthenticationSettings `json:"stepUpAuthentication,omitempty"`
+
+	// StepUpAuthenticationRule Deprecated: use stepUpAuthentication. Expression Language rule triggering step-up authentication.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	StepUpAuthenticationRule *string `json:"stepUpAuthenticationRule,omitempty"`
+}
+
+// WithDefaults returns a copy of MfaSettings with unset fields set to their OpenAPI defaults.
+func (v MfaSettings) WithDefaults() MfaSettings {
+	if v.Challenge != nil {
+		withDefaults := v.Challenge.WithDefaults()
+		v.Challenge = &withDefaults
+	}
+	if v.Enroll != nil {
+		withDefaults := v.Enroll.WithDefaults()
+		v.Enroll = &withDefaults
+	}
+	if v.Enrollment != nil {
+		withDefaults := v.Enrollment.WithDefaults()
+		v.Enrollment = &withDefaults
+	}
+	if v.Factor != nil {
+		withDefaults := v.Factor.WithDefaults()
+		v.Factor = &withDefaults
+	}
+	if v.RememberDevice != nil {
+		withDefaults := v.RememberDevice.WithDefaults()
+		v.RememberDevice = &withDefaults
+	}
+	if v.StepUpAuthentication != nil {
+		withDefaults := v.StepUpAuthentication.WithDefaults()
+		v.StepUpAuthentication = &withDefaults
+	}
+	return v
+}
+
 // AutomationOidcSettings OpenID Connect settings for the domain. CIMD (client identity metadata document) settings are not exposed by the Automation API and are reset on update.
 type AutomationOidcSettings = OidcSettings
 
@@ -838,6 +1874,39 @@ func (v OidcSettings) WithDefaults() OidcSettings {
 	if v.WorkloadIdentitySettings != nil {
 		withDefaults := v.WorkloadIdentitySettings.WithDefaults()
 		v.WorkloadIdentitySettings = &withDefaults
+	}
+	return v
+}
+
+// AutomationRememberDeviceSettings Remember device: skips the MFA challenge on a device already used to authenticate.
+type AutomationRememberDeviceSettings = RememberDeviceSettings
+
+// RememberDeviceSettings Remember device: skips the MFA challenge on a device already used to authenticate.
+type RememberDeviceSettings struct {
+	// Active Whether remember device is enabled.
+	Active *bool `json:"active,omitempty"`
+
+	// DeviceIdentifierId Device identifier used to recognize devices, as id:<uuid> (device identifiers have no Automation API endpoint).
+	//
+	// Example: id:5e8f1c0a-2b3d-4f5e-8a9b-0c1d2e3f4a5b
+	DeviceIdentifierId *string `json:"deviceIdentifierId,omitempty"`
+
+	// ExpirationTimeSeconds Duration, in seconds, for which a device is remembered.
+	//
+	// Example: 36000
+	ExpirationTimeSeconds *int64 `json:"expirationTimeSeconds,omitempty"`
+
+	// SkipRememberDevice Only used with a conditional MFA challenge: when true, remember device is not applied when the MFA condition evaluates to no risk.
+	SkipRememberDevice *bool `json:"skipRememberDevice,omitempty"`
+}
+
+// WithDefaults returns a copy of RememberDeviceSettings with unset fields set to their OpenAPI defaults.
+func (v RememberDeviceSettings) WithDefaults() RememberDeviceSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
+	if v.SkipRememberDevice == nil {
+		v.SkipRememberDevice = new(bool(false))
 	}
 	return v
 }
@@ -903,12 +1972,71 @@ func (v Reporter) WithDefaults() Reporter {
 	return v
 }
 
+// AutomationRiskAssessmentSettings Risk assessment of the authentication attempts, used by risk-based MFA. Effective only with the Enterprise Edition risk assessment plugin.
+type AutomationRiskAssessmentSettings = RiskAssessmentSettings
+
+// RiskAssessmentSettings Risk assessment of the authentication attempts, used by risk-based MFA. Effective only with the Enterprise Edition risk assessment plugin.
+type RiskAssessmentSettings struct {
+	// DeviceAssessment Settings of one risk assessment.
+	DeviceAssessment *AutomationAssessmentSettings `json:"deviceAssessment,omitempty"`
+
+	// Enabled Whether risk assessment is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// GeoVelocityAssessment Settings of one risk assessment.
+	GeoVelocityAssessment *AutomationAssessmentSettings `json:"geoVelocityAssessment,omitempty"`
+
+	// IpReputationAssessment Settings of one risk assessment.
+	IpReputationAssessment *AutomationAssessmentSettings `json:"ipReputationAssessment,omitempty"`
+}
+
+// WithDefaults returns a copy of RiskAssessmentSettings with unset fields set to their OpenAPI defaults.
+func (v RiskAssessmentSettings) WithDefaults() RiskAssessmentSettings {
+	if v.DeviceAssessment != nil {
+		withDefaults := v.DeviceAssessment.WithDefaults()
+		v.DeviceAssessment = &withDefaults
+	}
+	if v.Enabled == nil {
+		v.Enabled = new(bool(false))
+	}
+	if v.GeoVelocityAssessment != nil {
+		withDefaults := v.GeoVelocityAssessment.WithDefaults()
+		v.GeoVelocityAssessment = &withDefaults
+	}
+	if v.IpReputationAssessment != nil {
+		withDefaults := v.IpReputationAssessment.WithDefaults()
+		v.IpReputationAssessment = &withDefaults
+	}
+	return v
+}
+
+// AutomationSamlAssertionAttribute A custom attribute of the SAML assertion.
+type AutomationSamlAssertionAttribute = SamlAssertionAttribute
+
+// SamlAssertionAttribute A custom attribute of the SAML assertion.
+type SamlAssertionAttribute struct {
+	// Name Name of the SAML attribute.
+	//
+	// Example: email
+	Name string `json:"name"`
+
+	// Value Expression Language expression resolved to the attribute value.
+	//
+	// Example: {#context.attributes['user'].email}
+	Value string `json:"value"`
+}
+
+// WithDefaults returns a copy of SamlAssertionAttribute with unset fields set to their OpenAPI defaults.
+func (v SamlAssertionAttribute) WithDefaults() SamlAssertionAttribute {
+	return v
+}
+
 // AutomationSamlSettings Settings for the domain acting as a SAML 2.0 identity provider (IdP).
 type AutomationSamlSettings = SamlSettings
 
 // SamlSettings Settings for the domain acting as a SAML 2.0 identity provider (IdP).
 type SamlSettings struct {
-	// Certificate Key of a certificate managed under this domain, used to sign SAML responses. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever a certificate with that key exists.
+	// Certificate Certificate signing SAML responses: the key of a certificate of the domain, or id:<uuid> when the reference was not set by the Automation API. The reference is not checked against existing certificates: it can name one created after the domain or since deleted, and resolves whenever that certificate exists.
 	//
 	// Example: signing-cert
 	Certificate *string `json:"certificate,omitempty"`
@@ -926,6 +2054,160 @@ type SamlSettings struct {
 func (v SamlSettings) WithDefaults() SamlSettings {
 	if v.Enabled == nil {
 		v.Enabled = new(bool(false))
+	}
+	return v
+}
+
+// AutomationScopeSettings A scope the application can request, with its settings.
+type AutomationScopeSettings = ScopeSettings
+
+// ScopeSettings A scope the application can request, with its settings.
+type ScopeSettings struct {
+	// DefaultScope Whether the scope is granted when the authorization request carries no scope parameter.
+	DefaultScope *bool `json:"defaultScope,omitempty"`
+
+	// RequiredScope Whether the user cannot deselect this scope on the consent page.
+	RequiredScope *bool `json:"requiredScope,omitempty"`
+
+	// Scope Key of a scope of the domain. The scope must exist, otherwise the request is rejected with 400.
+	//
+	// Example: openid
+	Scope string `json:"scope"`
+
+	// ScopeApproval Duration, in seconds, of the user consent to this scope. When absent, the domain scope setting applies.
+	//
+	// Example: 86400
+	ScopeApproval *int32 `json:"scopeApproval,omitempty"`
+}
+
+// WithDefaults returns a copy of ScopeSettings with unset fields set to their OpenAPI defaults.
+func (v ScopeSettings) WithDefaults() ScopeSettings {
+	if v.DefaultScope == nil {
+		v.DefaultScope = new(bool(false))
+	}
+	if v.RequiredScope == nil {
+		v.RequiredScope = new(bool(false))
+	}
+	return v
+}
+
+// AutomationSessionSettings Session cookie settings.
+type AutomationSessionSettings = SessionSettings
+
+// SessionSettings Session cookie settings.
+type SessionSettings struct {
+	// Persistent Whether the session cookie is persistent (kept after the browser is closed) rather than a session cookie.
+	Persistent *bool `json:"persistent,omitempty"`
+}
+
+// WithDefaults returns a copy of SessionSettings with unset fields set to their OpenAPI defaults.
+func (v SessionSettings) WithDefaults() SessionSettings {
+	if v.Persistent == nil {
+		v.Persistent = new(bool(false))
+	}
+	return v
+}
+
+// AutomationStepUpAuthenticationSettings Step-up authentication: asks for MFA again during a session when its rule matches.
+type AutomationStepUpAuthenticationSettings = StepUpAuthenticationSettings
+
+// StepUpAuthenticationSettings Step-up authentication: asks for MFA again during a session when its rule matches.
+type StepUpAuthenticationSettings struct {
+	// Active Whether step-up authentication is enabled.
+	Active *bool `json:"active,omitempty"`
+
+	// StepUpAuthenticationRule Expression Language rule: when it evaluates to true, the user is challenged again.
+	//
+	// Example: {#request.params['scope'][0].contains('write')}
+	StepUpAuthenticationRule *string `json:"stepUpAuthenticationRule,omitempty"`
+}
+
+// WithDefaults returns a copy of StepUpAuthenticationSettings with unset fields set to their OpenAPI defaults.
+func (v StepUpAuthenticationSettings) WithDefaults() StepUpAuthenticationSettings {
+	if v.Active == nil {
+		v.Active = new(bool(false))
+	}
+	return v
+}
+
+// AutomationTokenClaim A custom claim added to the tokens issued to the application.
+type AutomationTokenClaim = TokenClaim
+
+// AutomationTokenClaimTokenType Token the claim is added to.
+//
+// Example: access_token
+type AutomationTokenClaimTokenType string
+
+// TokenClaim A custom claim added to the tokens issued to the application.
+type TokenClaim struct {
+	// ClaimName Name of the claim.
+	//
+	// Example: department
+	ClaimName string `json:"claimName"`
+
+	// ClaimValue Value of the claim: a literal or an Expression Language expression.
+	//
+	// Example: {#context.attributes['user']['additionalInformation']['department']}
+	ClaimValue string `json:"claimValue"`
+
+	// TokenType Token the claim is added to.
+	//
+	// Example: access_token
+	TokenType AutomationTokenClaimTokenType `json:"tokenType"`
+}
+
+// WithDefaults returns a copy of TokenClaim with unset fields set to their OpenAPI defaults.
+func (v TokenClaim) WithDefaults() TokenClaim {
+	return v
+}
+
+// AutomationUserInfoClaim A custom claim added to the UserInfo responses of the application.
+type AutomationUserInfoClaim = UserInfoClaim
+
+// UserInfoClaim A custom claim added to the UserInfo responses of the application.
+type UserInfoClaim struct {
+	// ClaimName Name of the claim.
+	//
+	// Example: department
+	ClaimName string `json:"claimName"`
+
+	// ClaimValue Value of the claim: a literal or an Expression Language expression.
+	//
+	// Example: {#context.attributes['user']['additionalInformation']['department']}
+	ClaimValue string `json:"claimValue"`
+}
+
+// WithDefaults returns a copy of UserInfoClaim with unset fields set to their OpenAPI defaults.
+func (v UserInfoClaim) WithDefaults() UserInfoClaim {
+	return v
+}
+
+// AutomationWorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
+type AutomationWorkloadIdentitySettings = WorkloadIdentitySettings
+
+// AutomationWorkloadIdentitySettingsSubjectMatchMode How subject is matched against the SVID sub claim. exact (default) requires equality. prefix is only allowed for hosted_delegated or autonomous agent applications: subject must end with / and the SVID sub is accepted when it starts with subject; the full SVID SPIFFE ID then becomes the per-instance act.sub in minted tokens.
+type AutomationWorkloadIdentitySettingsSubjectMatchMode string
+
+// WorkloadIdentitySettings SPIFFE workload identity the application authenticates with (JWT-SVID client authentication).
+type WorkloadIdentitySettings struct {
+	// Subject SPIFFE ID expected in the SVID sub claim, interpreted per subjectMatchMode.
+	//
+	// Example: spiffe://prod.example.org/ns/payments/sa/api
+	Subject *string `json:"subject,omitempty"`
+
+	// SubjectMatchMode How subject is matched against the SVID sub claim. exact (default) requires equality. prefix is only allowed for hosted_delegated or autonomous agent applications: subject must end with / and the SVID sub is accepted when it starts with subject; the full SVID SPIFFE ID then becomes the per-instance act.sub in minted tokens.
+	SubjectMatchMode *AutomationWorkloadIdentitySettingsSubjectMatchMode `json:"subjectMatchMode,omitempty"`
+
+	// TrustDomain Name of the trusted domain this application authenticates against.
+	//
+	// Example: prod.example.org
+	TrustDomain *string `json:"trustDomain,omitempty"`
+}
+
+// WithDefaults returns a copy of WorkloadIdentitySettings with unset fields set to their OpenAPI defaults.
+func (v WorkloadIdentitySettings) WithDefaults() WorkloadIdentitySettings {
+	if v.SubjectMatchMode == nil {
+		v.SubjectMatchMode = new(AutomationWorkloadIdentitySettingsSubjectMatchMode("exact"))
 	}
 	return v
 }
@@ -1788,6 +3070,12 @@ type UpsertDomainParams struct {
 	DryRun *bool `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
+// UpsertApplicationParams defines parameters for UpsertApplication.
+type UpsertApplicationParams struct {
+	// DryRun When true, validates the payload without persisting. The returned application includes a dryRunErrors field.
+	DryRun *bool `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
 // UpsertCertificateParams defines parameters for UpsertCertificate.
 type UpsertCertificateParams struct {
 	// DryRun When true, validates the payload without persisting. The returned certificate includes a dryRunErrors field.
@@ -1811,6 +3099,9 @@ type UpsertDataPlaneJSONRequestBody = AutomationDataPlane
 
 // UpsertDomainJSONRequestBody defines body for UpsertDomain for application/json ContentType.
 type UpsertDomainJSONRequestBody = AutomationDomain
+
+// UpsertApplicationJSONRequestBody defines body for UpsertApplication for application/json ContentType.
+type UpsertApplicationJSONRequestBody = AutomationApplication
 
 // UpsertCertificateJSONRequestBody defines body for UpsertCertificate for application/json ContentType.
 type UpsertCertificateJSONRequestBody = AutomationCertificate
@@ -1847,6 +3138,18 @@ type ServerInterface interface {
 	// GetDomain Get a domain
 	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey})
 	GetDomain(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string)
+	// ListApplications List a domain's applications
+	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications)
+	ListApplications(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string)
+	// UpsertApplication Create or update an application
+	// (PUT /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications)
+	UpsertApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, params UpsertApplicationParams)
+	// DeleteApplication Delete an application
+	// (DELETE /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey})
+	DeleteApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, applicationKey string)
+	// GetApplication Get an application
+	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey})
+	GetApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, applicationKey string)
 	// ListCertificates List a domain's certificates
 	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates)
 	ListCertificates(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string)
@@ -1934,6 +3237,30 @@ func (_ Unimplemented) DeleteDomain(w http.ResponseWriter, r *http.Request, orgI
 // GetDomain Get a domain
 // (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey})
 func (_ Unimplemented) GetDomain(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListApplications List a domain's applications
+// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications)
+func (_ Unimplemented) ListApplications(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpsertApplication Create or update an application
+// (PUT /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications)
+func (_ Unimplemented) UpsertApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, params UpsertApplicationParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DeleteApplication Delete an application
+// (DELETE /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey})
+func (_ Unimplemented) DeleteApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, applicationKey string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetApplication Get an application
+// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey})
+func (_ Unimplemented) GetApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, applicationKey string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2341,6 +3668,216 @@ func (siw *ServerInterfaceWrapper) GetDomain(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetDomain(w, r, orgId, envId, domainKey)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListApplications operation middleware
+func (siw *ServerInterfaceWrapper) ListApplications(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "orgId" -------------
+	var orgId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "orgId", chi.URLParam(r, "orgId"), &orgId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "orgId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "envId" -------------
+	var envId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "envId", chi.URLParam(r, "envId"), &envId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "envId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "domainKey" -------------
+	var domainKey string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "domainKey", chi.URLParam(r, "domainKey"), &domainKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "domainKey", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListApplications(w, r, orgId, envId, domainKey)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpsertApplication operation middleware
+func (siw *ServerInterfaceWrapper) UpsertApplication(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "orgId" -------------
+	var orgId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "orgId", chi.URLParam(r, "orgId"), &orgId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "orgId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "envId" -------------
+	var envId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "envId", chi.URLParam(r, "envId"), &envId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "envId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "domainKey" -------------
+	var domainKey string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "domainKey", chi.URLParam(r, "domainKey"), &domainKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "domainKey", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params UpsertApplicationParams
+
+	// ------------- Optional query parameter "dryRun" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "dryRun", r.URL.Query(), &params.DryRun, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "dryRun"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "dryRun", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpsertApplication(w, r, orgId, envId, domainKey, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteApplication operation middleware
+func (siw *ServerInterfaceWrapper) DeleteApplication(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "orgId" -------------
+	var orgId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "orgId", chi.URLParam(r, "orgId"), &orgId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "orgId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "envId" -------------
+	var envId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "envId", chi.URLParam(r, "envId"), &envId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "envId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "domainKey" -------------
+	var domainKey string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "domainKey", chi.URLParam(r, "domainKey"), &domainKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "domainKey", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "applicationKey" -------------
+	var applicationKey string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "applicationKey", chi.URLParam(r, "applicationKey"), &applicationKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "applicationKey", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteApplication(w, r, orgId, envId, domainKey, applicationKey)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetApplication operation middleware
+func (siw *ServerInterfaceWrapper) GetApplication(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "orgId" -------------
+	var orgId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "orgId", chi.URLParam(r, "orgId"), &orgId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "orgId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "envId" -------------
+	var envId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "envId", chi.URLParam(r, "envId"), &envId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "envId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "domainKey" -------------
+	var domainKey string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "domainKey", chi.URLParam(r, "domainKey"), &domainKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "domainKey", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "applicationKey" -------------
+	var applicationKey string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "applicationKey", chi.URLParam(r, "applicationKey"), &applicationKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "applicationKey", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetApplication(w, r, orgId, envId, domainKey, applicationKey)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3118,6 +4655,18 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/organizations/{orgId}/environments/{envId}/domains/{domainKey}", wrapper.GetDomain)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications", wrapper.ListApplications)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications", wrapper.UpsertApplication)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}", wrapper.DeleteApplication)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}", wrapper.GetApplication)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates", wrapper.ListCertificates)
 	})
 	r.Group(func(r chi.Router) {
@@ -3586,6 +5135,229 @@ func (response GetDomain403JSONResponse) VisitGetDomainResponse(w http.ResponseW
 type GetDomain404JSONResponse Error
 
 func (response GetDomain404JSONResponse) VisitGetDomainResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListApplicationsRequestObject struct {
+	OrgId     string `json:"orgId"`
+	EnvId     string `json:"envId"`
+	DomainKey string `json:"domainKey"`
+}
+
+type ListApplicationsResponseObject interface {
+	VisitListApplicationsResponse(w http.ResponseWriter) error
+}
+
+type ListApplications200JSONResponse []AutomationApplication
+
+func (response ListApplications200JSONResponse) VisitListApplicationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListApplications403JSONResponse Error
+
+func (response ListApplications403JSONResponse) VisitListApplicationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListApplications404JSONResponse Error
+
+func (response ListApplications404JSONResponse) VisitListApplicationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpsertApplicationRequestObject struct {
+	OrgId     string `json:"orgId"`
+	EnvId     string `json:"envId"`
+	DomainKey string `json:"domainKey"`
+	Params    UpsertApplicationParams
+	Body      *UpsertApplicationJSONRequestBody
+}
+
+type UpsertApplicationResponseObject interface {
+	VisitUpsertApplicationResponse(w http.ResponseWriter) error
+}
+
+type UpsertApplication200JSONResponse AutomationApplication
+
+func (response UpsertApplication200JSONResponse) VisitUpsertApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpsertApplication400JSONResponse Error
+
+func (response UpsertApplication400JSONResponse) VisitUpsertApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpsertApplication403JSONResponse Error
+
+func (response UpsertApplication403JSONResponse) VisitUpsertApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpsertApplication404JSONResponse Error
+
+func (response UpsertApplication404JSONResponse) VisitUpsertApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteApplicationRequestObject struct {
+	OrgId          string `json:"orgId"`
+	EnvId          string `json:"envId"`
+	DomainKey      string `json:"domainKey"`
+	ApplicationKey string `json:"applicationKey"`
+}
+
+type DeleteApplicationResponseObject interface {
+	VisitDeleteApplicationResponse(w http.ResponseWriter) error
+}
+
+type DeleteApplication204Response struct {
+}
+
+func (response DeleteApplication204Response) VisitDeleteApplicationResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteApplication403JSONResponse Error
+
+func (response DeleteApplication403JSONResponse) VisitDeleteApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteApplicationdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response DeleteApplicationdefaultJSONResponse) VisitDeleteApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetApplicationRequestObject struct {
+	OrgId          string `json:"orgId"`
+	EnvId          string `json:"envId"`
+	DomainKey      string `json:"domainKey"`
+	ApplicationKey string `json:"applicationKey"`
+}
+
+type GetApplicationResponseObject interface {
+	VisitGetApplicationResponse(w http.ResponseWriter) error
+}
+
+type GetApplication200JSONResponse AutomationApplication
+
+func (response GetApplication200JSONResponse) VisitGetApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetApplication403JSONResponse Error
+
+func (response GetApplication403JSONResponse) VisitGetApplicationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetApplication404JSONResponse Error
+
+func (response GetApplication404JSONResponse) VisitGetApplicationResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response); err != nil {
@@ -4292,6 +6064,18 @@ type StrictServerInterface interface {
 	// GetDomain Get a domain
 	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey})
 	GetDomain(ctx context.Context, request GetDomainRequestObject) (GetDomainResponseObject, error)
+	// ListApplications List a domain's applications
+	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications)
+	ListApplications(ctx context.Context, request ListApplicationsRequestObject) (ListApplicationsResponseObject, error)
+	// UpsertApplication Create or update an application
+	// (PUT /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications)
+	UpsertApplication(ctx context.Context, request UpsertApplicationRequestObject) (UpsertApplicationResponseObject, error)
+	// DeleteApplication Delete an application
+	// (DELETE /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey})
+	DeleteApplication(ctx context.Context, request DeleteApplicationRequestObject) (DeleteApplicationResponseObject, error)
+	// GetApplication Get an application
+	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey})
+	GetApplication(ctx context.Context, request GetApplicationRequestObject) (GetApplicationResponseObject, error)
 	// ListCertificates List a domain's certificates
 	// (GET /organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates)
 	ListCertificates(ctx context.Context, request ListCertificatesRequestObject) (ListCertificatesResponseObject, error)
@@ -4597,6 +6381,128 @@ func (sh *strictHandler) GetDomain(w http.ResponseWriter, r *http.Request, orgId
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetDomainResponseObject); ok {
 		if err := validResponse.VisitGetDomainResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListApplications operation middleware
+func (sh *strictHandler) ListApplications(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string) {
+	var request ListApplicationsRequestObject
+
+	request.OrgId = orgId
+	request.EnvId = envId
+	request.DomainKey = domainKey
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListApplications(ctx, request.(ListApplicationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListApplications")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListApplicationsResponseObject); ok {
+		if err := validResponse.VisitListApplicationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpsertApplication operation middleware
+func (sh *strictHandler) UpsertApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, params UpsertApplicationParams) {
+	var request UpsertApplicationRequestObject
+
+	request.OrgId = orgId
+	request.EnvId = envId
+	request.DomainKey = domainKey
+	request.Params = params
+
+	var body UpsertApplicationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpsertApplication(ctx, request.(UpsertApplicationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpsertApplication")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpsertApplicationResponseObject); ok {
+		if err := validResponse.VisitUpsertApplicationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteApplication operation middleware
+func (sh *strictHandler) DeleteApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, applicationKey string) {
+	var request DeleteApplicationRequestObject
+
+	request.OrgId = orgId
+	request.EnvId = envId
+	request.DomainKey = domainKey
+	request.ApplicationKey = applicationKey
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteApplication(ctx, request.(DeleteApplicationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteApplication")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteApplicationResponseObject); ok {
+		if err := validResponse.VisitDeleteApplicationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetApplication operation middleware
+func (sh *strictHandler) GetApplication(w http.ResponseWriter, r *http.Request, orgId string, envId string, domainKey string, applicationKey string) {
+	var request GetApplicationRequestObject
+
+	request.OrgId = orgId
+	request.EnvId = envId
+	request.DomainKey = domainKey
+	request.ApplicationKey = applicationKey
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetApplication(ctx, request.(GetApplicationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetApplication")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetApplicationResponseObject); ok {
+		if err := validResponse.VisitGetApplicationResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4975,255 +6881,384 @@ func (sh *strictHandler) GetReporter(w http.ResponseWriter, r *http.Request, org
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"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",
-	"7vb/BAAA//8=",
+	"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",
+	"0TVLY2fe6tJ9evfp/wsAAP//",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,
