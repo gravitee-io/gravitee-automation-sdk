@@ -527,7 +527,7 @@ type Application struct {
 	Name string `json:"name"`
 
 	// Settings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
-	Settings *AutomationApplicationSettings `json:"settings,omitempty"`
+	Settings *AutomationApplicationSettings `drift:"ignore-remote-default" json:"settings,omitempty"`
 
 	// Template Whether the application is a registration template for dynamic client registration rather than an active application.
 	Template *bool `json:"template,omitempty"`
@@ -795,7 +795,7 @@ type ApplicationOAuthSettings struct {
 	TokenEndpointAuthSigningAlg *string `json:"tokenEndpointAuthSigningAlg,omitempty"`
 
 	// TokenExchangeOAuthSettings OAuth-specific token-exchange behavior, such as how scopes are handled, with optional inheritance from domain defaults.
-	TokenExchangeOAuthSettings *TokenExchangeOAuthSettings `json:"tokenExchangeOAuthSettings,omitempty"`
+	TokenExchangeOAuthSettings *TokenExchangeOAuthSettings `drift:"ignore-remote-default" json:"tokenExchangeOAuthSettings,omitempty"`
 
 	// TosUri URL of the application terms of service.
 	TosUri *string `json:"tosUri,omitempty"`
@@ -967,22 +967,22 @@ type AutomationApplicationSettings = ApplicationSettings
 // ApplicationSettings Settings of the application. The login, account and cookieSettings blocks, when omitted, are inherited from the domain; any other omitted block is unset.
 type ApplicationSettings struct {
 	// Account User account settings for the domain: brute-force protection, registration, password reset, remember-me, and MFA challenge behavior.
-	Account *AutomationAccountSettings `json:"account,omitempty"`
+	Account *AutomationAccountSettings `drift:"ignore-remote-default" json:"account,omitempty"`
 
 	// Advanced Advanced application settings.
-	Advanced *AutomationAdvancedSettings `json:"advanced,omitempty"`
+	Advanced *AutomationAdvancedSettings `drift:"ignore-remote-default" json:"advanced,omitempty"`
 
 	// CookieSettings Session cookie settings of the application.
-	CookieSettings *AutomationCookieSettings `json:"cookieSettings,omitempty"`
+	CookieSettings *AutomationCookieSettings `drift:"ignore-remote-default" json:"cookieSettings,omitempty"`
 
 	// Login Configuration of the domain's login flow and the features offered on the sign-in page.
-	Login *LoginSettings `json:"login,omitempty"`
+	Login *LoginSettings `drift:"ignore-remote-default" json:"login,omitempty"`
 
 	// Mfa Multi-factor authentication settings of the application.
 	Mfa *AutomationMfaSettings `json:"mfa,omitempty"`
 
 	// Oauth OAuth 2.0 and OpenID Connect settings of the application. Fields described as computed are filled in by AM when omitted. tokenExchangeOAuthSettings, when omitted, is inherited from the domain.
-	Oauth *AutomationApplicationOAuthSettings `json:"oauth,omitempty"`
+	Oauth *AutomationApplicationOAuthSettings `drift:"ignore-remote-default" json:"oauth,omitempty"`
 
 	// RiskAssessment Risk assessment of the authentication attempts, used by risk-based MFA. Effective only with the Enterprise Edition risk assessment plugin.
 	RiskAssessment *AutomationRiskAssessmentSettings `json:"riskAssessment,omitempty"`

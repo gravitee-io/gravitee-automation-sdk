@@ -46,6 +46,36 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: ignore-remote-default
+  # Blocks AM stores and returns when omitted (inherited from the domain or computed): accept the remote value until the CRD
+  # declares the block.
+  - target: $.components.schemas.AutomationApplication.properties.settings
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationSettings.properties.oauth
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationSettings.properties.login
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationSettings.properties.account
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationSettings.properties.cookieSettings
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationSettings.properties.advanced
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationApplicationOAuthSettings.properties.tokenExchangeOAuthSettings
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
   - target: $.components.schemas.SpiffeDomainSettings.properties.defaultAllowedAlgorithms
     update:
       x-oapi-codegen-extra-tags:
