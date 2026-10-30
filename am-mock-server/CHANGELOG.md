@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.3.3...am-mock-server/v1.4.0) (2026-10-30)
+
+
+### Features
+
+* **am-mock-server:** serve domain-scoped applications ([1060511](https://github.com/gravitee-io/gravitee-automation-sdk/commit/10605117d12bdcf85a8ad705ac38342a11e3ee10))
+* **am-sdk:** generate Application client and models ([b8ef312](https://github.com/gravitee-io/gravitee-automation-sdk/commit/b8ef3125f1e999e747ee57fd25b0146b28910533))
+
+
+### Bug Fixes
+
+* **deps:** bump am-sdk to v2.4.0 ([5ac2371](https://github.com/gravitee-io/gravitee-automation-sdk/commit/5ac23710297916ac389f79e4dd5c84ae9e7d011c))
+* prefix new enums, leave computed PKCE flags unset, reject AM 400 cases in the mock ([8ae74d5](https://github.com/gravitee-io/gravitee-automation-sdk/commit/8ae74d52e2ca36673e9d745942d4f82159e68fe9))
+
 ## [1.3.3](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.3.2...am-mock-server/v1.3.3) (2026-10-08)
 
 
