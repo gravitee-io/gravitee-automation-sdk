@@ -23,6 +23,15 @@ func (v {{.TypeName}}) WithDefaults() {{.TypeName}} {
 		v.{{.GoFieldName}} = {{printf "%#v" $d}}
 	}
 {{- end}}
+{{- else if and .Schema.ArrayType (or .Schema.ArrayType.RefType .Schema.ArrayType.DefineViaAlias) .Schema.ArrayType.OAPISchema.Properties}}
+{{- $type := .GoTypeDef}}{{if .HasOptionalPointer}}{{$type = slice .GoTypeDef 1}}{{end}}
+	if v.{{.GoFieldName}} != nil {
+		items := make({{$type}}, len({{if .HasOptionalPointer}}*{{end}}v.{{.GoFieldName}}))
+		for i, item := range {{if .HasOptionalPointer}}*{{end}}v.{{.GoFieldName}} {
+			items[i] = item.WithDefaults()
+		}
+		v.{{.GoFieldName}} = {{if .HasOptionalPointer}}&{{end}}items
+	}
 {{- else if .Schema.OAPISchema.Properties}}
 {{- if .HasOptionalPointer}}
 	if v.{{.GoFieldName}} != nil {

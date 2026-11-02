@@ -447,6 +447,13 @@ func (v AccountSettings) WithDefaults() AccountSettings {
 	if v.ResetPasswordCustomForm == nil {
 		v.ResetPasswordCustomForm = new(bool(false))
 	}
+	if v.ResetPasswordCustomFormFields != nil {
+		items := make([]FormField, len(*v.ResetPasswordCustomFormFields))
+		for i, item := range *v.ResetPasswordCustomFormFields {
+			items[i] = item.WithDefaults()
+		}
+		v.ResetPasswordCustomFormFields = &items
+	}
 	if v.ResetPasswordInvalidateTokens == nil {
 		v.ResetPasswordInvalidateTokens = new(bool(false))
 	}
@@ -557,8 +564,22 @@ type Application struct {
 
 // WithDefaults returns a copy of Application with unset fields set to their OpenAPI defaults.
 func (v Application) WithDefaults() Application {
+	if v.DryRunErrors != nil {
+		items := make([]DryRunError, len(*v.DryRunErrors))
+		for i, item := range *v.DryRunErrors {
+			items[i] = item.WithDefaults()
+		}
+		v.DryRunErrors = &items
+	}
 	if v.Enabled == nil {
 		v.Enabled = new(bool(true))
+	}
+	if v.IdentityProviders != nil {
+		items := make([]AutomationApplicationIdentityProvider, len(*v.IdentityProviders))
+		for i, item := range *v.IdentityProviders {
+			items[i] = item.WithDefaults()
+		}
+		v.IdentityProviders = &items
 	}
 	if v.Settings != nil {
 		withDefaults := v.Settings.WithDefaults()
@@ -864,6 +885,13 @@ func (v ApplicationOAuthSettings) WithDefaults() ApplicationOAuthSettings {
 	if v.RequireAuthTime == nil {
 		v.RequireAuthTime = new(bool(false))
 	}
+	if v.ScopeSettings != nil {
+		items := make([]AutomationScopeSettings, len(*v.ScopeSettings))
+		for i, item := range *v.ScopeSettings {
+			items[i] = item.WithDefaults()
+		}
+		v.ScopeSettings = &items
+	}
 	if v.SilentReAuthentication == nil {
 		v.SilentReAuthentication = new(bool(false))
 	}
@@ -873,9 +901,23 @@ func (v ApplicationOAuthSettings) WithDefaults() ApplicationOAuthSettings {
 	if v.TlsClientCertificateBoundAccessTokens == nil {
 		v.TlsClientCertificateBoundAccessTokens = new(bool(false))
 	}
+	if v.TokenCustomClaims != nil {
+		items := make([]AutomationTokenClaim, len(*v.TokenCustomClaims))
+		for i, item := range *v.TokenCustomClaims {
+			items[i] = item.WithDefaults()
+		}
+		v.TokenCustomClaims = &items
+	}
 	if v.TokenExchangeOAuthSettings != nil {
 		withDefaults := v.TokenExchangeOAuthSettings.WithDefaults()
 		v.TokenExchangeOAuthSettings = &withDefaults
+	}
+	if v.UserinfoCustomClaims != nil {
+		items := make([]AutomationUserInfoClaim, len(*v.UserinfoCustomClaims))
+		for i, item := range *v.UserinfoCustomClaims {
+			items[i] = item.WithDefaults()
+		}
+		v.UserinfoCustomClaims = &items
 	}
 	return v
 }
@@ -957,6 +999,13 @@ type ApplicationSAMLSettings struct {
 
 // WithDefaults returns a copy of ApplicationSAMLSettings with unset fields set to their OpenAPI defaults.
 func (v ApplicationSAMLSettings) WithDefaults() ApplicationSAMLSettings {
+	if v.AssertionAttributes != nil {
+		items := make([]AutomationSamlAssertionAttribute, len(*v.AssertionAttributes))
+		for i, item := range *v.AssertionAttributes {
+			items[i] = item.WithDefaults()
+		}
+		v.AssertionAttributes = &items
+	}
 	if v.IncludeAssertionConditions == nil {
 		v.IncludeAssertionConditions = new(bool(false))
 	}
@@ -1156,6 +1205,13 @@ type Certificate struct {
 
 // WithDefaults returns a copy of Certificate with unset fields set to their OpenAPI defaults.
 func (v Certificate) WithDefaults() Certificate {
+	if v.DryRunErrors != nil {
+		items := make([]DryRunError, len(*v.DryRunErrors))
+		for i, item := range *v.DryRunErrors {
+			items[i] = item.WithDefaults()
+		}
+		v.DryRunErrors = &items
+	}
 	if v.System == nil {
 		v.System = new(bool(false))
 	}
@@ -1341,6 +1397,13 @@ type CrossAppAccessSettings struct {
 func (v CrossAppAccessSettings) WithDefaults() CrossAppAccessSettings {
 	if v.Enabled == nil {
 		v.Enabled = new(bool(false))
+	}
+	if v.ResourceServers != nil {
+		items := make([]AutomationCrossAppAccessResourceServer, len(*v.ResourceServers))
+		for i, item := range *v.ResourceServers {
+			items[i] = item.WithDefaults()
+		}
+		v.ResourceServers = &items
 	}
 	return v
 }
@@ -1529,6 +1592,13 @@ func (v Domain) WithDefaults() Domain {
 		withDefaults := v.CorsSettings.WithDefaults()
 		v.CorsSettings = &withDefaults
 	}
+	if v.DryRunErrors != nil {
+		items := make([]DryRunError, len(*v.DryRunErrors))
+		for i, item := range *v.DryRunErrors {
+			items[i] = item.WithDefaults()
+		}
+		v.DryRunErrors = &items
+	}
 	if v.Enabled == nil {
 		v.Enabled = new(bool(true))
 	}
@@ -1577,6 +1647,13 @@ func (v Domain) WithDefaults() Domain {
 	}
 	if v.VhostMode == nil {
 		v.VhostMode = new(bool(false))
+	}
+	if v.Vhosts != nil {
+		items := make([]VirtualHost, len(*v.Vhosts))
+		for i, item := range *v.Vhosts {
+			items[i] = item.WithDefaults()
+		}
+		v.Vhosts = &items
 	}
 	if v.WebAuthnSettings != nil {
 		withDefaults := v.WebAuthnSettings.WithDefaults()
@@ -1675,6 +1752,13 @@ type FactorSettings struct {
 
 // WithDefaults returns a copy of FactorSettings with unset fields set to their OpenAPI defaults.
 func (v FactorSettings) WithDefaults() FactorSettings {
+	if v.ApplicationFactors != nil {
+		items := make([]AutomationApplicationFactorSettings, len(*v.ApplicationFactors))
+		for i, item := range *v.ApplicationFactors {
+			items[i] = item.WithDefaults()
+		}
+		v.ApplicationFactors = &items
+	}
 	return v
 }
 
@@ -1737,6 +1821,13 @@ func (v IdentityProvider) WithDefaults() IdentityProvider {
 	if v.DomainWhitelist == nil {
 		value := []string{}
 		v.DomainWhitelist = &value
+	}
+	if v.DryRunErrors != nil {
+		items := make([]DryRunError, len(*v.DryRunErrors))
+		for i, item := range *v.DryRunErrors {
+			items[i] = item.WithDefaults()
+		}
+		v.DryRunErrors = &items
 	}
 	if v.GroupMapper == nil {
 		value := map[string][]string{}
@@ -1957,6 +2048,20 @@ type Reporter struct {
 
 // WithDefaults returns a copy of Reporter with unset fields set to their OpenAPI defaults.
 func (v Reporter) WithDefaults() Reporter {
+	if v.AttributeMappings != nil {
+		items := make([]ReporterAttributeMapping, len(*v.AttributeMappings))
+		for i, item := range *v.AttributeMappings {
+			items[i] = item.WithDefaults()
+		}
+		v.AttributeMappings = &items
+	}
+	if v.DryRunErrors != nil {
+		items := make([]DryRunError, len(*v.DryRunErrors))
+		for i, item := range *v.DryRunErrors {
+			items[i] = item.WithDefaults()
+		}
+		v.DryRunErrors = &items
+	}
 	if v.Enabled == nil {
 		v.Enabled = new(bool(true))
 	}
@@ -2803,6 +2908,13 @@ func (v TokenExchangeSettings) WithDefaults() TokenExchangeSettings {
 		withDefaults := v.TokenExchangeOAuthSettings.WithDefaults()
 		v.TokenExchangeOAuthSettings = &withDefaults
 	}
+	if v.TrustedIssuers != nil {
+		items := make([]TrustedIssuer, len(*v.TrustedIssuers))
+		for i, item := range *v.TrustedIssuers {
+			items[i] = item.WithDefaults()
+		}
+		v.TrustedIssuers = &items
+	}
 	return v
 }
 
@@ -2838,6 +2950,13 @@ type TrustedIssuer struct {
 
 // WithDefaults returns a copy of TrustedIssuer with unset fields set to their OpenAPI defaults.
 func (v TrustedIssuer) WithDefaults() TrustedIssuer {
+	if v.UserBindingCriteria != nil {
+		items := make([]UserBindingCriterion, len(*v.UserBindingCriteria))
+		for i, item := range *v.UserBindingCriteria {
+			items[i] = item.WithDefaults()
+		}
+		v.UserBindingCriteria = &items
+	}
 	if v.UserBindingEnabled == nil {
 		v.UserBindingEnabled = new(bool(false))
 	}
