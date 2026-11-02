@@ -18,6 +18,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gravitee-io/gravitee-automation-sdk/am-sdk/v2/pkg/sdk"
@@ -38,6 +39,19 @@ func TestDryRunPut_NoRejectReturnsEmptyAndDoesNotPersist(t *testing.T) {
 
 	_, exists := defaultTenant(am).Domains.Get("test")
 	assert.False(t, exists)
+}
+
+func TestDryRunPut_NoRejectEchoesPayloadLargerThan512Bytes(t *testing.T) {
+	_, srv := createAMServer(t)
+	body := Domain{Key: "test", Name: "Test domain", Path: "/test", Description: new(strings.Repeat("a", 1024))}
+
+	resp := httpPut(t, domainsURL(srv)+"?dryRun=true", body)
+	defer resp.Body.Close()
+	failOnNotOK(t, resp)
+
+	got, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.JSONEq(t, encode(t, body).String(), string(got))
 }
 
 func TestDryRunPut_DoesNotPersist(t *testing.T) {

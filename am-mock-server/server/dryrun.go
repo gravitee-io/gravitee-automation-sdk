@@ -35,8 +35,14 @@ func DryRun(reject bool) func(http.Handler) http.Handler {
 				return
 			}
 			if !reject {
+				// Read the whole body first: HTTP/1.x stops reading the request once the response starts.
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
 				w.Header().Set("Content-Type", "application/json")
-				_, _ = io.Copy(w, r.Body)
+				_, _ = w.Write(body)
 				return
 			}
 			var payload map[string]any
