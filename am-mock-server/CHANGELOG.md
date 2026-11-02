@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.4.0...am-mock-server/v1.4.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **am-mock-server:** echo the whole dry-run payload ([8bec8ef](https://github.com/gravitee-io/gravitee-automation-sdk/commit/8bec8efa10221dd0a6f3ad4b5991825ce6182f16))
+* **am-sdk:** fill OpenAPI defaults inside list items in WithDefaults ([a62a130](https://github.com/gravitee-io/gravitee-automation-sdk/commit/a62a13031870a8c3a40bd35eeb776d8c12617c50))
+* **deps:** bump am-sdk to v2.4.1 ([277f0bc](https://github.com/gravitee-io/gravitee-automation-sdk/commit/277f0bc9805eaed37d04282899948456b7cc9245))
+
 ## [1.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.3.3...am-mock-server/v1.4.0) (2026-10-30)
 
 
