@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.4.0...am-sdk/v2.4.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **am-sdk:** fill OpenAPI defaults inside list items in WithDefaults ([a62a130](https://github.com/gravitee-io/gravitee-automation-sdk/commit/a62a13031870a8c3a40bd35eeb776d8c12617c50))
+
 ## [2.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.3.4...am-sdk/v2.4.0) (2026-10-30)
 
 
