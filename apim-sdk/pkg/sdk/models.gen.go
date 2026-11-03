@@ -6686,7 +6686,8 @@ type SharedPolicyGroup struct {
 	// Examples: the resource cache "my-cache" is required
 	PrerequisiteMessage *string `json:"prerequisiteMessage,omitempty"`
 
-	// Steps SharedPolicyGroup Steps
+	// Steps SharedPolicyGroup Steps.
+	// A GET returns them only to a caller with the `SHARED_POLICY_GROUP` `UPDATE` permission on the environment.
 	Steps []StepV4 `drift:"empty-is-nil" json:"steps,omitempty"`
 }
 
@@ -6738,7 +6739,8 @@ type SharedPolicyGroupState struct {
 	// Examples: the resource cache "my-cache" is required
 	PrerequisiteMessage *string `json:"prerequisiteMessage,omitempty"`
 
-	// Steps SharedPolicyGroup Steps
+	// Steps SharedPolicyGroup Steps.
+	// A GET returns them only to a caller with the `SHARED_POLICY_GROUP` `UPDATE` permission on the environment.
 	Steps []StepV4 `drift:"empty-is-nil" json:"steps,omitempty"`
 }
 
@@ -7130,6 +7132,12 @@ type ApiHridParam = string
 // DryRunQueryParam Examples: true
 type DryRunQueryParam = bool
 
+// HridContainsApiUUIDQueryParam defines model for hridContainsApiUUIDQueryParam.
+type HridContainsApiUUIDQueryParam = bool
+
+// HridContainsAppUUIDQueryParam defines model for hridContainsAppUUIDQueryParam.
+type HridContainsAppUUIDQueryParam = bool
+
 // HridContainsUUIDQueryParam defines model for hridContainsUUIDQueryParam.
 type HridContainsUUIDQueryParam = bool
 
@@ -7144,6 +7152,9 @@ type IgnoreMembersQueryParam = bool
 
 // PortalHridParam Examples: default-portal
 type PortalHridParam = string
+
+// SetHridHeaderParam defines model for setHridHeaderParam.
+type SetHridHeaderParam = bool
 
 // AimError An error returned by the Automation API when a request could not be served.
 type AimError = AimHttpError
@@ -7212,6 +7223,70 @@ type UpsertApiLinkParams struct {
 	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
 	// the state of the underlying spec.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
+// UpsertApiSubscriptionParams defines parameters for UpsertApiSubscription.
+type UpsertApiSubscriptionParams struct {
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
+
+	// HridContainsApiUUID When true, the apiHrid path value (and, on create or update, the spec's planHrid) is treated as an
+	// existing UUID rather than a human-readable identifier. This is to support backward compatibility for
+	// resources created before migration to the automation API and should not be used for new resources.
+	HridContainsApiUUID *HridContainsApiUUIDQueryParam `form:"hridContainsApiUUID,omitempty" json:"hridContainsApiUUID,omitempty"`
+
+	// HridContainsAppUUID When true, the spec's applicationHrid is treated as an existing UUID rather than a human-readable
+	// identifier. This is to support backward compatibility for resources created before migration to the
+	// automation API and should not be used for new resources.
+	HridContainsAppUUID *HridContainsAppUUIDQueryParam `form:"hridContainsAppUUID,omitempty" json:"hridContainsAppUUID,omitempty"`
+}
+
+// DeleteApiSubscriptionParams defines parameters for DeleteApiSubscription.
+type DeleteApiSubscriptionParams struct {
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
+
+	// HridContainsApiUUID When true, the apiHrid path value (and, on create or update, the spec's planHrid) is treated as an
+	// existing UUID rather than a human-readable identifier. This is to support backward compatibility for
+	// resources created before migration to the automation API and should not be used for new resources.
+	HridContainsApiUUID *HridContainsApiUUIDQueryParam `form:"hridContainsApiUUID,omitempty" json:"hridContainsApiUUID,omitempty"`
+}
+
+// GetApiSubscriptionParams defines parameters for GetApiSubscription.
+type GetApiSubscriptionParams struct {
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
+
+	// HridContainsApiUUID When true, the apiHrid path value (and, on create or update, the spec's planHrid) is treated as an
+	// existing UUID rather than a human-readable identifier. This is to support backward compatibility for
+	// resources created before migration to the automation API and should not be used for new resources.
+	HridContainsApiUUID *HridContainsApiUUIDQueryParam `form:"hridContainsApiUUID,omitempty" json:"hridContainsApiUUID,omitempty"`
+}
+
+// DeleteApiParams defines parameters for DeleteApi.
+type DeleteApiParams struct {
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
+}
+
+// GetApiParams defines parameters for GetApi.
+type GetApiParams struct {
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
+
+	// XGraviteeSetHrid When true, the HRID path value is treated as an existing UUID (like hridContainsUUID), and the returned
+	// HRIDs are generated from names: the API's when missing or a UUID, its pages' and plans' always.
+	XGraviteeSetHrid *SetHridHeaderParam `json:"X-Gravitee-Set-Hrid,omitempty"`
 }
 
 // UpsertApplicationParams defines parameters for UpsertApplication.

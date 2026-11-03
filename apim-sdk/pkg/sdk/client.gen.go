@@ -336,7 +336,7 @@ type ClientInterface interface {
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-	UpsertApiSubscriptionWithBody(ctx context.Context, apiHrid ApiHridParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UpsertApiSubscriptionWithBody(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UpsertApiSubscription Create or update API Subscriptions from Subscription Spec
 	//
@@ -345,35 +345,35 @@ type ClientInterface interface {
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-	UpsertApiSubscription(ctx context.Context, apiHrid ApiHridParam, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UpsertApiSubscription(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteApiSubscription Delete an API subscription
 	//
 	// Delete an API subscription using HRID.
 	//
 	// Corresponds with DELETE /apis/{apiHrid}/subscriptions/{hrid} (the `DeleteApiSubscription` operationId).
-	DeleteApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+	DeleteApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *DeleteApiSubscriptionParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetApiSubscription Get one API subscription
 	//
 	// Get an API subscription using HRID.
 	//
 	// Corresponds with GET /apis/{apiHrid}/subscriptions/{hrid} (the `GetApiSubscription` operationId).
-	GetApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *GetApiSubscriptionParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteApi Delete one API
 	//
 	// Delete an API using it's HRID.
 	//
 	// Corresponds with DELETE /apis/{hrid} (the `DeleteApi` operationId).
-	DeleteApi(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+	DeleteApi(ctx context.Context, hrid HridParam, params *DeleteApiParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetApi Get one API
 	//
 	// Get an API using HRID.
 	//
 	// Corresponds with GET /apis/{hrid} (the `GetApi` operationId).
-	GetApi(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetApi(ctx context.Context, hrid HridParam, params *GetApiParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UpsertApplicationWithBody Create or update Applications from ApplicationSpec
 	//
@@ -1056,8 +1056,8 @@ func (c *Client) GetApiLink(ctx context.Context, apiHrid ApiHridParam, hrid Hrid
 // Takes any type of body and a specified content type.
 //
 // Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-func (c *Client) UpsertApiSubscriptionWithBody(ctx context.Context, apiHrid ApiHridParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpsertApiSubscriptionRequestWithBody(c.Server, apiHrid, contentType, body)
+func (c *Client) UpsertApiSubscriptionWithBody(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertApiSubscriptionRequestWithBody(c.Server, apiHrid, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1075,8 +1075,8 @@ func (c *Client) UpsertApiSubscriptionWithBody(ctx context.Context, apiHrid ApiH
 // Takes a body of the `application/json` content type.
 //
 // Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-func (c *Client) UpsertApiSubscription(ctx context.Context, apiHrid ApiHridParam, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpsertApiSubscriptionRequest(c.Server, apiHrid, body)
+func (c *Client) UpsertApiSubscription(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertApiSubscriptionRequest(c.Server, apiHrid, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1092,8 +1092,8 @@ func (c *Client) UpsertApiSubscription(ctx context.Context, apiHrid ApiHridParam
 // Delete an API subscription using HRID.
 //
 // Corresponds with DELETE /apis/{apiHrid}/subscriptions/{hrid} (the `DeleteApiSubscription` operationId).
-func (c *Client) DeleteApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteApiSubscriptionRequest(c.Server, apiHrid, hrid)
+func (c *Client) DeleteApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *DeleteApiSubscriptionParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteApiSubscriptionRequest(c.Server, apiHrid, hrid, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1109,8 +1109,8 @@ func (c *Client) DeleteApiSubscription(ctx context.Context, apiHrid ApiHridParam
 // Get an API subscription using HRID.
 //
 // Corresponds with GET /apis/{apiHrid}/subscriptions/{hrid} (the `GetApiSubscription` operationId).
-func (c *Client) GetApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetApiSubscriptionRequest(c.Server, apiHrid, hrid)
+func (c *Client) GetApiSubscription(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *GetApiSubscriptionParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApiSubscriptionRequest(c.Server, apiHrid, hrid, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1126,8 +1126,8 @@ func (c *Client) GetApiSubscription(ctx context.Context, apiHrid ApiHridParam, h
 // Delete an API using it's HRID.
 //
 // Corresponds with DELETE /apis/{hrid} (the `DeleteApi` operationId).
-func (c *Client) DeleteApi(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteApiRequest(c.Server, hrid)
+func (c *Client) DeleteApi(ctx context.Context, hrid HridParam, params *DeleteApiParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteApiRequest(c.Server, hrid, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1143,8 +1143,8 @@ func (c *Client) DeleteApi(ctx context.Context, hrid HridParam, reqEditors ...Re
 // Get an API using HRID.
 //
 // Corresponds with GET /apis/{hrid} (the `GetApi` operationId).
-func (c *Client) GetApi(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetApiRequest(c.Server, hrid)
+func (c *Client) GetApi(ctx context.Context, hrid HridParam, params *GetApiParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApiRequest(c.Server, hrid, params)
 	if err != nil {
 		return nil, err
 	}
@@ -2465,18 +2465,18 @@ func NewGetApiLinkRequest(server string, apiHrid ApiHridParam, hrid HridParam) (
 }
 
 // NewUpsertApiSubscriptionRequest calls the generic UpsertApiSubscription builder with application/json body
-func NewUpsertApiSubscriptionRequest(server string, apiHrid ApiHridParam, body UpsertApiSubscriptionJSONRequestBody) (*http.Request, error) {
+func NewUpsertApiSubscriptionRequest(server string, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, body UpsertApiSubscriptionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpsertApiSubscriptionRequestWithBody(server, apiHrid, "application/json", bodyReader)
+	return NewUpsertApiSubscriptionRequestWithBody(server, apiHrid, params, "application/json", bodyReader)
 }
 
 // NewUpsertApiSubscriptionRequestWithBody constructs an http.Request for the UpsertApiSubscription method, with any body, and a specified content type
-func NewUpsertApiSubscriptionRequestWithBody(server string, apiHrid ApiHridParam, contentType string, body io.Reader) (*http.Request, error) {
+func NewUpsertApiSubscriptionRequestWithBody(server string, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2501,6 +2501,57 @@ func NewUpsertApiSubscriptionRequestWithBody(server string, apiHrid ApiHridParam
 		return nil, err
 	}
 
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.HridContainsApiUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsApiUUID", *params.HridContainsApiUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.HridContainsAppUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsAppUUID", *params.HridContainsAppUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
 	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
 	if err != nil {
 		return nil, err
@@ -2512,7 +2563,7 @@ func NewUpsertApiSubscriptionRequestWithBody(server string, apiHrid ApiHridParam
 }
 
 // NewDeleteApiSubscriptionRequest constructs an http.Request for the DeleteApiSubscription method
-func NewDeleteApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid HridParam) (*http.Request, error) {
+func NewDeleteApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid HridParam, params *DeleteApiSubscriptionParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2542,6 +2593,45 @@ func NewDeleteApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid H
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.HridContainsApiUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsApiUUID", *params.HridContainsApiUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
 	}
 
 	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
@@ -2553,7 +2643,7 @@ func NewDeleteApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid H
 }
 
 // NewGetApiSubscriptionRequest constructs an http.Request for the GetApiSubscription method
-func NewGetApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid HridParam) (*http.Request, error) {
+func NewGetApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid HridParam, params *GetApiSubscriptionParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2585,6 +2675,45 @@ func NewGetApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid Hrid
 		return nil, err
 	}
 
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.HridContainsApiUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsApiUUID", *params.HridContainsApiUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
 	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -2594,7 +2723,7 @@ func NewGetApiSubscriptionRequest(server string, apiHrid ApiHridParam, hrid Hrid
 }
 
 // NewDeleteApiRequest constructs an http.Request for the DeleteApi method
-func NewDeleteApiRequest(server string, hrid HridParam) (*http.Request, error) {
+func NewDeleteApiRequest(server string, hrid HridParam, params *DeleteApiParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2617,6 +2746,33 @@ func NewDeleteApiRequest(server string, hrid HridParam) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
 	}
 
 	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
@@ -2628,7 +2784,7 @@ func NewDeleteApiRequest(server string, hrid HridParam) (*http.Request, error) {
 }
 
 // NewGetApiRequest constructs an http.Request for the GetApi method
-func NewGetApiRequest(server string, hrid HridParam) (*http.Request, error) {
+func NewGetApiRequest(server string, hrid HridParam, params *GetApiParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2653,9 +2809,51 @@ func NewGetApiRequest(server string, hrid HridParam) (*http.Request, error) {
 		return nil, err
 	}
 
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
 	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+
+		if params.XGraviteeSetHrid != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "X-Gravitee-Set-Hrid", *params.XGraviteeSetHrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "boolean", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("X-Gravitee-Set-Hrid", headerParam0)
+		}
+
 	}
 
 	return req, nil
@@ -4328,7 +4526,7 @@ type ClientWithResponsesInterface interface {
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-	UpsertApiSubscriptionWithBodyWithResponse(ctx context.Context, apiHrid ApiHridParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error)
+	UpsertApiSubscriptionWithBodyWithResponse(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error)
 
 	// UpsertApiSubscriptionWithResponse Create or update API Subscriptions from Subscription Spec
 	//
@@ -4337,7 +4535,7 @@ type ClientWithResponsesInterface interface {
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-	UpsertApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error)
+	UpsertApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error)
 
 	// DeleteApiSubscriptionWithResponse Delete an API subscription
 	//
@@ -4346,7 +4544,7 @@ type ClientWithResponsesInterface interface {
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /apis/{apiHrid}/subscriptions/{hrid} (the `DeleteApiSubscription` operationId).
-	DeleteApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*DeleteApiSubscriptionResponse, error)
+	DeleteApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *DeleteApiSubscriptionParams, reqEditors ...RequestEditorFn) (*DeleteApiSubscriptionResponse, error)
 
 	// GetApiSubscriptionWithResponse Get one API subscription
 	//
@@ -4355,7 +4553,7 @@ type ClientWithResponsesInterface interface {
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /apis/{apiHrid}/subscriptions/{hrid} (the `GetApiSubscription` operationId).
-	GetApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*GetApiSubscriptionResponse, error)
+	GetApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *GetApiSubscriptionParams, reqEditors ...RequestEditorFn) (*GetApiSubscriptionResponse, error)
 
 	// DeleteApiWithResponse Delete one API
 	//
@@ -4364,7 +4562,7 @@ type ClientWithResponsesInterface interface {
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /apis/{hrid} (the `DeleteApi` operationId).
-	DeleteApiWithResponse(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*DeleteApiResponse, error)
+	DeleteApiWithResponse(ctx context.Context, hrid HridParam, params *DeleteApiParams, reqEditors ...RequestEditorFn) (*DeleteApiResponse, error)
 
 	// GetApiWithResponse Get one API
 	//
@@ -4373,7 +4571,7 @@ type ClientWithResponsesInterface interface {
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /apis/{hrid} (the `GetApi` operationId).
-	GetApiWithResponse(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*GetApiResponse, error)
+	GetApiWithResponse(ctx context.Context, hrid HridParam, params *GetApiParams, reqEditors ...RequestEditorFn) (*GetApiResponse, error)
 
 	// UpsertApplicationWithBodyWithResponse Create or update Applications from ApplicationSpec
 	//
@@ -5594,6 +5792,8 @@ type UpsertApiSubscriptionResponse struct {
 	JSON401 *Unauthenticated
 	// JSON403 the response for an HTTP 403 `application/json` response
 	JSON403 *Unauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *NotFound
 	// JSONDefault the response for an HTTP default `application/json` response
 	JSONDefault *Error
 }
@@ -5616,6 +5816,11 @@ func (r UpsertApiSubscriptionResponse) GetJSON401() *Unauthenticated {
 // GetJSON403 returns the response for an HTTP 403 `application/json` response
 func (r UpsertApiSubscriptionResponse) GetJSON403() *Unauthorized {
 	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r UpsertApiSubscriptionResponse) GetJSON404() *NotFound {
+	return r.JSON404
 }
 
 // GetJSONDefault returns the response for an HTTP default `application/json` response
@@ -8078,8 +8283,8 @@ func (c *ClientWithResponses) GetApiLinkWithResponse(ctx context.Context, apiHri
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
 // Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-func (c *ClientWithResponses) UpsertApiSubscriptionWithBodyWithResponse(ctx context.Context, apiHrid ApiHridParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error) {
-	rsp, err := c.UpsertApiSubscriptionWithBody(ctx, apiHrid, contentType, body, reqEditors...)
+func (c *ClientWithResponses) UpsertApiSubscriptionWithBodyWithResponse(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error) {
+	rsp, err := c.UpsertApiSubscriptionWithBody(ctx, apiHrid, params, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8093,8 +8298,8 @@ func (c *ClientWithResponses) UpsertApiSubscriptionWithBodyWithResponse(ctx cont
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
 // Corresponds with PUT /apis/{apiHrid}/subscriptions (the `UpsertApiSubscription` operationId).
-func (c *ClientWithResponses) UpsertApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error) {
-	rsp, err := c.UpsertApiSubscription(ctx, apiHrid, body, reqEditors...)
+func (c *ClientWithResponses) UpsertApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, params *UpsertApiSubscriptionParams, body UpsertApiSubscriptionJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertApiSubscriptionResponse, error) {
+	rsp, err := c.UpsertApiSubscription(ctx, apiHrid, params, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8108,8 +8313,8 @@ func (c *ClientWithResponses) UpsertApiSubscriptionWithResponse(ctx context.Cont
 // Returns a wrapper object for the known response body format(s).
 //
 // Corresponds with DELETE /apis/{apiHrid}/subscriptions/{hrid} (the `DeleteApiSubscription` operationId).
-func (c *ClientWithResponses) DeleteApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*DeleteApiSubscriptionResponse, error) {
-	rsp, err := c.DeleteApiSubscription(ctx, apiHrid, hrid, reqEditors...)
+func (c *ClientWithResponses) DeleteApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *DeleteApiSubscriptionParams, reqEditors ...RequestEditorFn) (*DeleteApiSubscriptionResponse, error) {
+	rsp, err := c.DeleteApiSubscription(ctx, apiHrid, hrid, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8123,8 +8328,8 @@ func (c *ClientWithResponses) DeleteApiSubscriptionWithResponse(ctx context.Cont
 // Returns a wrapper object for the known response body format(s).
 //
 // Corresponds with GET /apis/{apiHrid}/subscriptions/{hrid} (the `GetApiSubscription` operationId).
-func (c *ClientWithResponses) GetApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, reqEditors ...RequestEditorFn) (*GetApiSubscriptionResponse, error) {
-	rsp, err := c.GetApiSubscription(ctx, apiHrid, hrid, reqEditors...)
+func (c *ClientWithResponses) GetApiSubscriptionWithResponse(ctx context.Context, apiHrid ApiHridParam, hrid HridParam, params *GetApiSubscriptionParams, reqEditors ...RequestEditorFn) (*GetApiSubscriptionResponse, error) {
+	rsp, err := c.GetApiSubscription(ctx, apiHrid, hrid, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8138,8 +8343,8 @@ func (c *ClientWithResponses) GetApiSubscriptionWithResponse(ctx context.Context
 // Returns a wrapper object for the known response body format(s).
 //
 // Corresponds with DELETE /apis/{hrid} (the `DeleteApi` operationId).
-func (c *ClientWithResponses) DeleteApiWithResponse(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*DeleteApiResponse, error) {
-	rsp, err := c.DeleteApi(ctx, hrid, reqEditors...)
+func (c *ClientWithResponses) DeleteApiWithResponse(ctx context.Context, hrid HridParam, params *DeleteApiParams, reqEditors ...RequestEditorFn) (*DeleteApiResponse, error) {
+	rsp, err := c.DeleteApi(ctx, hrid, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8153,8 +8358,8 @@ func (c *ClientWithResponses) DeleteApiWithResponse(ctx context.Context, hrid Hr
 // Returns a wrapper object for the known response body format(s).
 //
 // Corresponds with GET /apis/{hrid} (the `GetApi` operationId).
-func (c *ClientWithResponses) GetApiWithResponse(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*GetApiResponse, error) {
-	rsp, err := c.GetApi(ctx, hrid, reqEditors...)
+func (c *ClientWithResponses) GetApiWithResponse(ctx context.Context, hrid HridParam, params *GetApiParams, reqEditors ...RequestEditorFn) (*GetApiResponse, error) {
+	rsp, err := c.GetApi(ctx, hrid, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -9442,6 +9647,13 @@ func ParseUpsertApiSubscriptionResponse(rsp *http.Response) (*UpsertApiSubscript
 			return nil, err
 		}
 		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
