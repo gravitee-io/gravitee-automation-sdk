@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.4.1...am-sdk/v2.5.0) (2026-11-03)
+
+
+### Features
+
+* **am-sdk:** generate ClientSecret client and models ([b95fd92](https://github.com/gravitee-io/gravitee-automation-sdk/commit/b95fd9254b1114d6d44b14b1657ea4f9ef263283))
+
 ## [2.4.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.4.0...am-sdk/v2.4.1) (2026-11-02)
 
 
