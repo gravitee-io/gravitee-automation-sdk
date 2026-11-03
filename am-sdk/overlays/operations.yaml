@@ -56,6 +56,19 @@ actions:
     update:
       operationId: deleteApplication
 
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets"].get
+    update:
+      operationId: listClientSecrets
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets"].put
+    update:
+      operationId: upsertClientSecret
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey}"].get
+    update:
+      operationId: getClientSecret
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey}"].delete
+    update:
+      operationId: deleteClientSecret
+
   - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates"].get
     update:
       operationId: listCertificates

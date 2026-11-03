@@ -241,6 +241,45 @@ type ClientInterface interface {
 	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey} (the `GetApplication` operationId).
 	GetApplication(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ListClientSecrets List an application's client secrets
+	//
+	// Returns the client secrets managed by the Automation API, sorted by key. Secrets created outside the Automation API (for example in the Console) are not returned; they can still be read and deleted by id:<uuid>. Secret values are never returned.
+	//
+	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets (the `ListClientSecrets` operationId).
+	ListClientSecrets(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertClientSecretWithBody Create or keep a client secret
+	//
+	// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+	UpsertClientSecretWithBody(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertClientSecret Create or keep a client secret
+	//
+	// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+	UpsertClientSecret(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, body UpsertClientSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteClientSecret Delete a client secret
+	//
+	// Deletes a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The gateway rejects the secret once it has synced the change. Deleting the last secret of an application is allowed. Deleting a secret that does not exist also returns 204.
+	//
+	// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `DeleteClientSecret` operationId).
+	DeleteClientSecret(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClientSecret Get a client secret
+	//
+	// Retrieves a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The value is never returned.
+	//
+	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `GetClientSecret` operationId).
+	GetClientSecret(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListCertificates List a domain's certificates
 	//
 	// Returns all certificates managed by the Automation API under the domain. Certificates created outside the Automation API are not returned.
@@ -616,6 +655,95 @@ func (c *Client) DeleteApplication(ctx context.Context, domainKey string, applic
 // Corresponds with GET /domains/{domainKey}/applications/{applicationKey} (the `GetApplication` operationId).
 func (c *Client) GetApplication(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetApplicationRequest(c.Server, domainKey, applicationKey)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListClientSecrets List an application's client secrets
+//
+// Returns the client secrets managed by the Automation API, sorted by key. Secrets created outside the Automation API (for example in the Console) are not returned; they can still be read and deleted by id:<uuid>. Secret values are never returned.
+//
+// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets (the `ListClientSecrets` operationId).
+func (c *Client) ListClientSecrets(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListClientSecretsRequest(c.Server, domainKey, applicationKey)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertClientSecretWithBody Create or keep a client secret
+//
+// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+func (c *Client) UpsertClientSecretWithBody(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertClientSecretRequestWithBody(c.Server, domainKey, applicationKey, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertClientSecret Create or keep a client secret
+//
+// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+func (c *Client) UpsertClientSecret(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, body UpsertClientSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertClientSecretRequest(c.Server, domainKey, applicationKey, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteClientSecret Delete a client secret
+//
+// Deletes a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The gateway rejects the secret once it has synced the change. Deleting the last secret of an application is allowed. Deleting a secret that does not exist also returns 204.
+//
+// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `DeleteClientSecret` operationId).
+func (c *Client) DeleteClientSecret(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteClientSecretRequest(c.Server, domainKey, applicationKey, secretKey)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetClientSecret Get a client secret
+//
+// Retrieves a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The value is never returned.
+//
+// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `GetClientSecret` operationId).
+func (c *Client) GetClientSecret(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClientSecretRequest(c.Server, domainKey, applicationKey, secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1363,6 +1491,224 @@ func NewGetApplicationRequest(server string, domainKey string, applicationKey st
 	}
 
 	operationPath := fmt.Sprintf("/domains/%s/applications/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewListClientSecretsRequest constructs an http.Request for the ListClientSecrets method
+func NewListClientSecretsRequest(server string, domainKey string, applicationKey string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "applicationKey", applicationKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications/%s/secrets", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpsertClientSecretRequest calls the generic UpsertClientSecret builder with application/json body
+func NewUpsertClientSecretRequest(server string, domainKey string, applicationKey string, params *UpsertClientSecretParams, body UpsertClientSecretJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpsertClientSecretRequestWithBody(server, domainKey, applicationKey, params, "application/json", bodyReader)
+}
+
+// NewUpsertClientSecretRequestWithBody constructs an http.Request for the UpsertClientSecret method, with any body, and a specified content type
+func NewUpsertClientSecretRequestWithBody(server string, domainKey string, applicationKey string, params *UpsertClientSecretParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "applicationKey", applicationKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications/%s/secrets", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteClientSecretRequest constructs an http.Request for the DeleteClientSecret method
+func NewDeleteClientSecretRequest(server string, domainKey string, applicationKey string, secretKey string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "applicationKey", applicationKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithOptions("simple", false, "secretKey", secretKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications/%s/secrets/%s", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClientSecretRequest constructs an http.Request for the GetClientSecret method
+func NewGetClientSecretRequest(server string, domainKey string, applicationKey string, secretKey string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "domainKey", domainKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "applicationKey", applicationKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithOptions("simple", false, "secretKey", secretKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/domains/%s/applications/%s/secrets/%s", pathParam0, pathParam1, pathParam2)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2129,6 +2475,51 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey} (the `GetApplication` operationId).
 	GetApplicationWithResponse(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*GetApplicationResponse, error)
 
+	// ListClientSecretsWithResponse List an application's client secrets
+	//
+	// Returns the client secrets managed by the Automation API, sorted by key. Secrets created outside the Automation API (for example in the Console) are not returned; they can still be read and deleted by id:<uuid>. Secret values are never returned.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets (the `ListClientSecrets` operationId).
+	ListClientSecretsWithResponse(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*ListClientSecretsResponse, error)
+
+	// UpsertClientSecretWithBodyWithResponse Create or keep a client secret
+	//
+	// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+	UpsertClientSecretWithBodyWithResponse(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertClientSecretResponse, error)
+
+	// UpsertClientSecretWithResponse Create or keep a client secret
+	//
+	// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+	UpsertClientSecretWithResponse(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, body UpsertClientSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertClientSecretResponse, error)
+
+	// DeleteClientSecretWithResponse Delete a client secret
+	//
+	// Deletes a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The gateway rejects the secret once it has synced the change. Deleting the last secret of an application is allowed. Deleting a secret that does not exist also returns 204.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `DeleteClientSecret` operationId).
+	DeleteClientSecretWithResponse(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*DeleteClientSecretResponse, error)
+
+	// GetClientSecretWithResponse Get a client secret
+	//
+	// Retrieves a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The value is never returned.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `GetClientSecret` operationId).
+	GetClientSecretWithResponse(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*GetClientSecretResponse, error)
+
 	// ListCertificatesWithResponse List a domain's certificates
 	//
 	// Returns all certificates managed by the Automation API under the domain. Certificates created outside the Automation API are not returned.
@@ -2771,6 +3162,8 @@ type UpsertApplicationResponse struct {
 	JSON403 *Error
 	// JSON404 the response for an HTTP 404 `application/json` response
 	JSON404 *Error
+	// JSON409 the response for an HTTP 409 `application/json` response
+	JSON409 *Error
 }
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
@@ -2791,6 +3184,11 @@ func (r UpsertApplicationResponse) GetJSON403() *Error {
 // GetJSON404 returns the response for an HTTP 404 `application/json` response
 func (r UpsertApplicationResponse) GetJSON404() *Error {
 	return r.JSON404
+}
+
+// GetJSON409 returns the response for an HTTP 409 `application/json` response
+func (r UpsertApplicationResponse) GetJSON409() *Error {
+	return r.JSON409
 }
 
 // GetBody returns the raw response body bytes
@@ -2919,6 +3317,233 @@ func (r GetApplicationResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r GetApplicationResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ListClientSecretsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *[]AutomationClientSecret
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *Error
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ListClientSecretsResponse) GetJSON200() *[]AutomationClientSecret {
+	return r.JSON200
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r ListClientSecretsResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r ListClientSecretsResponse) GetJSON404() *Error {
+	return r.JSON404
+}
+
+// GetBody returns the raw response body bytes
+func (r ListClientSecretsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ListClientSecretsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListClientSecretsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ListClientSecretsResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpsertClientSecretResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AutomationClientSecret
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *Error
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *Error
+	// JSON409 the response for an HTTP 409 `application/json` response
+	JSON409 *Error
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpsertClientSecretResponse) GetJSON200() *AutomationClientSecret {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r UpsertClientSecretResponse) GetJSON400() *Error {
+	return r.JSON400
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r UpsertClientSecretResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r UpsertClientSecretResponse) GetJSON404() *Error {
+	return r.JSON404
+}
+
+// GetJSON409 returns the response for an HTTP 409 `application/json` response
+func (r UpsertClientSecretResponse) GetJSON409() *Error {
+	return r.JSON409
+}
+
+// GetBody returns the raw response body bytes
+func (r UpsertClientSecretResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpsertClientSecretResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpsertClientSecretResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpsertClientSecretResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteClientSecretResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSON409 the response for an HTTP 409 `application/json` response
+	JSON409 *Error
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r DeleteClientSecretResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSON409 returns the response for an HTTP 409 `application/json` response
+func (r DeleteClientSecretResponse) GetJSON409() *Error {
+	return r.JSON409
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteClientSecretResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteClientSecretResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteClientSecretResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteClientSecretResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetClientSecretResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AutomationClientSecret
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *Error
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *Error
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetClientSecretResponse) GetJSON200() *AutomationClientSecret {
+	return r.JSON200
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r GetClientSecretResponse) GetJSON403() *Error {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r GetClientSecretResponse) GetJSON404() *Error {
+	return r.JSON404
+}
+
+// GetBody returns the raw response body bytes
+func (r GetClientSecretResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClientSecretResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClientSecretResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetClientSecretResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -3810,6 +4435,81 @@ func (c *ClientWithResponses) GetApplicationWithResponse(ctx context.Context, do
 	return ParseGetApplicationResponse(rsp)
 }
 
+// ListClientSecretsWithResponse List an application's client secrets
+//
+// Returns the client secrets managed by the Automation API, sorted by key. Secrets created outside the Automation API (for example in the Console) are not returned; they can still be read and deleted by id:<uuid>. Secret values are never returned.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets (the `ListClientSecrets` operationId).
+func (c *ClientWithResponses) ListClientSecretsWithResponse(ctx context.Context, domainKey string, applicationKey string, reqEditors ...RequestEditorFn) (*ListClientSecretsResponse, error) {
+	rsp, err := c.ListClientSecrets(ctx, domainKey, applicationKey, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListClientSecretsResponse(rsp)
+}
+
+// UpsertClientSecretWithBodyWithResponse Create or keep a client secret
+//
+// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+func (c *ClientWithResponses) UpsertClientSecretWithBodyWithResponse(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertClientSecretResponse, error) {
+	rsp, err := c.UpsertClientSecretWithBody(ctx, domainKey, applicationKey, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertClientSecretResponse(rsp)
+}
+
+// UpsertClientSecretWithResponse Create or keep a client secret
+//
+// Idempotent create. Uses the key field in the body to identify the secret within the application. On first apply the secret is created with the given value, and the gateway accepts it once it has synced the change. A secret is immutable: applying it again with the same value changes nothing, a different value is rejected with 400. To rotate a secret, create one with a new key, move the clients to it, then delete the old one. The value is never returned. The number of secrets of an application is limited (applications.secretsMax, 10 by default), secrets created in the Console included. The key is at most 64 characters. With BCrypt hashing the value is at most 72 bytes, and an unhashed value at most 374 characters. An application using client_secret_jwt stores its secrets unhashed. A secret created outside the Automation API can be addressed with key id:<uuid>: it is never created that way, only checked against the given value. When dryRun is true, the endpoint validates the payload without persisting; the returned secret carries a dryRunErrors list (absent on success, populated with validation errors otherwise).
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /domains/{domainKey}/applications/{applicationKey}/secrets (the `UpsertClientSecret` operationId).
+func (c *ClientWithResponses) UpsertClientSecretWithResponse(ctx context.Context, domainKey string, applicationKey string, params *UpsertClientSecretParams, body UpsertClientSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertClientSecretResponse, error) {
+	rsp, err := c.UpsertClientSecret(ctx, domainKey, applicationKey, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertClientSecretResponse(rsp)
+}
+
+// DeleteClientSecretWithResponse Delete a client secret
+//
+// Deletes a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The gateway rejects the secret once it has synced the change. Deleting the last secret of an application is allowed. Deleting a secret that does not exist also returns 204.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `DeleteClientSecret` operationId).
+func (c *ClientWithResponses) DeleteClientSecretWithResponse(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*DeleteClientSecretResponse, error) {
+	rsp, err := c.DeleteClientSecret(ctx, domainKey, applicationKey, secretKey, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteClientSecretResponse(rsp)
+}
+
+// GetClientSecretWithResponse Get a client secret
+//
+// Retrieves a client secret managed by the Automation API by its key, or any secret of the application by id:<uuid>. The value is never returned.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey} (the `GetClientSecret` operationId).
+func (c *ClientWithResponses) GetClientSecretWithResponse(ctx context.Context, domainKey string, applicationKey string, secretKey string, reqEditors ...RequestEditorFn) (*GetClientSecretResponse, error) {
+	rsp, err := c.GetClientSecret(ctx, domainKey, applicationKey, secretKey, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClientSecretResponse(rsp)
+}
+
 // ListCertificatesWithResponse List a domain's certificates
 //
 // Returns all certificates managed by the Automation API under the domain. Certificates created outside the Automation API are not returned.
@@ -4443,6 +5143,13 @@ func ParseUpsertApplicationResponse(rsp *http.Response) (*UpsertApplicationRespo
 		}
 		response.JSON404 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
 	}
 
 	return response, nil
@@ -4500,6 +5207,176 @@ func ParseGetApplicationResponse(rsp *http.Response) (*GetApplicationResponse, e
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest AutomationApplication
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListClientSecretsResponse parses an HTTP response from a ListClientSecretsWithResponse call
+func ParseListClientSecretsResponse(rsp *http.Response) (*ListClientSecretsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListClientSecretsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []AutomationClientSecret
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpsertClientSecretResponse parses an HTTP response from a UpsertClientSecretWithResponse call
+func ParseUpsertClientSecretResponse(rsp *http.Response) (*UpsertClientSecretResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpsertClientSecretResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AutomationClientSecret
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteClientSecretResponse parses an HTTP response from a DeleteClientSecretWithResponse call
+func ParseDeleteClientSecretResponse(rsp *http.Response) (*DeleteClientSecretResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteClientSecretResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case rsp.StatusCode == 204:
+		break // No content-type
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClientSecretResponse parses an HTTP response from a GetClientSecretWithResponse call
+func ParseGetClientSecretResponse(rsp *http.Response) (*GetClientSecretResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClientSecretResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AutomationClientSecret
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

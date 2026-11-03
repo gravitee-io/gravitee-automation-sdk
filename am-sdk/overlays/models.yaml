@@ -59,6 +59,9 @@ actions:
   - target: $.components.schemas.AutomationClientRegistrationSettings
     update:
       x-go-type-name: ClientRegistrationSettings
+  - target: $.components.schemas.AutomationClientSecret
+    update:
+      x-go-type-name: ClientSecret
   - target: $.components.schemas.AutomationCookieSettings
     update:
       x-go-type-name: CookieSettings

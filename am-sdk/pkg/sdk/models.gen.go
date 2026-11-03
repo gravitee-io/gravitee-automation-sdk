@@ -1317,6 +1317,40 @@ func (v ClientRegistrationSettings) WithDefaults() ClientRegistrationSettings {
 	return v
 }
 
+// AutomationClientSecret A client secret of an application, managed by the Automation API. A secret is immutable: to rotate it, create a secret with a new key, then delete the old one.
+type AutomationClientSecret = ClientSecret
+
+// ClientSecret A client secret of an application, managed by the Automation API. A secret is immutable: to rotate it, create a secret with a new key, then delete the old one.
+type ClientSecret struct {
+	// DryRunErrors Validation errors returned when dryRun is true. Absent when validation succeeds.
+	DryRunErrors []DryRunError `drift:"ignore" json:"dryRunErrors,omitempty"`
+
+	// ExpiresAt Expiration timestamp (ISO-8601 / RFC 3339, UTC), set from the secret expiration settings of the application, else of the domain. Absent when the secret does not expire. Read-only.
+	ExpiresAt *time.Time `drift:"ignore" json:"expiresAt,omitempty"`
+
+	// Key Stable, immutable identifier for the secret within its application, also used as the read-only name of the secret. Lowercase alphanumeric and hyphens, starting and ending with an alphanumeric character. At most 64 characters. A secret created outside the Automation API is addressed as id:<uuid>.
+	//
+	// Example: ci-2026-10
+	Key string `json:"key"`
+
+	// Value Value of the secret. Write-only: never returned. Required on every request: sending the stored value again is a no-op, a different value is rejected with 400. At least 43 characters; generate it from a cryptographically secure random source with at least 32 bytes of entropy (for example 32 random bytes, base64url-encoded), and never reuse it across applications. With BCrypt hashing, at most 72 bytes in UTF-8 (BCrypt ignores the rest); with no hashing, at most 374 characters. An application using client_secret_jwt stores the secret without hashing, since the gateway needs the value to verify the JWT signature. Switching an application that holds hashed secrets to client_secret_jwt is rejected with 400: delete its secrets, apply the application, then apply the secrets again.
+	//
+	// Example: q8Zk3vN2xT7pR1mW9yB4cD6fH0jL5sA8eG2iK7oU3wQ
+	Value *string `drift:"ignore" json:"value,omitempty"`
+}
+
+// WithDefaults returns a copy of ClientSecret with unset fields set to their OpenAPI defaults.
+func (v ClientSecret) WithDefaults() ClientSecret {
+	if v.DryRunErrors != nil {
+		items := make([]DryRunError, len(v.DryRunErrors))
+		for i, item := range v.DryRunErrors {
+			items[i] = item.WithDefaults()
+		}
+		v.DryRunErrors = items
+	}
+	return v
+}
+
 // AutomationCookieSettings Session cookie settings of the application.
 type AutomationCookieSettings = CookieSettings
 
@@ -1402,7 +1436,7 @@ type DataPlane struct {
 	// Configuration Connection settings. Write-only: it can hold credentials.
 	//
 	// Example: {"mongodb":{"dbname":"gravitee-am-acme","host":"mongo","port":27017}}
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"ignore" json:"configuration,omitempty"`
 
 	// CreatedAt Creation timestamp (ISO-8601 / RFC 3339, UTC). Read-only.
 	CreatedAt *time.Time `drift:"ignore" json:"createdAt,omitempty"`
@@ -3175,6 +3209,12 @@ type UpsertApplicationParams struct {
 	DryRun *bool `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
+// UpsertClientSecretParams defines parameters for UpsertClientSecret.
+type UpsertClientSecretParams struct {
+	// DryRun When true, validates the payload without persisting. The returned secret includes a dryRunErrors field.
+	DryRun *bool `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
 // UpsertCertificateParams defines parameters for UpsertCertificate.
 type UpsertCertificateParams struct {
 	// DryRun When true, validates the payload without persisting. The returned certificate includes a dryRunErrors field.
@@ -3201,6 +3241,9 @@ type UpsertDomainJSONRequestBody = AutomationDomain
 
 // UpsertApplicationJSONRequestBody defines body for UpsertApplication for application/json ContentType.
 type UpsertApplicationJSONRequestBody = AutomationApplication
+
+// UpsertClientSecretJSONRequestBody defines body for UpsertClientSecret for application/json ContentType.
+type UpsertClientSecretJSONRequestBody = AutomationClientSecret
 
 // UpsertCertificateJSONRequestBody defines body for UpsertCertificate for application/json ContentType.
 type UpsertCertificateJSONRequestBody = AutomationCertificate
