@@ -88,6 +88,10 @@ func applicationsURL(srv *httptest.Server) string {
 	return collectionURL(srv, "/domains/"+defaultDomainKey+"/applications")
 }
 
+func clientSecretsURL(srv *httptest.Server) string {
+	return applicationsURL(srv) + "/" + testApplication().Key + "/secrets"
+}
+
 func certificatesURL(srv *httptest.Server) string {
 	return collectionURL(srv, "/domains/"+defaultDomainKey+"/certificates")
 }
