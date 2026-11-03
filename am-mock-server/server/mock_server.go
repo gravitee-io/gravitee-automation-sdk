@@ -17,7 +17,10 @@ package server
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -43,6 +46,7 @@ type tenant struct {
 	Domains           *store.Store[Domain]
 	DataPlanes        *store.Store[DataPlane]
 	Applications      *store.Store[Child[Application]]
+	ClientSecrets     *store.Store[Child[ClientSecret]]
 	Certificates      *store.Store[Child[Certificate]]
 	IdentityProviders *store.Store[Child[IdentityProvider]]
 	Reporters         *store.Store[Child[Reporter]]
@@ -53,6 +57,7 @@ func newTenant() *tenant {
 		Domains:           store.NewStore[Domain](),
 		DataPlanes:        store.NewStore[DataPlane](),
 		Applications:      store.NewStore[Child[Application]](),
+		ClientSecrets:     store.NewStore[Child[ClientSecret]](),
 		Certificates:      store.NewStore[Child[Certificate]](),
 		IdentityProviders: store.NewStore[Child[IdentityProvider]](),
 		Reporters:         store.NewStore[Child[Reporter]](),
@@ -111,6 +116,9 @@ func (m *MockAM) DeleteDomain(_ context.Context, req DeleteDomainRequestObject) 
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	tenant.Domains.DeleteByKey(req.DomainKey)
+	for _, app := range ofParent(tenant.Applications.GetAll(), req.DomainKey) {
+		deleteChildren(tenant.ClientSecrets, app.Identity())
+	}
 	deleteChildren(tenant.Applications, req.DomainKey)
 	deleteChildren(tenant.Certificates, req.DomainKey)
 	deleteChildren(tenant.IdentityProviders, req.DomainKey)
@@ -205,7 +213,9 @@ func applicationRejection(apps *store.Store[Child[Application]], domainKey strin
 }
 
 func (m *MockAM) DeleteApplication(_ context.Context, req DeleteApplicationRequestObject) (DeleteApplicationResponseObject, error) {
-	deleteChild(m.getTenant(req).Applications, req.DomainKey, req.ApplicationKey)
+	tenant := m.getTenant(req)
+	deleteChild(tenant.Applications, req.DomainKey, req.ApplicationKey)
+	deleteChildren(tenant.ClientSecrets, applicationIdentity(req.DomainKey, req.ApplicationKey))
 	return DeleteApplication204Response{}, nil
 }
 
@@ -215,6 +225,80 @@ func (m *MockAM) GetApplication(_ context.Context, req GetApplicationRequestObje
 		return GetApplication200JSONResponse(app.Self), nil
 	}
 	return GetApplication404JSONResponse(notFoundError("Application", req.ApplicationKey)), nil
+}
+
+func (m *MockAM) ListClientSecrets(_ context.Context, req ListClientSecretsRequestObject) (ListClientSecretsResponseObject, error) {
+	tenant := m.getTenant(req)
+	if _, ok := isChildOf(tenant.Applications, req.DomainKey, req.ApplicationKey); !ok {
+		return ListClientSecrets404JSONResponse(notFoundError("Application", req.ApplicationKey)), nil
+	}
+	secrets := asSelves(ofParent(tenant.ClientSecrets.GetAll(), applicationIdentity(req.DomainKey, req.ApplicationKey)))
+	slices.SortFunc(secrets, func(a, b ClientSecret) int { return strings.Compare(a.Key, b.Key) })
+	for i := range secrets {
+		secrets[i].Value = nil
+	}
+	return ListClientSecrets200JSONResponse(secrets), nil
+}
+
+// UpsertClientSecret creates a secret once and keeps it immutable afterwards. Like AM, it never returns the value.
+func (m *MockAM) UpsertClientSecret(_ context.Context, req UpsertClientSecretRequestObject) (UpsertClientSecretResponseObject, error) {
+	if req.Body == nil {
+		return UpsertClientSecret400JSONResponse(emptyBodyError()), nil
+	}
+	tenant := m.getTenant(req)
+	if _, ok := isChildOf(tenant.Applications, req.DomainKey, req.ApplicationKey); !ok {
+		return UpsertClientSecret404JSONResponse(notFoundError("Application", req.ApplicationKey)), nil
+	}
+	parent := applicationIdentity(req.DomainKey, req.ApplicationKey)
+	body := req.Body.WithDefaults()
+	if reason := clientSecretRejection(ofParent(tenant.ClientSecrets.GetAll(), parent), body); reason != "" {
+		return UpsertClientSecret400JSONResponse(badRequestError(reason)), nil
+	}
+	tenant.ClientSecrets.Put(newChild(body, parent))
+	body.Value = nil
+	return UpsertClientSecret200JSONResponse(body), nil
+}
+
+const (
+	minClientSecretLength = 43
+	maxClientSecrets      = 10
+)
+
+// clientSecretRejection returns why AM rejects next among the application's secrets, or "" when it accepts it.
+func clientSecretRejection(secrets []Child[ClientSecret], next ClientSecret) string {
+	value := ""
+	if next.Value != nil {
+		value = *next.Value
+	}
+	for _, secret := range secrets {
+		if secret.Self.Key == next.Key {
+			if *secret.Self.Value != value {
+				return "client secret is immutable"
+			}
+			return ""
+		}
+	}
+	if len(value) < minClientSecretLength {
+		return fmt.Sprintf("client secret value must be at least %d characters", minClientSecretLength)
+	}
+	if len(secrets) >= maxClientSecrets {
+		return fmt.Sprintf("an application cannot have more than %d client secrets", maxClientSecrets)
+	}
+	return ""
+}
+
+func (m *MockAM) DeleteClientSecret(_ context.Context, req DeleteClientSecretRequestObject) (DeleteClientSecretResponseObject, error) {
+	deleteChild(m.getTenant(req).ClientSecrets, applicationIdentity(req.DomainKey, req.ApplicationKey), req.SecretKey)
+	return DeleteClientSecret204Response{}, nil
+}
+
+func (m *MockAM) GetClientSecret(_ context.Context, req GetClientSecretRequestObject) (GetClientSecretResponseObject, error) {
+	secret, ok := isChildOf(m.getTenant(req).ClientSecrets, applicationIdentity(req.DomainKey, req.ApplicationKey), req.SecretKey)
+	if ok {
+		secret.Self.Value = nil
+		return GetClientSecret200JSONResponse(secret.Self), nil
+	}
+	return GetClientSecret404JSONResponse(notFoundError("ClientSecret", req.SecretKey)), nil
 }
 
 func (m *MockAM) ListCertificates(_ context.Context, req ListCertificatesRequestObject) (ListCertificatesResponseObject, error) {

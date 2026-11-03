@@ -30,6 +30,10 @@ func (c Certificate) Identity() string {
 	return c.Key
 }
 
+func (c ClientSecret) Identity() string {
+	return c.Key
+}
+
 func (i IdentityProvider) Identity() string {
 	return i.Key
 }

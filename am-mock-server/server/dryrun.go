@@ -19,13 +19,14 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const dryRunMessage = "Mock server is in dry-run-reject mode, all PUT request are rejected on purpose when ?dryRun=true"
 
 var dryRunErrors = []DryRunError{{Severity: new(SeverityError), Message: new(dryRunMessage)}}
 
-// DryRun skips PUT persistence when ?dryRun=true and echoes the payload back.
+// DryRun skips PUT persistence when ?dryRun=true and echoes the payload back, without a client secret value.
 // When reject is true, the echoed payload carries a fixed dryRunErrors list.
 func DryRun(reject bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -34,27 +35,36 @@ func DryRun(reject bool) func(http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 				return
 			}
-			if !reject {
-				// Read the whole body first: HTTP/1.x stops reading the request once the response starts.
-				body, err := io.ReadAll(r.Body)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusBadRequest)
-					return
-				}
+			// Read the whole body first: HTTP/1.x stops reading the request once the response starts.
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			if !reject && !isClientSecret(r) {
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = w.Write(body)
 				return
 			}
 			var payload map[string]any
-			if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			if err := json.Unmarshal(body, &payload); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			payload["dryRunErrors"] = dryRunErrors
+			if isClientSecret(r) {
+				delete(payload, "value") // AM never returns a client secret value
+			}
+			if reject {
+				payload["dryRunErrors"] = dryRunErrors
+			}
 			w.Header().Set("Content-Type", "application/json")
 			_ = json.NewEncoder(w).Encode(payload)
 		})
 	}
+}
+
+func isClientSecret(r *http.Request) bool {
+	return strings.HasSuffix(r.URL.Path, "/secrets")
 }
 
 func isDryRun(r *http.Request) bool {

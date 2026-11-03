@@ -41,6 +41,15 @@ func (r DeleteApplicationRequestObject) GetEnvId() string { return r.EnvId }
 func (r GetApplicationRequestObject) GetOrgId() string    { return r.OrgId }
 func (r GetApplicationRequestObject) GetEnvId() string    { return r.EnvId }
 
+func (r ListClientSecretsRequestObject) GetOrgId() string  { return r.OrgId }
+func (r ListClientSecretsRequestObject) GetEnvId() string  { return r.EnvId }
+func (r UpsertClientSecretRequestObject) GetOrgId() string { return r.OrgId }
+func (r UpsertClientSecretRequestObject) GetEnvId() string { return r.EnvId }
+func (r DeleteClientSecretRequestObject) GetOrgId() string { return r.OrgId }
+func (r DeleteClientSecretRequestObject) GetEnvId() string { return r.EnvId }
+func (r GetClientSecretRequestObject) GetOrgId() string    { return r.OrgId }
+func (r GetClientSecretRequestObject) GetEnvId() string    { return r.EnvId }
+
 func (r ListCertificatesRequestObject) GetOrgId() string  { return r.OrgId }
 func (r ListCertificatesRequestObject) GetEnvId() string  { return r.EnvId }
 func (r UpsertCertificateRequestObject) GetOrgId() string { return r.OrgId }

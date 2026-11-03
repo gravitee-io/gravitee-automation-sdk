@@ -49,3 +49,8 @@ func parentExists(w http.ResponseWriter, params map[string]string, checker Paren
 	}
 	return true
 }
+
+// applicationIdentity is the identity of a stored application, and so the parent identity of its client secrets.
+func applicationIdentity(domainKey, applicationKey string) string {
+	return domainKey + "/" + applicationKey
+}
