@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.4.1...am-mock-server/v1.5.0) (2026-11-03)
+
+
+### Features
+
+* **am-mock-server:** serve application client secrets ([ffa450e](https://github.com/gravitee-io/gravitee-automation-sdk/commit/ffa450e1700660877331df00aec04f06a600cf31))
+
+
+### Bug Fixes
+
+* **deps:** bump am-sdk to v2.5.0 ([59c0ac9](https://github.com/gravitee-io/gravitee-automation-sdk/commit/59c0ac925b7f777c241682b448632ca2c2f83821))
+
 ## [1.4.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.4.0...am-mock-server/v1.4.1) (2026-11-02)
 
 
