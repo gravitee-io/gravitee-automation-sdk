@@ -94,13 +94,15 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: unstructured:masked
-  - target: $.components.schemas.AutomationDataPlane.properties.configuration
-    update:
-      x-oapi-codegen-extra-tags:
-        drift: unstructured
 
   # Read-only properties are set by AM, never part of the desired state: drift detection skips them.
   - target: $.components.schemas.*.properties[?(@.readOnly == true)]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+
+  # Write-only properties are never returned by AM: drift detection skips them.
+  - target: $.components.schemas.*.properties[?(@.writeOnly == true)]
     update:
       x-oapi-codegen-extra-tags:
         drift: ignore

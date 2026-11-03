@@ -39,6 +39,8 @@ actions:
       "/domains/{domainKey}": {}
       "/domains/{domainKey}/applications": {}
       "/domains/{domainKey}/applications/{applicationKey}": {}
+      "/domains/{domainKey}/applications/{applicationKey}/secrets": {}
+      "/domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey}": {}
       "/domains/{domainKey}/certificates": {}
       "/domains/{domainKey}/certificates/{certKey}": {}
       "/domains/{domainKey}/identities": {}
@@ -58,6 +60,10 @@ actions:
     copy: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications"]
   - target: $.paths["/domains/{domainKey}/applications/{applicationKey}"]
     copy: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}"]
+  - target: $.paths["/domains/{domainKey}/applications/{applicationKey}/secrets"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets"]
+  - target: $.paths["/domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey}"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey}"]
   - target: $.paths["/domains/{domainKey}/certificates"]
     copy: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates"]
   - target: $.paths["/domains/{domainKey}/certificates/{certKey}"]
@@ -82,6 +88,10 @@ actions:
   - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications"]
     remove: true
   - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/applications/{applicationKey}/secrets/{secretKey}"]
     remove: true
   - target: $.paths["/organizations/{orgId}/environments/{envId}/domains/{domainKey}/certificates"]
     remove: true
