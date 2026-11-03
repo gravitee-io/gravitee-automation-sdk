@@ -118,7 +118,7 @@ func TestNewClient_Call(t *testing.T) {
 			defer s.Close()
 			client, err := NewAPIMClient(tt.apiContextSupplier(s.URL))
 			require.NoError(t, err)
-			r, err := client.GetApiWithResponse(context.Background(), "x")
+			r, err := client.GetApiWithResponse(context.Background(), "x", nil)
 			require.NoError(t, err)
 			assert.Equal(t, http.StatusOK, r.StatusCode())
 			assert.Equal(t, tt.expectedAuth, givenAuth)
@@ -140,14 +140,14 @@ func TestWithHTTPClient_ReturnsNewClientUsingGivenHTTPClient(t *testing.T) {
 
 	withHTTPClient, err := client.WithHTTPClient(&http.Client{Transport: transport})
 	require.NoError(t, err)
-	_, err = withHTTPClient.GetApiWithResponse(context.Background(), "x")
+	_, err = withHTTPClient.GetApiWithResponse(context.Background(), "x", nil)
 	require.NoError(t, err)
 
 	assert.NotSame(t, client, withHTTPClient)
 	assert.Equal(t, 1, transport.calls)
 	assert.Equal(t, "Bearer 123", givenAuth)
 
-	_, err = client.GetApiWithResponse(context.Background(), "x")
+	_, err = client.GetApiWithResponse(context.Background(), "x", nil)
 	require.NoError(t, err)
 	assert.Equal(t, 1, transport.calls, "original client must keep its own HTTP client")
 }
