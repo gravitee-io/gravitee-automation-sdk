@@ -106,6 +106,10 @@ Errors and response helpers are the same as the AM SDK's.
   `make sync-aim-oas` and `make verify-aim-oas` need a `gh` login with access to the AIM repo. CI runs the AIM check
   in CircleCI, which holds the token in Keeper (as terraform-provider-apim does). `make check-oas` covers AM and core APIM.
 - **No list operations**: upstream has none.
+- **Legacy UUID params**: `hridContainsUUID`, `hridContainsApiUUID`, `hridContainsAppUUID` and the
+  `X-Gravitee-Set-Hrid` header treat an hrid as the UUID of a resource created before the automation API. Only some
+  operations declare them (see "Using the SDK from GKO"); those take a params argument, `nil` for none
+  (`client.GetApiWithResponse(ctx, hrid, nil)`).
 - **Model names** drop `Spec` and keep `State` (`ApiV4` is the PUT body, `ApiV4State` the response).
 - **Dates** are RFC 3339 strings (`*string`), not `time.Time`.
 - **Free-form configurations** (plugin, endpoint, page source, subscription entrypoint) are `unstructured.Unstructured`.
@@ -144,8 +148,23 @@ Errors and response helpers are the same as the AM SDK's.
   `name`): the CRD validation must cover them.
 - **Branches**: only GKO master and 4.13.x can adopt it (4.12.x has neither these DTOs nor `internal/drift`).
   Suggested order: SharedPolicyGroup → Dictionary → Application → API v4.
-- **Keep GKO's HTTP client** until the spec declares `hridContainsUUID`.
+- **Keep GKO's HTTP client where the spec lacks `hridContainsUUID`.** It is declared on the API GET and DELETE and on
+  the group and subscription operations, but not yet on the API PUT or on the application, dictionary and shared
+  policy group operations.
 - **Pin the SDK release line** matching the branch's APIM minor.
+
+### Updating the AIM fragment
+
+The AIM fragment is pinned by `AIM_OAS_REF` in the `Makefile`. Nothing bumps it automatically, and
+`make verify-aim-oas` only checks the committed file against that tag. To move it:
+
+1. Set `AIM_OAS_REF` to the new tag, then run `make sync-aim-oas generate`.
+2. If a discriminated type gained a variant (e.g. a new upstream auth `type`), add it to `overlays/oneof.yaml` and to
+   its `OneOf*` struct in `pkg/sdk/oneof.go`, with a round-trip test. Decoding an unknown `type` fails, so a missing
+   variant breaks every resource that uses it.
+3. Check new properties against `overlays/drift.yaml`: the generic rules tag `readOnly` properties and the
+   `writeOnly` ones of variants (`allOf` branches); any other property may need a tag of its own.
+4. Run `make lint test`.
 
 ## Prerequisites
 
