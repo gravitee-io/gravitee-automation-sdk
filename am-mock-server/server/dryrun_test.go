@@ -51,7 +51,7 @@ func TestDryRunPut_NoRejectEchoesPayloadLargerThan512Bytes(t *testing.T) {
 
 	got, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
-	assert.JSONEq(t, encode(t, body).String(), string(got))
+	assert.JSONEq(t, encode(t, body.WithDefaults()).String(), string(got), "spec defaults are applied before the echo")
 }
 
 func TestDryRunPut_DoesNotPersist(t *testing.T) {
