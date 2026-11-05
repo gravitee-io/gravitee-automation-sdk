@@ -59,3 +59,9 @@ func TestUpsertDomainRejectedBodyIsNotStored(t *testing.T) {
 	_, exists := defaultTenant(am).Domains.Get("test")
 	assert.False(t, exists)
 }
+
+func TestDryRunUpsertDomainRejectsInvalidBody(t *testing.T) {
+	_, srv := createAMServerWithDryRunReject(t, true)
+
+	assertPut400(t, domainsURL(srv)+"?dryRun=true", jsonObject{"key": "test", "name": "Test"}, `property "path" is missing`)
+}

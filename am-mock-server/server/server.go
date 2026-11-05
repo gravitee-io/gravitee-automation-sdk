@@ -41,8 +41,8 @@ func NewWithPath(mockAM *MockAM, basePath string, reg *auth.Registry, dryRunReje
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 
-	// First in the list is innermost: requests are validated after auth, parent and dry-run checks.
-	middlewares := []MiddlewareFunc{requestValidator(basePath)}
+	// First in the list is innermost: dry-run applies to requests that passed auth, parent and spec validation.
+	middlewares := []MiddlewareFunc{DryRun(dryRunReject), requestValidator(basePath)}
 	if reg != nil {
 		r.Use(auth.AuthnMiddleware(reg))
 		middlewares = append(middlewares, auth.AuthzMiddleware(reg, chiRouteInfoExtractor()))
@@ -51,8 +51,6 @@ func NewWithPath(mockAM *MockAM, basePath string, reg *auth.Registry, dryRunReje
 		_, exists := mockAM.getTenant(orgEnv{org: org, env: env}).Domains.Get(key)
 		return exists
 	}))
-
-	middlewares = append(middlewares, DryRun(dryRunReject))
 
 	var si ServerInterface = Unimplemented{}
 	if mockAM != nil {
