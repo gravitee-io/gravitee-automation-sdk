@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.5.0...am-mock-server/v1.5.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **am-mock-server:** validate requests against the spec before dry-run ([fd7e4fa](https://github.com/gravitee-io/gravitee-automation-sdk/commit/fd7e4faaba0029b2621f0a27db3484bb433ae02d))
+
 ## [1.5.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.4.1...am-mock-server/v1.5.0) (2026-11-03)
 
 
