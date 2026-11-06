@@ -18,10 +18,6 @@ func (v {{.TypeName}}) WithDefaults() {{.TypeName}} {
 	if v.{{.GoFieldName}} == nil {
 		v.{{.GoFieldName}} = new({{slice .GoTypeDef 1}}({{printf "%#v" $d}}))
 	}
-{{- else}}
-	if v.{{.GoFieldName}} == *new({{.GoTypeDef}}) {
-		v.{{.GoFieldName}} = {{printf "%#v" $d}}
-	}
 {{- end}}
 {{- else if and .Schema.ArrayType (or .Schema.ArrayType.RefType .Schema.ArrayType.DefineViaAlias) .Schema.ArrayType.OAPISchema.Properties}}
 {{- $type := .GoTypeDef}}{{if .HasOptionalPointer}}{{$type = slice .GoTypeDef 1}}{{end}}
@@ -32,7 +28,7 @@ func (v {{.TypeName}}) WithDefaults() {{.TypeName}} {
 		}
 		v.{{.GoFieldName}} = {{if .HasOptionalPointer}}&{{end}}items
 	}
-{{- else if .Schema.OAPISchema.Properties}}
+{{- else if and .Schema.OAPISchema.Properties (ne (slice (printf "%-6s" .Schema.GoType) 0 6) "struct")}}
 {{- if .HasOptionalPointer}}
 	if v.{{.GoFieldName}} != nil {
 		withDefaults := v.{{.GoFieldName}}.WithDefaults()

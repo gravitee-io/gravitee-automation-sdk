@@ -1,0 +1,353 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+overlay: 1.1.0
+info:
+  title: Tag model fields for drift detection (SDK only, not the mock server), ported from GKO's APIM DTOs
+  version: 0.0.1
+actions:
+  # API v4 (GKO APIV4DTO and its nested DTOs).
+  - target: $.components.schemas.ApiV4Spec.properties.hrid
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas['ApiV4Spec','SharedPolicyGroupSpec'].properties.crossId
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.ApiV4Spec.properties.notifyMembers
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-true
+  - target: $.components.schemas.ApiV4Spec.properties.consoleNotification.properties.events
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.ApiV4Spec.properties.consoleNotification.properties.groups
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:crd,strip-ns
+  - target: $.components.schemas.Property.properties['dynamic','encryptable']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.FailoverV4.properties['failureCondition','forceNextEndpointOnFailure']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.EndpointV4.properties.weight
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.FlowExecution.properties.mode
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default:DEFAULT
+  - target: $.components.schemas.FlowV4.properties['selectors','request','response','subscribe','publish','entrypointConnect','interact']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.TracingRedactionConfig.properties.rules
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.TracingMaskingStrategy.properties.type
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: case-insensitive
+  - target: $.components.schemas.Analytics.properties['enabled','reporterMetricsEnabled']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-true
+  - target: $.components.schemas.PlanV4.properties.id
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.PlanSecurity.properties.type
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: case-insensitive
+  - target: $.components.schemas.PageV4.properties.id
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+
+  # Free-form plugin configurations, typed as unstructured.Unstructured in models.yaml: compared as unstructured objects.
+  - target: $.components.schemas['APIResource','BaseStep','EndpointV4','PageSource','PlanSecurity','ServiceV4','AimMcpProxyFlowStep'].properties.configuration
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: unstructured
+  - target: $.components.schemas.EndpointV4.properties.sharedConfigurationOverride
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: unstructured
+  - target: $.components.schemas.EndpointGroupV4.properties.sharedConfiguration
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: unstructured
+  - target: $.components.schemas.SubscriptionConsumerConfiguration.properties.entrypointConfiguration
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: unstructured
+
+  # Read-only next to a $ref: kin-openapi drops the readOnly before the generic rule can see it.
+  - target: $.components.schemas['BaseStatus','AimResourceStatus'].properties.errors
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.ApplicationSpec.properties.primaryOwner
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+
+  # Application (GKO ApplicationDTO).
+  - target: $.components.schemas.ApplicationSpec.properties['hrid','status']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.ApplicationSpec.properties.description
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: trimmed
+  - target: $.components.schemas.ApplicationSpec.properties['settings','notifyMembers','background','domain','pictureUrl']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.SimpleApplicationSettings.properties.type
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  # Metadata key is returned by APIM; the CRD never carries it.
+  - target: $.components.schemas.Metadata.properties.key
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.ApplicationOAuthClientSettings.properties.applicationType
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: case-insensitive
+  - target: $.components.schemas.ApplicationOAuthClientSettings.properties.additionalClientMetadata
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.ApplicationTLSSettings.properties.clientCertificate
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: trimmed
+  - target: $.components.schemas.ApplicationTLSSettings.properties.clientCertificates
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:crd,expired,scheduled
+  - target: $.components.schemas.ClientCertificate.properties.content
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: trimmed
+  - target: $.components.schemas.ClientCertificate.properties['startsAt','endsAt']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: rfc3339
+
+  # Subscription (GKO SubscriptionDTO: hrid/applicationHrid/apiHrid are its legacy id/applicationId/apiId, see ToLegacy).
+  - target: $.components.schemas.SubscriptionSpec.properties['hrid','applicationHrid']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-namespace-prefix
+  - target: $.components.schemas.SubscriptionSpec.properties.endingAt
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: rfc3339
+  - target: $.components.schemas.SubscriptionSpec.properties.metadata
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.SubscriptionSpec.properties.apiKeys
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:crd
+  - target: $.components.schemas.ApiKeySpec.properties.expireAt
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: rfc3339
+
+  # Group (GKO GroupDTO).
+  - target: $.components.schemas.GroupSpec.properties['hrid','notifyMembers']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.GroupSpec.properties.members
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:crd
+  - target: $.components.schemas.GroupSpec.properties.defaultMemberRoles
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+
+  # Shared policy group (GKO SharedPolicyGroupDTO; step configuration is tagged above, crossId by the allOf readOnly rule).
+  - target: $.components.schemas.SharedPolicyGroupSpec.properties.hrid
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.SharedPolicyGroupSpec.properties.steps
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+
+  # Dictionary (GKO Provider; useSystemProxy/body/encryptOnFetch are pointers in the SDK, nil and false/"" mean the same).
+  - target: $.components.schemas.HttpDictionaryProvider.properties['headers','useSystemProxy','body']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.DictionaryEncryptionPolicy.properties.encryptOnFetch
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas['ManualDictionarySpec','DynamicDictionarySpec'].properties.encryptedProperties
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+
+  # Next-gen portal: APIM resolves omitted area and visibility server-side.
+  - target: $.components.schemas.PortalSpec.properties.navigation
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.DocumentationSpec.properties.area
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default:TOP_NAVBAR
+  - target: $.components.schemas['DocumentationSpec','PortalLinkSpec','PortalListingApiEntry'].properties.visibility
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+
+  # AIM catalog MCP server (GKO CatalogMcpServerDTO).
+  - target: $.components.schemas.AimCatalogMcpServerSpec.properties.hrid
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.AimCatalogMcpServerSpec.properties.description
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimCatalogMcpServerOAuth2Auth.allOf[1].properties.scope
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+
+  # AIM MCP proxy (GKO McpProxyDTO).
+  - target: $.components.schemas.AimMcpProxySpec.properties.hrid
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.AimMcpProxySpec.properties['description','proxy','studio','flowExecution','flows','identityProviders']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyProxy.properties.upstreamAuth
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyStudioTool.properties.alias
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyPlan.properties.flows
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyFlow.properties['selectors','request','response','tags']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyFlowStep.properties['description','condition']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyOAuth2UpstreamAuth.allOf[1].properties.scopes
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyApiKeyPlanSecurity.allOf[1].properties['apiKeyHeader','propagateApiKey']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyOAuth2PlanSecurity.allOf[1].properties.scopes
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[1].properties['clientId','userInfoEndpoint']
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyMcpFlowSelector.allOf[1].properties.methods
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyConditionFlowSelector.allOf[1].properties.condition
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+
+  # Read-only properties are set by APIM, never part of the desired state: drift detection skips them.
+  - target: $.components.schemas.*.properties[?(@.readOnly == true)]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+
+  # Same for read-only properties of status schemas composed with allOf (crossId, startingAt, portalHrid, ...).
+  - target: $.components.schemas.*.allOf[*].properties[?(@.readOnly == true)]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+
+  # Write-only secrets of AIM variants are never returned: drift detection skips them.
+  - target: $.components.schemas.*.allOf[*].properties[?(@.writeOnly == true)]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+
+  # APIM stores unique arrays as sets, so order carries no meaning: compare them order-insensitively.
+  - target: $.components.schemas.*.properties[?(@.uniqueItems == true)]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: set
+
+  # Array APIM defaults to []: absent and empty mean the same thing.
+  - target: $.components.schemas.*.properties[?@.type == "array" && length(@.default) == 0]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+
+  # GKO filters one side on these lists and on the subscription's API: must come after the generic rules above.
+  - target: $.components.schemas.ApiV4Spec.properties.metadata
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:remote
+  - target: $.components.schemas['ApiV4Spec','ApplicationSpec'].properties.groups
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:crd,strip-ns
+  - target: $.components.schemas['ApiV4Spec','ApplicationSpec'].properties.members
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:crd
+  - target: $.components.schemas.ApiV4Spec.properties.categories
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-only:crd
+  - target: $.components.schemas.SubscriptionStatus.allOf[1].properties.apiHrid
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-namespace-prefix

@@ -81,9 +81,27 @@ jobs:
           go-version-file: go.work
       - run: make test
 
+  # The AIM source is private: CircleCI holds the token that reads it (see .circleci/config.yml).
+  aim-oas:
+    needs: changes
+    # head_ref is empty on workflow_dispatch.
+    if: github.event_name == 'pull_request' && needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the check in CircleCI, where the token that reads the aim repository lives
+        working-directory: hack/scripts
+        env:
+          CIRCLECI_TOKEN: ${{ secrets.CIRCLECI_TOKEN }}
+        run: |
+          npm ci
+          npx zx verify-aim-oas.mjs --branch "${{ github.head_ref }}"
+
   ci-ok:
     if: always()
-    needs: [changes, oas, generate, lint, test]
+    needs: [changes, oas, generate, lint, test, aim-oas]
     runs-on: ubuntu-latest
     steps:
       - run: |

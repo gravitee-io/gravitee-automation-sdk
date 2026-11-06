@@ -15,11 +15,16 @@
 # Daily OAS check: a CircleCI scheduled trigger (project settings, main, trigger=check_oas)
 # runs make check-oas and posts to Slack when it fails. The message reports drift, the usual cause:
 # a download error only shows in the job log, linked from the message.
+#
+# AI Management OAS check: the GitHub token that reads the private gravitee-gamma-module-aim
+# repository lives in Keeper, which only CircleCI can reach. GitHub Actions triggers it
+# (trigger=verify_aim_oas, hack/scripts/verify-aim-oas.mjs), as terraform-provider-apim does.
 version: 2.1
 
 orbs:
   keeper: gravitee-io/keeper@0.7.1
   slack: circleci/slack@6.1.1
+  gh: circleci/github-cli@2.7.2
 
 parameters:
   trigger:
@@ -27,6 +32,7 @@ parameters:
     default: none
     enum:
       - check_oas
+      - verify_aim_oas
       - none
 
 jobs:
@@ -70,6 +76,20 @@ jobs:
               ]
             }
 
+  verify-aim-oas:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - checkout
+      - keeper/env-export:
+          secret-url: keeper://TIlcGPFq4rN5GvgnZb9hng/field/password
+          var-name: GITHUB_TOKEN
+      - gh/setup
+      - run:
+          name: Verify the AI Management OAS fragment matches its tag
+          command: make verify-aim-oas
+
 workflows:
   check-oas:
     when:
@@ -79,4 +99,14 @@ workflows:
     jobs:
       - check-oas:
           name: Check OAS matches upstream
+          context: cicd-orchestrator
+
+  verify-aim-oas:
+    when:
+      equal:
+        - << pipeline.parameters.trigger >>
+        - verify_aim_oas
+    jobs:
+      - verify-aim-oas:
+          name: Verify AI Management OAS matches upstream
           context: cicd-orchestrator

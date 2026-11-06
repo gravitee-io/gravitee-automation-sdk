@@ -30,7 +30,7 @@ jobs:
         run: |
           BUMPED_SOURCES=""
           DETAILS=""
-          for PATTERN in "common/v*" "am-sdk/v*"; do
+          for PATTERN in "common/v*" "am-sdk/v*" "apim-sdk/v*"; do
             TAG=$(git tag -l "$PATTERN" --sort=-version:refname | head -1)
             [ -z "$TAG" ] && continue
             COMPONENT="${TAG%%/*}"

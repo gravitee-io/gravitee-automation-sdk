@@ -1,0 +1,170 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+overlay: 1.1.0
+info:
+  title: Type polymorphic schemas as hand-written OneOf* structs (pkg/sdk/oneof.go), one pointer per variant
+  version: 0.0.1
+actions:
+  # AIM discriminators have no oneOf: each variant extends the discriminator itself through allOf.
+  # Move the shared fields to a <Base> the variants extend, and make <Name> a oneOf of the variants, as the core
+  # Listener and Selector are (the oneOf also keeps oapi-codegen from pruning the variants).
+  - target: $.components.schemas
+    update:
+      AimCatalogMcpServerBaseAuth: {}
+  - target: $.components.schemas.AimCatalogMcpServerBaseAuth
+    copy: $.components.schemas.AimCatalogMcpServerAuth
+  - target: $.components.schemas.AimCatalogMcpServerNoAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimCatalogMcpServerBaseAuth'
+  - target: $.components.schemas.AimCatalogMcpServerHeaderAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimCatalogMcpServerBaseAuth'
+  - target: $.components.schemas.AimCatalogMcpServerOAuth2Auth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimCatalogMcpServerBaseAuth'
+  - target: $.components.schemas.AimCatalogMcpServerAuth['properties','required','examples']
+    remove: true
+  - target: $.components.schemas.AimCatalogMcpServerAuth
+    update:
+      oneOf:
+        - $ref: '#/components/schemas/AimCatalogMcpServerNoAuth'
+        - $ref: '#/components/schemas/AimCatalogMcpServerHeaderAuth'
+        - $ref: '#/components/schemas/AimCatalogMcpServerOAuth2Auth'
+
+  - target: $.components.schemas
+    update:
+      AimMcpProxyBaseUpstreamAuth: {}
+  - target: $.components.schemas.AimMcpProxyBaseUpstreamAuth
+    copy: $.components.schemas.AimMcpProxyUpstreamAuth
+  - target: $.components.schemas.AimMcpProxyNoUpstreamAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
+  - target: $.components.schemas.AimMcpProxyApiKeyUpstreamAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
+  - target: $.components.schemas.AimMcpProxyBearerUpstreamAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
+  - target: $.components.schemas.AimMcpProxyBasicUpstreamAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
+  - target: $.components.schemas.AimMcpProxyOAuth2UpstreamAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
+  - target: $.components.schemas.AimMcpProxyUpstreamAuth['properties','required','examples']
+    remove: true
+  - target: $.components.schemas.AimMcpProxyUpstreamAuth
+    update:
+      oneOf:
+        - $ref: '#/components/schemas/AimMcpProxyNoUpstreamAuth'
+        - $ref: '#/components/schemas/AimMcpProxyApiKeyUpstreamAuth'
+        - $ref: '#/components/schemas/AimMcpProxyBearerUpstreamAuth'
+        - $ref: '#/components/schemas/AimMcpProxyBasicUpstreamAuth'
+        - $ref: '#/components/schemas/AimMcpProxyOAuth2UpstreamAuth'
+
+  - target: $.components.schemas
+    update:
+      AimMcpProxyBasePlanSecurity: {}
+  - target: $.components.schemas.AimMcpProxyBasePlanSecurity
+    copy: $.components.schemas.AimMcpProxyPlanSecurity
+  - target: $.components.schemas.AimMcpProxyKeyLessPlanSecurity.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBasePlanSecurity'
+  - target: $.components.schemas.AimMcpProxyApiKeyPlanSecurity.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBasePlanSecurity'
+  - target: $.components.schemas.AimMcpProxyOAuth2PlanSecurity.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBasePlanSecurity'
+  - target: $.components.schemas.AimMcpProxyPlanSecurity['properties','required','examples']
+    remove: true
+  - target: $.components.schemas.AimMcpProxyPlanSecurity
+    update:
+      oneOf:
+        - $ref: '#/components/schemas/AimMcpProxyKeyLessPlanSecurity'
+        - $ref: '#/components/schemas/AimMcpProxyApiKeyPlanSecurity'
+        - $ref: '#/components/schemas/AimMcpProxyOAuth2PlanSecurity'
+
+  - target: $.components.schemas
+    update:
+      AimMcpProxyBaseFlowSelector: {}
+  - target: $.components.schemas.AimMcpProxyBaseFlowSelector
+    copy: $.components.schemas.AimMcpProxyFlowSelector
+  - target: $.components.schemas.AimMcpProxyMcpFlowSelector.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseFlowSelector'
+  - target: $.components.schemas.AimMcpProxyConditionFlowSelector.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseFlowSelector'
+  - target: $.components.schemas.AimMcpProxyFlowSelector['properties','required','examples']
+    remove: true
+  - target: $.components.schemas.AimMcpProxyFlowSelector
+    update:
+      oneOf:
+        - $ref: '#/components/schemas/AimMcpProxyMcpFlowSelector'
+        - $ref: '#/components/schemas/AimMcpProxyConditionFlowSelector'
+
+  - target: $.components.schemas
+    update:
+      AimMcpProxyBaseIdentityProvider: {}
+  - target: $.components.schemas.AimMcpProxyBaseIdentityProvider
+    copy: $.components.schemas.AimMcpProxyIdentityProvider
+  - target: $.components.schemas.AimMcpProxyGraviteeAmIdentityProvider.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseIdentityProvider'
+  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseIdentityProvider'
+  - target: $.components.schemas.AimMcpProxyAuth0IdentityProvider.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseIdentityProvider'
+  - target: $.components.schemas.AimMcpProxyIdentityProvider['properties','required','examples']
+    remove: true
+  - target: $.components.schemas.AimMcpProxyIdentityProvider
+    update:
+      oneOf:
+        - $ref: '#/components/schemas/AimMcpProxyGraviteeAmIdentityProvider'
+        - $ref: '#/components/schemas/AimMcpProxyGenericIdentityProvider'
+        - $ref: '#/components/schemas/AimMcpProxyAuth0IdentityProvider'
+
+  # oapi-codegen can only type a oneOf as an opaque json.RawMessage union, which GKO's drift cannot walk.
+  - target: $.components.schemas.Listener
+    update:
+      x-go-type: OneOfListener
+  - target: $.components.schemas.Selector
+    update:
+      x-go-type: OneOfSelector
+  - target: $.components.schemas.AimCatalogMcpServerAuth
+    update:
+      x-go-type: OneOfAimCatalogMcpServerAuth
+  - target: $.components.schemas.AimMcpProxyUpstreamAuth
+    update:
+      x-go-type: OneOfAimMcpProxyUpstreamAuth
+  - target: $.components.schemas.AimMcpProxyPlanSecurity
+    update:
+      x-go-type: OneOfAimMcpProxyPlanSecurity
+  - target: $.components.schemas.AimMcpProxyFlowSelector
+    update:
+      x-go-type: OneOfAimMcpProxyFlowSelector
+  - target: $.components.schemas.AimMcpProxyIdentityProvider
+    update:
+      x-go-type: OneOfAimMcpProxyIdentityProvider
+
+  # DictionaryProvider has a single variant: no union needed.
+  - target: $.components.schemas.DynamicDictionarySpec.properties.provider
+    update:
+      $ref: '#/components/schemas/HttpDictionaryProvider'
+  - target: $.components.schemas.DictionaryProvider
+    remove: true
