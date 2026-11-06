@@ -4628,8 +4628,8 @@ func (v DynamicDictionary) WithDefaults() DynamicDictionary {
 
 // EncryptableValue A secret property value.
 type EncryptableValue struct {
-	// Value The plaintext value to encrypt on save.
-	Value *string `json:"value,omitempty"`
+	// Value On a read, always `••••••••••••`. On a write, the plaintext to encrypt, or `••••••••••••` to keep the stored value. Sending the mask for a key APIM does not hold encrypted is rejected with `dictionary.property.maskedValue`.
+	Value string `json:"value"`
 }
 
 // WithDefaults returns a copy of EncryptableValue with unset fields set to their OpenAPI defaults.
@@ -5488,10 +5488,10 @@ type ManualDictionarySpec = ManualDictionary
 
 // ManualDictionary A manual dictionary with static key/value properties.
 type ManualDictionary struct {
-	// EncryptedProperties Secret properties, keyed by the property key. Their values are write-only: they are never returned, so a client can compare a `GET` against its manifest without seeing a difference on a value it cannot read back. A key must not appear in both `properties` and `encryptedProperties`.
+	// EncryptedProperties Secret properties, keyed by the property key. APIM stores each value encrypted and never returns it: a read reports every key with its value masked. The mask is a fixed literal that proves only that a value is stored, so a value changed outside the manifest cannot be detected by comparing reads. Moving a plain key here encrypts it on the next apply. A key must not appear in both `properties` and `encryptedProperties`.
 	EncryptedProperties map[string]EncryptableValue `drift:"ignore" json:"encryptedProperties,omitempty"`
 
-	// Properties Dictionary data are key/value pairs for `MANUAL` properties
+	// Properties Plain properties, keyed by the property key. A key APIM stores encrypted cannot be listed here: the request is rejected with `dictionary.property.encryptedToPlain`. To make a secret plain, remove it from `encryptedProperties` and apply, then add it here and apply again.
 	Properties map[string]string `json:"properties,omitempty"`
 }
 
@@ -7199,8 +7199,10 @@ type UpsertAimMcpProxyParams struct {
 
 // UpsertApiParams defines parameters for UpsertApi.
 type UpsertApiParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 
 	// IgnoreGroups When true, `groups` in the spec is not applied and the platform keeps ownership of the
@@ -7213,15 +7215,19 @@ type UpsertApiParams struct {
 
 // UpsertApiDocumentationParams defines parameters for UpsertApiDocumentation.
 type UpsertApiDocumentationParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // UpsertApiLinkParams defines parameters for UpsertApiLink.
 type UpsertApiLinkParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
@@ -7291,8 +7297,10 @@ type GetApiParams struct {
 
 // UpsertApplicationParams defines parameters for UpsertApplication.
 type UpsertApplicationParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 
 	// IgnoreGroups When true, `groups` in the spec is not applied and the platform keeps ownership of the
@@ -7305,15 +7313,19 @@ type UpsertApplicationParams struct {
 
 // UpsertDictionaryParams defines parameters for UpsertDictionary.
 type UpsertDictionaryParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // UpsertGroupParams defines parameters for UpsertGroup.
 type UpsertGroupParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 
 	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
@@ -7345,50 +7357,64 @@ type GetGroupParams struct {
 
 // UpsertPortalThemeParams defines parameters for UpsertPortalTheme.
 type UpsertPortalThemeParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // UpsertPortalParams defines parameters for UpsertPortal.
 type UpsertPortalParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // UpsertPortalDocumentationParams defines parameters for UpsertPortalDocumentation.
 type UpsertPortalDocumentationParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // UpsertPortalLinkParams defines parameters for UpsertPortalLink.
 type UpsertPortalLinkParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // UpsertPortalListingParams defines parameters for UpsertPortalListing.
 type UpsertPortalListingParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // UpsertSharedPolicyGroupParams defines parameters for UpsertSharedPolicyGroup.
 type UpsertSharedPolicyGroupParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
 // DeleteSharedPolicyGroupParams defines parameters for DeleteSharedPolicyGroup.
 type DeleteSharedPolicyGroupParams struct {
-	// DryRun For modifying requests, this parameter allow you to test the result of an endpoint without actually persisting
-	// the state of the underlying spec.
+	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
+	// request runs without `dryRun` and fails with the same error, so a request a dry run accepts is accepted when
+	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
+	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
 }
 
