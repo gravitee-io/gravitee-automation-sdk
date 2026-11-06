@@ -197,6 +197,11 @@ returns. Requests are validated against the merged OpenAPI spec, as on the AM mo
   method. A subscription PUT answers 404 when its application, or its plan on the API, does not exist.
 - **Cascades**: deleting an API deletes its subscriptions, documentations and links; deleting a portal deletes its
   listings, documentations and links; deleting an application deletes its subscriptions (APIM closes them instead).
+- **Encrypted dictionary values** are answered masked (`••••••••••••`), as APIM does. A PUT that sends the mask keeps
+  the stored value. Like APIM, a PUT (dry run included) answers 400 when a key is in both `properties` and
+  `encryptedProperties` (`dictionary.propertyOptions.invalid`), when an encrypted key is sent as plain
+  (`dictionary.property.encryptedToPlain`), or when the mask is sent for a key with no encrypted value
+  (`dictionary.property.maskedValue`).
 - **Legacy UUID params** (`hridContainsUUID`, `hridContainsApiUUID`, `hridContainsAppUUID`, the `X-Gravitee-Set-Hrid`
   header), `ignoreGroups` and `ignoreMembers` are accepted and ignored: an hrid is always an hrid.
 - **Polymorphic fields** (listeners, selectors, the AIM discriminated objects) are stored as unstructured maps, so

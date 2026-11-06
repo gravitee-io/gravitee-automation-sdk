@@ -179,16 +179,24 @@ func (m *MockAPIM) DeleteGroup(_ context.Context, req DeleteGroupRequestObject) 
 
 // Dictionaries
 
+// UpsertDictionary stores encrypted values in plain text and answers them masked. Like APIM, it
+// rejects a masked value it does not hold and an encrypted key made plain, dry run included.
 func (m *MockAPIM) UpsertDictionary(_ context.Context, req UpsertDictionaryRequestObject) (UpsertDictionaryResponseObject, error) {
+	dictionaries := m.tenant(req.OrgId, req.EnvId).Dictionaries
+	stored, exists := dictionaries.Get(req.Body.Hrid)
+	body, rejection := resolveSecrets(*req.Body, stored, exists)
+	if rejection != nil {
+		return UpsertDictionary400JSONResponse{BadRequestJSONResponse(*rejection)}, nil
+	}
 	status := m.status(at(req.OrgId, req.EnvId, "dictionary"), req.Body.Hrid, req.Params.DryRun)
-	dictionary := state[DictionaryState](req.Body.WithDefaults(), status)
-	save(m.tenant(req.OrgId, req.EnvId).Dictionaries, dictionary, req.Params.DryRun)
-	return UpsertDictionary200JSONResponse(dictionary), nil
+	dictionary := state[DictionaryState](body.WithDefaults(), status)
+	save(dictionaries, dictionary, req.Params.DryRun)
+	return UpsertDictionary200JSONResponse(masked(dictionary)), nil
 }
 
 func (m *MockAPIM) GetDictionary(_ context.Context, req GetDictionaryRequestObject) (GetDictionaryResponseObject, error) {
 	if dictionary, ok := m.tenant(req.OrgId, req.EnvId).Dictionaries.Get(req.Hrid); ok {
-		return GetDictionary200JSONResponse(dictionary), nil
+		return GetDictionary200JSONResponse(masked(dictionary)), nil
 	}
 	return GetDictionary404JSONResponse{NotFoundJSONResponse(hridNotFound(req.Hrid))}, nil
 }
