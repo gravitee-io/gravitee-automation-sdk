@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.5.0...am-sdk/v2.5.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **am-sdk:** tag the domain oidc settings AM defaults for drift detection ([1777974](https://github.com/gravitee-io/gravitee-automation-sdk/commit/17779746ab9cd31ebc1def5f3f775b8ad9ac03dc))
+
 ## [2.5.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.4.1...am-sdk/v2.5.0) (2026-11-03)
 
 
