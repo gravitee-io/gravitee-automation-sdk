@@ -76,6 +76,46 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: ignore-remote-default
+  # A domain's oidc block: AM stores its defaults when the block is omitted, fills
+  # clientRegistrationSettings when the block leaves it out, and reads every flag and number below back
+  # with its default when a declared sub-block leaves it out. Drift detection accepts the remote value
+  # until the CRD sets it.
+  - target: $.components.schemas.AutomationDomain.properties.oidc
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationOidcSettings.properties.clientRegistrationSettings
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationOidcSettings.properties.redirectUriStrictMatching
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationClientRegistrationSettings.properties[?(@.type == "boolean")]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.SecurityProfileSettings.properties[?(@.type == "boolean")]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.AutomationCIBASettings.properties[?(@.type == "boolean" || @.type == "integer")]
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.SpiffeDomainSettings.properties.enabled
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.SpiffeDomainSettings.properties.maxJwtLifetimeSeconds
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
+  - target: $.components.schemas.SpiffeDomainSettings.properties.clockSkewSeconds
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default
   - target: $.components.schemas.SpiffeDomainSettings.properties.defaultAllowedAlgorithms
     update:
       x-oapi-codegen-extra-tags:
