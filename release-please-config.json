@@ -11,7 +11,8 @@
     "apim-sdk": {
       "release-type": "go",
       "component": "apim-sdk",
-      "bump-minor-pre-major": true
+      "bump-minor-pre-major": true,
+      "initial-version": "0.1.0"
     },
     "common": {
       "release-type": "go",
