@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/common/v1.2.0...common/v1.3.0) (2026-11-09)
+
+
+### Features
+
+* **apim-sdk:** never set non-pointer scalars nor recurse into anonymous structs in WithDefaults ([b476da2](https://github.com/gravitee-io/gravitee-automation-sdk/commit/b476da2e945c417834929507a87fd2f62e2b27e8))
+* **apim-sdk:** share mergeoverlay, mergespec and the typedef template in common ([2ccef3a](https://github.com/gravitee-io/gravitee-automation-sdk/commit/2ccef3a466e59c977b317d630ae8ae3499082fa0))
+* **apim-sdk:** sync APIM OAS with the masked dictionary reads ([e158897](https://github.com/gravitee-io/gravitee-automation-sdk/commit/e158897915757d5d6cac51d51c4ab63694fa7e69))
+
 ## [1.2.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/common/v1.1.0...common/v1.2.0) (2026-09-29)
 
 
