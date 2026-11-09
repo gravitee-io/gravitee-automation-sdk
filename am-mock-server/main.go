@@ -80,6 +80,7 @@ func serve(ctx context.Context, port int, basePath string, reg *auth.Registry, d
 	errCh := make(chan error, 1)
 	go func() {
 		log.Printf("AM mock server listening on http://localhost:%d%s", port, basePath)
+		log.Printf("AM mock faults at http://localhost:%d%s", port, server.FaultsPath)
 		errCh <- srv.ListenAndServe()
 	}()
 

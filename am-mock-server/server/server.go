@@ -36,13 +36,29 @@ func New(impl *MockAM) http.Handler {
 	return NewWithPath(impl, BasePath, nil, false)
 }
 
-// NewWithPath mounts the API at basePath. nil Registry leaves the API open. nil impl serves Unimplemented.
+// NewWithPath mounts the API at basePath, and the faults of mockAM at FaultsPath. nil Registry leaves the API open.
+// nil impl serves Unimplemented, with no faults.
 func NewWithPath(mockAM *MockAM, basePath string, reg *auth.Registry, dryRunReject bool) http.Handler {
+	api := newAPI(mockAM, basePath, reg, dryRunReject)
+	if mockAM == nil {
+		return api
+	}
+	root := chi.NewRouter()
+	routeFaultsEndpoint(root, mockAM.Faults)
+	root.Mount("/", api)
+	return root
+}
+
+func newAPI(mockAM *MockAM, basePath string, reg *auth.Registry, dryRunReject bool) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 
 	// First in the list is innermost: dry-run applies to requests that passed auth, parent and spec validation.
+	// A fault answers after auth and the parent check, before spec validation and dry-run.
 	middlewares := []MiddlewareFunc{DryRun(dryRunReject), requestValidator(basePath)}
+	if mockAM != nil {
+		middlewares = append(middlewares, injectFaults(mockAM.Faults))
+	}
 	if reg != nil {
 		r.Use(auth.AuthnMiddleware(reg))
 		middlewares = append(middlewares, auth.AuthzMiddleware(reg, chiRouteInfoExtractor()))

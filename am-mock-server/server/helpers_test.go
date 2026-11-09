@@ -73,7 +73,12 @@ func newAMClient(t *testing.T, srv *httptest.Server) *sdk.AMClient {
 }
 
 func collectionURL(srv *httptest.Server, resourcePath string) string {
-	return srv.URL + BasePath + "/organizations/DEFAULT/environments/DEFAULT" + resourcePath
+	return srv.URL + requestPath(resourcePath)
+}
+
+// requestPath is the full path of an org/env-relative resource path, as a Fault matches it.
+func requestPath(resourcePath string) string {
+	return BasePath + "/organizations/DEFAULT/environments/DEFAULT" + resourcePath
 }
 
 func domainsURL(srv *httptest.Server) string {
