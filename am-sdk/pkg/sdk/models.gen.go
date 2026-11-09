@@ -1119,16 +1119,16 @@ type AutomationCIBASettings = CIBASettings
 // CIBASettings Client-Initiated Backchannel Authentication (CIBA) settings for the domain. CIBA lets a relying party initiate end-user authentication from a separate consumption device, without redirecting the user through the browser. Authentication device notifiers are not managed by the Automation API and are not exposed here.
 type CIBASettings struct {
 	// AuthReqExpiry Default validity period, in seconds, of the issued auth_req_id.
-	AuthReqExpiry *int32 `json:"authReqExpiry,omitempty"`
+	AuthReqExpiry *int32 `drift:"ignore-remote-default" json:"authReqExpiry,omitempty"`
 
 	// BindingMessageLength Maximum number of characters accepted for the binding_message parameter.
-	BindingMessageLength *int32 `json:"bindingMessageLength,omitempty"`
+	BindingMessageLength *int32 `drift:"ignore-remote-default" json:"bindingMessageLength,omitempty"`
 
 	// Enabled Whether Client-Initiated Backchannel Authentication is enabled for the domain.
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled *bool `drift:"ignore-remote-default" json:"enabled,omitempty"`
 
 	// TokenReqInterval Minimum delay, in seconds, that a client must wait between two polls of the token endpoint for the same auth_req_id (POLL or PING delivery mode).
-	TokenReqInterval *int32 `json:"tokenReqInterval,omitempty"`
+	TokenReqInterval *int32 `drift:"ignore-remote-default" json:"tokenReqInterval,omitempty"`
 }
 
 // WithDefaults returns a copy of CIBASettings with unset fields set to their OpenAPI defaults.
@@ -1258,34 +1258,34 @@ type AutomationClientRegistrationSettings = ClientRegistrationSettings
 // ClientRegistrationSettings OpenID Connect Dynamic Client Registration configuration for the domain.
 type ClientRegistrationSettings struct {
 	// AllowHttpSchemeRedirectUri Whether the unsecured http scheme is permitted in redirect URIs.
-	AllowHttpSchemeRedirectUri *bool `json:"allowHttpSchemeRedirectUri,omitempty"`
+	AllowHttpSchemeRedirectUri *bool `drift:"ignore-remote-default" json:"allowHttpSchemeRedirectUri,omitempty"`
 
 	// AllowLocalhostRedirectUri Whether localhost is permitted as a redirect URI host.
-	AllowLocalhostRedirectUri *bool `json:"allowLocalhostRedirectUri,omitempty"`
+	AllowLocalhostRedirectUri *bool `drift:"ignore-remote-default" json:"allowLocalhostRedirectUri,omitempty"`
 
 	// AllowRedirectUriParamsExpressionLanguage Whether expression language is permitted in redirect URI parameters.
-	AllowRedirectUriParamsExpressionLanguage *bool `json:"allowRedirectUriParamsExpressionLanguage,omitempty"`
+	AllowRedirectUriParamsExpressionLanguage *bool `drift:"ignore-remote-default" json:"allowRedirectUriParamsExpressionLanguage,omitempty"`
 
 	// AllowWildCardRedirectUri Whether wildcards are permitted in redirect URIs.
-	AllowWildCardRedirectUri *bool `json:"allowWildCardRedirectUri,omitempty"`
+	AllowWildCardRedirectUri *bool `drift:"ignore-remote-default" json:"allowWildCardRedirectUri,omitempty"`
 
 	// AllowedScopes Scopes permitted on client registration requests when the allowed list is enabled.
 	AllowedScopes []string `json:"allowedScopes,omitempty"`
 
 	// AllowedScopesEnabled Whether registered client scopes are restricted to an allowed list.
-	AllowedScopesEnabled *bool `json:"allowedScopesEnabled,omitempty"`
+	AllowedScopesEnabled *bool `drift:"ignore-remote-default" json:"allowedScopesEnabled,omitempty"`
 
 	// ClientTemplateEnabled Whether a client may be used as a template for dynamic client registration.
-	ClientTemplateEnabled *bool `json:"clientTemplateEnabled,omitempty"`
+	ClientTemplateEnabled *bool `drift:"ignore-remote-default" json:"clientTemplateEnabled,omitempty"`
 
 	// DefaultScopes Default scopes added to every client registration request.
 	DefaultScopes []string `json:"defaultScopes,omitempty"`
 
 	// DynamicClientRegistrationEnabled Whether Dynamic Client Registration is enabled for the domain.
-	DynamicClientRegistrationEnabled *bool `json:"dynamicClientRegistrationEnabled,omitempty"`
+	DynamicClientRegistrationEnabled *bool `drift:"ignore-remote-default" json:"dynamicClientRegistrationEnabled,omitempty"`
 
 	// OpenDynamicClientRegistrationEnabled Whether open (unauthenticated) Dynamic Client Registration is enabled for the domain.
-	OpenDynamicClientRegistrationEnabled *bool `json:"openDynamicClientRegistrationEnabled,omitempty"`
+	OpenDynamicClientRegistrationEnabled *bool `drift:"ignore-remote-default" json:"openDynamicClientRegistrationEnabled,omitempty"`
 }
 
 // WithDefaults returns a copy of ClientRegistrationSettings with unset fields set to their OpenAPI defaults.
@@ -1546,7 +1546,7 @@ type Domain struct {
 	Name string `json:"name"`
 
 	// Oidc OpenID Connect settings for the domain. CIMD (client identity metadata document) settings are not exposed by the Automation API and are reset on update.
-	Oidc *AutomationOidcSettings `json:"oidc,omitempty"`
+	Oidc *AutomationOidcSettings `drift:"ignore-remote-default" json:"oidc,omitempty"`
 
 	// PasswordSettings Password policy applied to users of the domain: complexity requirements, expiry, and history.
 	PasswordSettings *PasswordSettings `json:"passwordSettings,omitempty"`
@@ -1941,13 +1941,13 @@ type OidcSettings struct {
 	CibaSettings *AutomationCIBASettings `json:"cibaSettings,omitempty"`
 
 	// ClientRegistrationSettings OpenID Connect Dynamic Client Registration configuration for the domain.
-	ClientRegistrationSettings *AutomationClientRegistrationSettings `json:"clientRegistrationSettings,omitempty"`
+	ClientRegistrationSettings *AutomationClientRegistrationSettings `drift:"ignore-remote-default" json:"clientRegistrationSettings,omitempty"`
 
 	// PostLogoutRedirectUris URLs the user may be redirected to after sign-out (post_logout_redirect_uri).
 	PostLogoutRedirectUris []string `json:"postLogoutRedirectUris,omitempty"`
 
 	// RedirectUriStrictMatching Whether redirect_uri and post_logout_redirect_uri values are matched strictly during OpenID Connect flows.
-	RedirectUriStrictMatching *bool `json:"redirectUriStrictMatching,omitempty"`
+	RedirectUriStrictMatching *bool `drift:"ignore-remote-default" json:"redirectUriStrictMatching,omitempty"`
 
 	// RequestUris Allowed request_uri values for passing OpenID Connect request objects by reference.
 	RequestUris []string `json:"requestUris,omitempty"`
@@ -2745,10 +2745,10 @@ func (v SecretExpirationSettings) WithDefaults() SecretExpirationSettings {
 // SecurityProfileSettings Financial-grade API (FAPI) security profile configuration for the domain.
 type SecurityProfileSettings struct {
 	// EnableFapiBrazil Whether the Open Banking Brasil Financial-grade API security profile (version 1.0) is applied.
-	EnableFapiBrazil *bool `json:"enableFapiBrazil,omitempty"`
+	EnableFapiBrazil *bool `drift:"ignore-remote-default" json:"enableFapiBrazil,omitempty"`
 
 	// EnablePlainFapi Whether the standard Financial-grade API security profile (version 1.0) is applied.
-	EnablePlainFapi *bool `json:"enablePlainFapi,omitempty"`
+	EnablePlainFapi *bool `drift:"ignore-remote-default" json:"enablePlainFapi,omitempty"`
 }
 
 // WithDefaults returns a copy of SecurityProfileSettings with unset fields set to their OpenAPI defaults.
@@ -2805,20 +2805,20 @@ type SpiffeDomainSettings struct {
 	CacheTtlSeconds *int32 `json:"cacheTtlSeconds,omitempty"`
 
 	// ClockSkewSeconds Allowed clock skew, in seconds, when validating JWT temporal claims.
-	ClockSkewSeconds *int32 `json:"clockSkewSeconds,omitempty"`
+	ClockSkewSeconds *int32 `drift:"ignore-remote-default" json:"clockSkewSeconds,omitempty"`
 
 	// DefaultAllowedAlgorithms Default allowlist of signature algorithms accepted for SPIFFE JWT validation.
 	DefaultAllowedAlgorithms []string `drift:"ignore-only:remote" json:"defaultAllowedAlgorithms,omitempty"`
 
 	// Enabled Whether SPIFFE workload identity support is enabled for the domain.
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled *bool `drift:"ignore-remote-default" json:"enabled,omitempty"`
 
 	// FetchTimeoutMs Deprecated: moved to keyRetrievalSettings.fetchTimeoutMs.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	FetchTimeoutMs *int32 `json:"fetchTimeoutMs,omitempty"`
 
 	// MaxJwtLifetimeSeconds Maximum accepted JWT lifetime, in seconds, computed as exp minus iat.
-	MaxJwtLifetimeSeconds *int32 `json:"maxJwtLifetimeSeconds,omitempty"`
+	MaxJwtLifetimeSeconds *int32 `drift:"ignore-remote-default" json:"maxJwtLifetimeSeconds,omitempty"`
 
 	// MaxResponseSizeKb Deprecated: moved to keyRetrievalSettings.maxResponseSizeKb.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
