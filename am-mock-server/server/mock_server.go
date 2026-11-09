@@ -31,6 +31,8 @@ import (
 type MockAM struct {
 	tenants map[string]*tenant
 	mutex   sync.Mutex
+	// Faults are the errors the mock answers instead of serving a request. Tests set and clear them while it runs.
+	Faults *Faults
 }
 
 type Child[T store.Identifiable] struct {
@@ -92,6 +94,7 @@ func NewMockAM() *MockAM {
 	return &MockAM{
 		tenants: make(map[string]*tenant),
 		mutex:   sync.Mutex{},
+		Faults:  &Faults{},
 	}
 }
 

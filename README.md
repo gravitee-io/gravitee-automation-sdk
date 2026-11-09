@@ -65,6 +65,7 @@ go run ./am-mock-server --dry-run-reject
 
 Like AM, upserts fill unset fields with their OpenAPI defaults, so the PUT and GET responses carry them.
 Requests are validated against the OpenAPI spec: an invalid body or parameter gets a `400` with the failing field; read-only fields sent by clients are ignored.
+A running mock can also answer an error instead of serving a request (fault injection), through `MockAM.Faults` in Go or `/_mock/faults` over HTTP: see [am-mock-server/README.md](am-mock-server/README.md#fault-injection).
 
 ## APIM SDK
 
