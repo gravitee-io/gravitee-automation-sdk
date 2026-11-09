@@ -27,7 +27,8 @@
     "apim-mock-server": {
       "release-type": "go",
       "component": "apim-mock-server",
-      "bump-minor-pre-major": true
+      "bump-minor-pre-major": true,
+      "initial-version": "0.1.0"
     }
   }
 }
