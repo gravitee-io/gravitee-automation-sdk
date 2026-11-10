@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.1.0...apim-sdk/v0.1.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **deps:** bump common to v1.3.0 ([623ed04](https://github.com/gravitee-io/gravitee-automation-sdk/commit/623ed0430585da3385631888ecc39e48a9f3fc0b))
+
 ## 0.1.0 (2026-11-09)
 
 
