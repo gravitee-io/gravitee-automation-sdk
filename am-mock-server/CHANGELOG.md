@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.5.2...am-mock-server/v1.6.0) (2026-11-10)
+
+
+### Features
+
+* **apim-sdk:** share mergeoverlay, mergespec and the typedef template in common ([2ccef3a](https://github.com/gravitee-io/gravitee-automation-sdk/commit/2ccef3a466e59c977b317d630ae8ae3499082fa0))
+* **apim-sdk:** sync APIM OAS with the masked dictionary reads ([e158897](https://github.com/gravitee-io/gravitee-automation-sdk/commit/e158897915757d5d6cac51d51c4ab63694fa7e69))
+
+
+### Bug Fixes
+
+* **deps:** bump am-sdk to v2.6.0 ([ba84c02](https://github.com/gravitee-io/gravitee-automation-sdk/commit/ba84c028c368781223bf447b3b06a23f2f9285c7))
+* **deps:** bump common to v1.3.0 ([623ed04](https://github.com/gravitee-io/gravitee-automation-sdk/commit/623ed0430585da3385631888ecc39e48a9f3fc0b))
+
 ## [1.5.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.5.1...am-mock-server/v1.5.2) (2026-11-09)
 
 
