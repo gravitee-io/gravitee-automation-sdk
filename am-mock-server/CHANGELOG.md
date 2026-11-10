@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.6.0...am-mock-server/v1.7.0) (2026-11-10)
+
+
+### Features
+
+* **am-mock-server:** inject faults at runtime ([3fa0539](https://github.com/gravitee-io/gravitee-automation-sdk/commit/3fa05397f912dc3edc90aa3271931c2b9a640acb))
+
+
+### Bug Fixes
+
+* **am-mock-server:** refuse a fault that can never match ([5b9f8f6](https://github.com/gravitee-io/gravitee-automation-sdk/commit/5b9f8f601ad183eaf3c174afbf14fff51ceeb081))
+
 ## [1.6.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.5.2...am-mock-server/v1.6.0) (2026-11-10)
 
 
