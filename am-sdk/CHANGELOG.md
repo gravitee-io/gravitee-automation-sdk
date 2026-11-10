@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.6.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.5.1...am-sdk/v2.6.0) (2026-11-10)
+
+
+### Features
+
+* **apim-sdk:** share mergeoverlay, mergespec and the typedef template in common ([2ccef3a](https://github.com/gravitee-io/gravitee-automation-sdk/commit/2ccef3a466e59c977b317d630ae8ae3499082fa0))
+* **apim-sdk:** sync APIM OAS with the masked dictionary reads ([e158897](https://github.com/gravitee-io/gravitee-automation-sdk/commit/e158897915757d5d6cac51d51c4ab63694fa7e69))
+
+
+### Bug Fixes
+
+* **deps:** bump common to v1.3.0 ([623ed04](https://github.com/gravitee-io/gravitee-automation-sdk/commit/623ed0430585da3385631888ecc39e48a9f3fc0b))
+
 ## [2.5.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.5.0...am-sdk/v2.5.1) (2026-11-09)
 
 
