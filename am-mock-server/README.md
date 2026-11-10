@@ -5,7 +5,7 @@ In-memory HTTP mock of the AM Automation API. Flags, auth and dry-run behaviour 
 
 ## Fault injection
 
-A running mock can answer an error instead of serving a request, for example to refuse a delete and then allow it, without losing what it stores. A fault matches a method (any case) and the exact request path, base path included (the query is ignored), and answers `status` (400-599) with AM's error body `{"http_status": <status>, "message": <message>}`. `times` > 0 answers that many requests, then the fault clears itself; omitted, it stays until cleared. A fault answers after authentication, authorization and the domain parent check, and before spec validation and dry-run.
+A running mock can answer an error instead of serving a request, for example to refuse a delete and then allow it, without losing what it stores. A fault matches a method (any case) and the exact request path, base path included: the path starts with `/` and holds no query (the request's query is ignored), or the fault is refused. It answers `status` (400-599) with AM's error body `{"http_status": <status>, "message": <message>}`. `times` > 0 answers that many requests, then the fault clears itself; omitted, it stays until cleared. A fault answers after authentication, authorization and the domain parent check, and before spec validation and dry-run.
 
 In Go, through `MockAM.Faults`:
 
@@ -32,4 +32,4 @@ curl -X DELETE 'localhost:8080/_mock/faults?method=DELETE&path=/automation/organ
 curl -X DELETE localhost:8080/_mock/faults
 ```
 
-`PUT` answers `204`, or `400` for an invalid fault. `DELETE` answers `204`, or `400` when only one of `method` and `path` is given.
+`PUT` answers `204`, or `400` for an invalid fault or a body with an unknown field. `DELETE` answers `204`, or `400` when only one of `method` and `path` is given.

@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/gravitee-io/gravitee-automation-sdk/am-sdk/v2/pkg/sdk"
@@ -93,9 +94,12 @@ func TestFault_ClearServesTheStoredResourceAgain(t *testing.T) {
 func TestFault_TimesAnswersThatManyRequests(t *testing.T) {
 	am, _, client := createAMServerWithCertificates(t, "test")
 	fault := refuseCertificateDelete("test")
-	fault.Times = 1
+	fault.Times = 2
 	am.Faults.Set(fault)
 
+	assertDeleteRefused(t, client, "test")
+	fault.Times = 1
+	assert.Equal(t, []Fault{fault}, am.Faults.List())
 	assertDeleteRefused(t, client, "test")
 
 	assertDeleted(t, client, "test")
@@ -117,11 +121,13 @@ func TestFault_ResetClearsEveryFault(t *testing.T) {
 func TestFault_SetPanicsOnAnInvalidFault(t *testing.T) {
 	valid := refuseCertificateDelete("test")
 	for name, mutate := range map[string]func(*Fault){
-		"no method":  func(f *Fault) { f.Method = "" },
-		"no path":    func(f *Fault) { f.Path = "" },
-		"status 200": func(f *Fault) { f.Status = http.StatusOK },
-		"status 600": func(f *Fault) { f.Status = 600 },
-		"times -1":   func(f *Fault) { f.Times = -1 },
+		"no method":       func(f *Fault) { f.Method = "" },
+		"no path":         func(f *Fault) { f.Path = "" },
+		"status 200":      func(f *Fault) { f.Status = http.StatusOK },
+		"status 600":      func(f *Fault) { f.Status = 600 },
+		"times -1":        func(f *Fault) { f.Times = -1 },
+		"relative path":   func(f *Fault) { f.Path = strings.TrimPrefix(f.Path, "/") },
+		"path with query": func(f *Fault) { f.Path += "?dryRun=false" },
 	} {
 		t.Run(name, func(t *testing.T) {
 			fault := valid
@@ -153,6 +159,16 @@ func TestFault_AnswersAfterAuth(t *testing.T) {
 	}
 }
 
+func TestFault_AnswersAfterTheDomainParentCheck(t *testing.T) {
+	am, srv := createAMServer(t) // no domain stored
+	am.Faults.Set(refuseCertificateDelete("test"))
+
+	resp := httpDelete(t, certificatesURL(srv), "test")
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+}
+
 func faultsURL(srv *httptest.Server) string {
 	return srv.URL + FaultsPath
 }
@@ -169,6 +185,17 @@ func deleteFaults(t *testing.T, srv *httptest.Server, query url.Values) *http.Re
 func putFault(t *testing.T, srv *httptest.Server, fault Fault) *http.Response {
 	t.Helper()
 	resp := httpPut(t, faultsURL(srv), fault)
+	t.Cleanup(func() { resp.Body.Close() })
+	return resp
+}
+
+func putFaultBody(t *testing.T, srv *httptest.Server, body string) *http.Response {
+	t.Helper()
+	req, err := http.NewRequest(http.MethodPut, faultsURL(srv), strings.NewReader(body))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
 	t.Cleanup(func() { resp.Body.Close() })
 	return resp
 }
@@ -216,22 +243,50 @@ func TestFaultsEndpoint_DeleteWithoutParametersClearsAll(t *testing.T) {
 }
 
 func TestFaultsEndpoint_DeleteWithOneParameterIsRefused(t *testing.T) {
-	_, srv := createAMServer(t)
-	putFault(t, srv, refuseCertificateDelete("test"))
+	for name, query := range map[string]url.Values{
+		"only method": {"method": {http.MethodDelete}},
+		"only path":   {"path": {certificatePath("test")}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, srv := createAMServer(t)
+			putFault(t, srv, refuseCertificateDelete("test"))
 
-	resp := deleteFaults(t, srv, url.Values{"method": {http.MethodDelete}})
+			resp := deleteFaults(t, srv, query)
 
-	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-	assert.Len(t, listFaults(t, srv), 1)
+			assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+			assert.Len(t, listFaults(t, srv), 1)
+		})
+	}
 }
 
 func TestFaultsEndpoint_PutRefusesAnInvalidFault(t *testing.T) {
-	_, srv := createAMServer(t)
-	fault := refuseCertificateDelete("test")
-	fault.Status = http.StatusOK
+	for name, mutate := range map[string]func(*Fault){
+		"status 200":      func(f *Fault) { f.Status = http.StatusOK },
+		"path with query": func(f *Fault) { f.Path += "?dryRun=false" },
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, srv := createAMServer(t)
+			fault := refuseCertificateDelete("test")
+			mutate(&fault)
 
-	assert.Equal(t, http.StatusBadRequest, putFault(t, srv, fault).StatusCode)
-	assert.Empty(t, listFaults(t, srv))
+			assert.Equal(t, http.StatusBadRequest, putFault(t, srv, fault).StatusCode)
+			assert.Empty(t, listFaults(t, srv))
+		})
+	}
+}
+
+func TestFaultsEndpoint_PutRefusesABodyThatIsNotAFault(t *testing.T) {
+	for name, body := range map[string]string{
+		"malformed JSON": `{"method": "DELETE",`,
+		"unknown field":  `{"method": "DELETE", "path": "/automation", "status": 400, "time": 1}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, srv := createAMServer(t)
+
+			assert.Equal(t, http.StatusBadRequest, putFaultBody(t, srv, body).StatusCode)
+			assert.Empty(t, listFaults(t, srv))
+		})
+	}
 }
 
 func TestFaultsEndpoint_NeedsNoToken(t *testing.T) {

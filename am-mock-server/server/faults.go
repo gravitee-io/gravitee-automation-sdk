@@ -46,6 +46,9 @@ func (f Fault) validate() error {
 	if f.Method == "" || f.Path == "" {
 		return errors.New("a fault needs a method and a path")
 	}
+	if !strings.HasPrefix(f.Path, "/") || strings.ContainsAny(f.Path, "?#") {
+		return fmt.Errorf("fault path %q can never match: it must start with / and hold no query or fragment", f.Path)
+	}
 	if f.Status < 400 || f.Status > 599 {
 		return fmt.Errorf("fault status %d is not an error status (400-599)", f.Status)
 	}
@@ -72,8 +75,14 @@ type Faults struct {
 
 // Set injects fault, replacing any fault on the same method and path. It panics on an invalid fault.
 func (f *Faults) Set(fault Fault) {
-	if err := fault.validate(); err != nil {
+	if err := f.set(fault); err != nil {
 		panic(err)
+	}
+}
+
+func (f *Faults) set(fault Fault) error {
+	if err := fault.validate(); err != nil {
+		return err
 	}
 	fault.Method = strings.ToUpper(fault.Method)
 	f.mu.Lock()
@@ -82,6 +91,7 @@ func (f *Faults) Set(fault Fault) {
 		f.faults = make(map[faultKey]Fault)
 	}
 	f.faults[keyOf(fault.Method, fault.Path)] = fault
+	return nil
 }
 
 // Clear removes the fault on method and path, if any.
@@ -150,15 +160,16 @@ func injectFaults(faults *Faults) MiddlewareFunc {
 func routeFaultsEndpoint(router chi.Router, faults *Faults) {
 	router.Put(FaultsPath, func(w http.ResponseWriter, r *http.Request) {
 		var fault Fault
-		if err := json.NewDecoder(r.Body).Decode(&fault); err != nil {
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&fault); err != nil {
 			auth.WriteError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		if err := fault.validate(); err != nil {
+		if err := faults.set(fault); err != nil {
 			auth.WriteError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		faults.Set(fault)
 		w.WriteHeader(http.StatusNoContent)
 	})
 	router.Get(FaultsPath, func(w http.ResponseWriter, _ *http.Request) {
