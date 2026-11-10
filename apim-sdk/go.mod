@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
-	github.com/gravitee-io/gravitee-automation-sdk/common v1.2.0
+	github.com/gravitee-io/gravitee-automation-sdk/common v1.3.0
 	github.com/oapi-codegen/runtime v1.7.0
 	github.com/stretchr/testify v1.12.1
 )
