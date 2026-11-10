@@ -3,10 +3,9 @@ module github.com/gravitee-io/gravitee-automation-sdk/am-sdk/v2
 go 1.26.1
 
 require (
-	github.com/gravitee-io/gravitee-automation-sdk/common v1.2.0
+	github.com/gravitee-io/gravitee-automation-sdk/common v1.3.0
 	github.com/oapi-codegen/runtime v1.7.0
 	github.com/stretchr/testify v1.12.1
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 replace github.com/gravitee-io/gravitee-automation-sdk/common => ../common
@@ -30,6 +29,7 @@ require (
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 	golang.org/x/tools v0.48.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
