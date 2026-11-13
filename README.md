@@ -74,8 +74,8 @@ Import the generated package:
 `github.com/gravitee-io/gravitee-automation-sdk/apim-sdk/pkg/sdk`
 
 `sdk.NewAPIMClient` takes an `sdk.APIContext` and returns an `APIMClient`. `APIContext` embeds the common
-`apicontext.APIContext` (base URL, org, env, **one** of bearer or basic) and adds `CloudToken`.
-`BaseURL` is the full automation URL, as for AM (`http://localhost:8083/automation`).
+`apicontext.APIContext` (base URL, org, env, **one** of bearer or basic) and adds `CloudToken`. `BaseURL` is the full
+automation URL (`http://localhost:8083/automation`). Org/env default to `DEFAULT`.
 
 ```go
 client, err := sdk.NewAPIMClient(sdk.APIContext{
@@ -90,7 +90,8 @@ With `CloudToken`, `Auth.BearerToken` is a Gravitee Cloud token (GKO's rules):
 - an empty `EnvID` is the token's only env (several envs is an error); a given `EnvID` must be in `envs`
 - an empty `BaseURL` becomes `https://{cpg}.cloudgate.gravitee.io/apim/automation`; a given one is kept
 
-**Capabilities** — upsert (PUT) / get / delete (e.g. `client.UpsertApiWithResponse(ctx, params, body)`):
+**Capabilities** — upsert (PUT) / get / delete, called directly on the client (e.g.
+`client.UpsertApiWithResponse(ctx, params, body)`). APIM has no list operations.
 
 | Resource | Scope |
 |----------|--------|
@@ -99,52 +100,57 @@ With `CloudToken`, `Auth.BearerToken` is a Gravitee Cloud token (GKO's rules):
 | Subscriptions, documentations, links | API |
 | Listings, documentations, links | portal |
 
-Errors and response helpers are the same as the AM SDK's.
+Operations with query parameters (`dryRun`, the legacy UUID params) take a params argument, `nil` for none
+(`client.GetApiWithResponse(ctx, hrid, nil)`).
 
-### Differences from AM
+**Models**
 
-- **Two sources.** Core APIM (`gravitee-api-management` `master`) and the AIM fragment (private
-  `gravitee-gamma-module-aim`, pinned tag) are merged by `common/cmd/mergespec` into `apim-sdk/openapi/openapi.yaml`.
-  `make sync-aim-oas` and `make verify-aim-oas` need a `gh` login with access to the AIM repo. CI runs the AIM check
-  in CircleCI, which holds the token in Keeper (as terraform-provider-apim does). `make check-oas` covers AM and core APIM.
-- **No list operations**: upstream has none.
-- **Legacy UUID params**: `hridContainsUUID`, `hridContainsApiUUID`, `hridContainsAppUUID` and the
-  `X-Gravitee-Set-Hrid` header treat an hrid as the UUID of a resource created before the automation API. Only some
-  operations declare them (see "Using the SDK from GKO"); those take a params argument, `nil` for none
-  (`client.GetApiWithResponse(ctx, hrid, nil)`).
-- **Model names** drop `Spec` and keep `State` (`ApiV4` is the PUT body, `ApiV4State` the response).
-- **Dates** are RFC 3339 strings (`*string`), not `time.Time`.
-- **Free-form configurations** (plugin, endpoint, page source, subscription entrypoint) are `unstructured.Unstructured`.
-- **`crossId` is writable** on `ApiV4` and `SharedPolicyGroup`. APIM honours it on PUT for legacy resources
-  (first created with a UUID), but the spec omits it.
-- **Versioning**: `main` tracks APIM `master`. As a rule, each APIM minor gets its own SDK release line, synced from
-  that APIM release branch; pick the line that matches your APIM. Only `main` ships for now.
-- **No breaking-change commits before v1**: the APIM SDK is not used anywhere yet, so an API change is a plain
-  `feat` or `fix`, never marked `!` or `BREAKING CHANGE:`. Drop this rule at v1.
-- **Polymorphic types** (`Listener`, `Selector`, and the AIM `AimCatalogMcpServerAuth`, `AimMcpProxyUpstreamAuth`,
+- `ApiV4` is the PUT body, `ApiV4State` the response: resource types drop `Spec` and keep `State`. Each State's
+  `Spec()` returns the PUT body it holds (a shallow copy), e.g. `GroupState.Spec()` → `Group`.
+- `WithDefaults()` fills unset pointers, slices and maps with their OpenAPI defaults, nested structs included. It never
+  sets non-pointer scalars (a `false` stays `false`) and never recurses into anonymous structs.
+- Resources (by hrid) and list items with an identity (`Member`, `GroupMember`, `Metadata`, `ApiKey`,
+  `ClientCertificate`) implement `store.Identifiable` (`pkg/sdk/identifiable.go`), with GKO's keys.
+- Dates are RFC 3339 strings (`*string`), not `time.Time`.
+- Free-form configurations (plugin, endpoint, page source, subscription entrypoint) are `unstructured.Unstructured`.
+- Polymorphic types (`Listener`, `Selector`, and the AIM `AimCatalogMcpServerAuth`, `AimMcpProxyUpstreamAuth`,
   `AimMcpProxyPlanSecurity`, `AimMcpProxyFlowSelector`, `AimMcpProxyIdentityProvider`) are hand-written `OneOf*` structs
-  (`pkg/sdk/oneof.go`) with one pointer per variant. On the wire they are the variant plus `type`; set exactly one.
-  The AIM discriminators have no `oneOf` upstream: the overlay moves their fields to a `*Base*` schema and declares the
-  `oneOf` of their variants, as core APIM does. `DynamicDictionary.provider` is flattened to `HttpDictionaryProvider`.
-- **`WithDefaults()`** never sets non-pointer scalars (a `false` stays `false`) and never recurses into anonymous
-  structs. The template is shared, so AM gets the same rules; its output is unchanged.
-- **List items with an identity** (`Member`, `GroupMember`, `Metadata`, `ApiKey`, `ClientCertificate`) implement
-  `store.Identifiable` (`pkg/sdk/identifiable.go`), with GKO's keys.
-- **Drift tags** are ported from GKO's APIM DTOs (`overlays/drift.yaml`), with these changes:
-  - `entrypointConnect` replaces GKO's flow `connect`
-  - explicit `ignore` on `readOnly` properties next to a `$ref` (the parser drops that `readOnly`)
-  - generic `readOnly`/`writeOnly` rules inside `allOf` branches (status fields, AIM secrets)
-  - overrides (`ignore-only:…`, `ignore-namespace-prefix`) placed after the generic rules
-  - extra tags beyond GKO's: `empty-is-nil` on fields that became pointers, `ignore` on `Metadata.key` and on
-    dictionary `encryptedProperties`
-  - targets use `['a','b']` unions: if APIM renames one property of a union, its tag is dropped without an error
+  (`pkg/sdk/oneof.go`) with one pointer per variant: set exactly one. On the wire they are the variant plus `type`.
+  `DynamicDictionary.provider` is an `HttpDictionaryProvider`.
+- `crossId` is writable on `ApiV4` and `SharedPolicyGroup`: APIM honours it on PUT for legacy resources (first created
+  with a UUID), though the spec omits it.
+- The legacy UUID params (`hridContainsUUID`, `hridContainsApiUUID`, `hridContainsAppUUID`, the `X-Gravitee-Set-Hrid`
+  header) treat an hrid as the UUID of a resource created before the automation API. Only some operations declare them
+  (see "Using the SDK from GKO").
+- Fields carry GKO's drift tags (`overlays/drift.yaml`), ported from its APIM DTOs.
+
+Calls return the generated `(resp, err)` pair. `err` is transport/construction only.
+
+**Errors**
+
+| When | What |
+|------|------|
+| `NewAPIMClient` | `errors.ClientError` (bad URL, invalid cloud token, etc.) |
+| Auth missing or both set | `errors.NoAuthProvided` / `errors.ManyAuthProvided` |
+| HTTP call | use `common/pkg/response`: `IsNotFound`, `IsUnauthorized`, `IsForbidden`, `IsServerError`, `IsNetworkError` |
+| 200 body | `response.Payload[T](resp)` |
+| Error body | `JSON400`, `JSON404`… on the response: APIM's `message` and `details` |
+
+**Versioning**: `main` tracks APIM `master`. As a rule, each APIM minor gets its own SDK release line, synced from
+that APIM release branch; pick the line that matches your APIM. Only `main` ships for now. Until v1 the SDK is not used
+anywhere, so an API change is a plain `feat` or `fix` commit, never marked `!` or `BREAKING CHANGE:`. Drop this rule at
+v1.
+
+Not an API reference — generated methods and models live in `apim-sdk/pkg/sdk`.
 
 ### Using the SDK from GKO
 
-- **Drift on the GET response**: decode it into the PUT type (e.g. `ApiV4State` → `ApiV4`) before drift. Comparing
-  two different types panics.
+- **Drift on the GET response**: convert the State with `Spec()` (e.g. `ApiV4State.Spec()` → `ApiV4`) before drift.
+  Comparing two different types panics.
 - **Drift engine changes**: `ignore-only` must pair items through `store.Identifiable`; `ignore` must be registered
   for numeric kinds (`GroupStatus.memberCount`); client-certificate `Expired`/`Scheduled` must move into the engine.
+- **Drift tags beyond GKO's**: `empty-is-nil` on fields that became pointers, `ignore` on `Metadata.key` and on
+  dictionary `encryptedProperties`.
 - **Never call `WithDefaults()` on the CRD side.** Its defaults differ from the CRD's (e.g. API `visibility` PUBLIC
   vs PRIVATE), and it would defeat `ignore-remote-default` and `empty-is-nil`.
 - **Map flow `connect` to `entrypointConnect`.** GKO sends `connect` today, and APIM ignores it.
@@ -157,17 +163,25 @@ Errors and response helpers are the same as the AM SDK's.
   policy group operations.
 - **Pin the SDK release line** matching the branch's APIM minor.
 
-### Updating the AIM fragment
+### Updating the spec
 
-The AIM fragment is pinned by `AIM_OAS_REF` in the `Makefile`. Nothing bumps it automatically, and
-`make verify-aim-oas` only checks the committed file against that tag. To move it:
+The spec has two sources, merged by `common/cmd/mergespec` into `apim-sdk/openapi/openapi.yaml`: core APIM
+(`gravitee-api-management` `master`, `make sync-oas`, checked by `make check-oas`) and the AIM fragment (private
+`gravitee-gamma-module-aim`, pinned by `AIM_OAS_REF` in the `Makefile`). `make sync-aim-oas` and
+`make verify-aim-oas` need a `gh` login with access to the AIM repo; CI runs the AIM check in CircleCI, which holds the
+token in Keeper (as terraform-provider-apim does).
+
+Nothing bumps the AIM fragment automatically, and `make verify-aim-oas` only checks the committed file against its
+tag. To move it:
 
 1. Set `AIM_OAS_REF` to the new tag, then run `make sync-aim-oas generate`.
 2. If a discriminated type gained a variant (e.g. a new upstream auth `type`), add it to `overlays/oneof.yaml` and to
    its `OneOf*` struct in `pkg/sdk/oneof.go`, with a round-trip test. Decoding an unknown `type` fails, so a missing
-   variant breaks every resource that uses it.
+   variant breaks every resource that uses it. The AIM discriminators have no `oneOf` upstream: the overlay moves
+   their fields to a `*Base*` schema and declares the `oneOf` of their variants, as core APIM does.
 3. Check new properties against `overlays/drift.yaml`: the generic rules tag `readOnly` properties and the
-   `writeOnly` ones of variants (`allOf` branches); any other property may need a tag of its own.
+   `writeOnly` ones of variants (`allOf` branches); any other property may need a tag of its own. Targets use
+   `['a','b']` unions: if APIM renames one property of a union, its tag is dropped without an error.
 4. Run `make lint test`.
 
 ## APIM mock server
@@ -178,31 +192,35 @@ go run ./apim-mock-server --auth-file apim-mock-server/examples/auth.yaml
 go run ./apim-mock-server --dry-run-reject
 ```
 
-Same flags as the AM mock server (`--port`, `--base-path`, `--auth-file`, `--dry-run-reject`); the sample auth file is
-`apim-mock-server/examples/auth.yaml`. It serves every APIM SDK operation, AIM included, at
-`/automation/organizations/{orgId}/environments/{envId}/…`.
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--port` | `8080` | HTTP listen port |
+| `--base-path` | `/automation` | API base path |
+| `--auth-file` | | Auth YAML (optional). Sample: `apim-mock-server/examples/auth.yaml` |
+| `--dry-run-reject` | off | PUT `?dryRun=true` answers `200` with the message in `errors.severe`, and persists nothing. |
 
-Like APIM, a PUT fills unset fields with their OpenAPI defaults and answers the resource State, which the GET then
-returns. Requests are validated against the merged OpenAPI spec, as on the AM mock.
+It serves every APIM SDK operation, AIM included, at `/automation/organizations/{orgId}/environments/{envId}/…`.
+Requests are validated against the merged OpenAPI spec: an invalid body or parameter gets a `400` with the failing
+field.
 
-### Differences from AM
+It behaves like APIM:
 
+- **PUT returns the State**: the spec with its OpenAPI defaults plus `id`, `organizationId`, `environmentId` and, on
+  sub-resources, `apiHrid`/`portalHrid`. Subscriptions also get `startingAt`, kept across PUTs. GET returns the same
+  State.
 - **404 on a missing resource**: GET or DELETE of an unknown hrid answers 404 `HRID [<hrid>] cannot be found.`
-  (the AM mock answers 204 on such a DELETE).
 - **Deterministic ids**: `id` (and `crossId`) are UUIDv5, stable per org, env, kind, parent (for a sub-resource)
-  and hrid, like APIM's. They are not byte-identical to APIM's. A `crossId` sent on an API or shared policy group PUT is kept, as for legacy resources.
-- **PUT returns the State**: the spec with its defaults plus `id`, `organizationId`, `environmentId` and, on
-  sub-resources, `apiHrid`/`portalHrid`. Subscriptions also get `startingAt`, kept across PUTs.
-- **Dry run returns a computed State**, built as for a real PUT, and persists nothing. With `--dry-run-reject`, the
-  message is in `errors.severe` (still `200`). The shared policy group DELETE also supports `dryRun`: `404` if
-  missing, else `204` with nothing deleted.
+  and hrid, like APIM's but not byte-identical. A `crossId` sent on an API or shared policy group PUT is kept, as for
+  legacy resources.
+- **Dry run returns a computed State**, built as for a real PUT, and persists nothing. The shared policy group DELETE
+  also supports `dryRun`: `404` if missing, else `204` with nothing deleted.
 - **References**: sub-resources under a missing API (`apiHrid`) or portal (`portalHrid`) answer 404, whatever the
   method. A subscription PUT answers 404 when its application, or its plan on the API, does not exist.
 - **Cascades**: deleting an API deletes its subscriptions, documentations and links; deleting a portal deletes its
   listings, documentations and links; deleting an application deletes its subscriptions (APIM closes them instead).
+- **`ignoreMembers`** is applied on groups: an update keeps the stored members, a new group has none.
 - **Legacy UUID params** (`hridContainsUUID`, `hridContainsApiUUID`, `hridContainsAppUUID`, the `X-Gravitee-Set-Hrid`
   header) and `ignoreGroups` are accepted and ignored: an hrid is always an hrid.
-- **`ignoreMembers`** is applied on groups, as in APIM: an update keeps the stored members, a new group has none.
 - **Polymorphic fields** (listeners, selectors, the AIM discriminated objects) are stored as unstructured maps, so
   every variant field is kept but no defaults are applied inside them.
 
