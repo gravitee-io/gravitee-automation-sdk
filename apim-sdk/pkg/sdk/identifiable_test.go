@@ -27,6 +27,20 @@ var (
 	_ store.Identifiable = Metadata{}
 	_ store.Identifiable = ApiKey{}
 	_ store.Identifiable = ClientCertificate{}
+
+	_ store.Identifiable = AimCatalogMcpServer{}
+	_ store.Identifiable = AimMcpProxy{}
+	_ store.Identifiable = ApiV4{}
+	_ store.Identifiable = Application{}
+	_ store.Identifiable = Dictionary{}
+	_ store.Identifiable = Documentation{}
+	_ store.Identifiable = Group{}
+	_ store.Identifiable = Portal{}
+	_ store.Identifiable = PortalLink{}
+	_ store.Identifiable = PortalListing{}
+	_ store.Identifiable = PortalTheme{}
+	_ store.Identifiable = SharedPolicyGroup{}
+	_ store.Identifiable = Subscription{}
 )
 
 func TestIdentity(t *testing.T) {
@@ -41,6 +55,8 @@ func TestIdentity(t *testing.T) {
 		{"api key", ApiKey{Key: "secret-key"}, "secret-key"},
 		{"named certificate", ClientCertificate{Name: "client", Content: "PEM"}, "client"},
 		{"unnamed certificate", ClientCertificate{Content: "\n  PEM\n"}, "PEM"},
+		{"group", Group{Hrid: "developers"}, "developers"},
+		{"api", ApiV4{Hrid: "petstore"}, "petstore"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

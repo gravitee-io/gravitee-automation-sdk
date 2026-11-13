@@ -86,7 +86,7 @@ A Go workspace with five modules:
 | `common` | Shared utilities: `apicontext` (auth + base URL), `response` (status helpers + generic `Payload[T]` extractor), `store` (channel-based in-memory generic store), `errors`, `refs` |
 | `am-sdk` | Generated SDK clients for AM resources (domains, data planes, applications, certificates, identity providers, reporters). All resources are generated into the single `am-sdk/pkg/sdk` package |
 | `am-mock-server` | Standalone mock HTTP server implementing the same OpenAPI spec with strict-server codegen. Used for integration-testing the SDK |
-| `apim-sdk` | Generated SDK client for the APIM Automation API (core APIM + the AIM fragment) in `apim-sdk/pkg/sdk`, with hand-written `oneof.go` (polymorphic types), `identifiable.go` (list item identities) and `apicontext.go` (`APIContext` with cloud-token resolution) |
+| `apim-sdk` | Generated SDK client for the APIM Automation API (core APIM + the AIM fragment) in `apim-sdk/pkg/sdk`, with hand-written `oneof.go` (polymorphic types), `identifiable.go` (resource and list item identities) and `apicontext.go` (`APIContext` with cloud-token resolution) |
 | `apim-mock-server` | Standalone mock HTTP server for the APIM Automation API (strict-server codegen from the merged APIM spec). Mirrors real APIM where the AM mock differs: 404 on missing hrids, deterministic ids, PUT returns the State, dry run in the handlers, parent and subscription reference checks, cascades |
 
 ---
