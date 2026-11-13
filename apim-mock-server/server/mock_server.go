@@ -159,7 +159,13 @@ func (m *MockAPIM) DeleteApplication(_ context.Context, req DeleteApplicationReq
 func (m *MockAPIM) UpsertGroup(_ context.Context, req UpsertGroupRequestObject) (UpsertGroupResponseObject, error) {
 	status := m.status(at(req.OrgId, req.EnvId, "group"), req.Body.Hrid, req.Params.DryRun)
 	group := state[GroupState](req.Body.WithDefaults(), status)
-	save(m.tenant(req.OrgId, req.EnvId).Groups, group, req.Params.DryRun)
+	groups := m.tenant(req.OrgId, req.EnvId).Groups
+	if ignoreMembers := req.Params.IgnoreMembers; ignoreMembers != nil && *ignoreMembers {
+		// As APIM: the stored members stay, a new group has none.
+		stored, _ := groups.Get(req.Body.Hrid)
+		group.Members = stored.Members
+	}
+	save(groups, group, req.Params.DryRun)
 	return UpsertGroup200JSONResponse(group), nil
 }
 
