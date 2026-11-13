@@ -42,4 +42,25 @@ func (v {{.TypeName}}) WithDefaults() {{.TypeName}} {
 	return v
 }
 {{- end}}
+{{- if and (not .IsAlias) .Schema.Properties}}
+{{- $state := .}}
+{{- range $.Types}}
+{{- if and (not .IsAlias) (eq (printf "%sState" .TypeName) $state.TypeName)}}
+{{- $spec := .}}
+
+// Spec returns the desired state held in s: the fields a PUT of {{$spec.TypeName}} sends. Shallow copy.
+func (s {{$state.TypeName}}) Spec() {{$spec.TypeName}} {
+	return {{$spec.TypeName}}{
+{{- range $spec.Schema.Properties}}
+{{- $field := .}}{{$value := printf "s.%s" .GoFieldName}}
+{{- range $state.Schema.Properties}}
+{{- if and (eq .GoFieldName $field.GoFieldName) (ne .GoTypeDef $field.GoTypeDef)}}{{$value = printf "(%s)(s.%s)" $field.GoTypeDef .GoFieldName}}{{end}}
+{{- end}}
+		{{.GoFieldName}}: {{$value}},
+{{- end}}
+	}
+}
+{{- end}}
+{{- end}}
+{{- end}}
 {{end}}

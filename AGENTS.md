@@ -107,10 +107,11 @@ The overlay chain differs between SDK and mock server:
 | SDK (`am-sdk/pkg/sdk/`) | `models.yaml` + `operations.yaml` + `paths.yaml` (bakes org/env into the server URL and strips them from paths) | Client + models (all tags), with `WithDefaults()` from `common/templates/typedef.tmpl` |
 | Mock server (`am-mock-server/server/`) | `models.yaml` + `operations.yaml` | chi strict-server + models (all tags, original paths kept) |
 | CRD models (`am-sdk/pkg/crd/domain/`) | `models.yaml` + `operations.yaml` + its own `overlay.yaml` (experimental) | Models only |
-| APIM SDK (`apim-sdk/pkg/sdk/`) | `models.yaml` + `oneof.yaml` (polymorphic types → hand-written `OneOf*`) + `drift.yaml` (GKO drift tags) + `operations.yaml` + `paths.yaml` | Client + models, with `WithDefaults()` |
+| APIM SDK (`apim-sdk/pkg/sdk/`) | `models.yaml` + `oneof.yaml` (polymorphic types → hand-written `OneOf*`) + `drift.yaml` (GKO drift tags) + `operations.yaml` + `paths.yaml` | Client + models, with `WithDefaults()` and `Spec()` |
 | APIM mock server (`apim-mock-server/server/`) | `models.yaml` + `oneof.yaml` + the mock's own `gen/server/oneof.yaml` (polymorphic types → `unstructured.Unstructured`, so the server does not depend on the SDK's hand-written types) + `operations.yaml` | chi strict-server + models (original paths kept, no drift tags) |
 
 `common/templates/typedef.tmpl` (`WithDefaults()`) is shared by every target. It fills unset pointers, nil slices and maps with their defaults, and recurses into named nested types. It never sets non-pointer scalars (zero is indistinguishable from unset) and never recurses into anonymous structs.
+It also gives each `<Name>State` struct whose `<Name>` struct exists a `Spec()` returning that PUT type (the APIM SDK and mock: a GET's State → the payload a PUT sends). It copies every `<Name>` field from the State, converting the ones whose type differs (such as the Application status enums); a State missing one of them fails to compile.
 
 In `apim-sdk/pkg/sdk`, `oneof.go` must have one `OneOf<Name>` struct per `x-go-type: OneOf<Name>` in `oneof.yaml`, with a field per variant (`oneof:"<TYPE>"` tag). A new upstream variant needs a new field: unmarshal fails on an unknown `type`.
 

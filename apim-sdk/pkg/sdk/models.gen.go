@@ -661,168 +661,84 @@ func (e ApiType) Valid() bool {
 	}
 }
 
-// Defines values for ApiV4SpecConsoleNotificationEvents.
+// Defines values for ApiV4ConsoleNotificationEvent.
 const (
-	ApiV4SpecConsoleNotificationEventsAPIDEPLOYED             ApiV4SpecConsoleNotificationEvents = "API_DEPLOYED"
-	ApiV4SpecConsoleNotificationEventsAPIDEPRECATED           ApiV4SpecConsoleNotificationEvents = "API_DEPRECATED"
-	ApiV4SpecConsoleNotificationEventsAPIKEYEXPIRED           ApiV4SpecConsoleNotificationEvents = "APIKEY_EXPIRED"
-	ApiV4SpecConsoleNotificationEventsAPIKEYRENEWED           ApiV4SpecConsoleNotificationEvents = "APIKEY_RENEWED"
-	ApiV4SpecConsoleNotificationEventsAPIKEYREVOKED           ApiV4SpecConsoleNotificationEvents = "APIKEY_REVOKED"
-	ApiV4SpecConsoleNotificationEventsAPISTARTED              ApiV4SpecConsoleNotificationEvents = "API_STARTED"
-	ApiV4SpecConsoleNotificationEventsAPISTOPPED              ApiV4SpecConsoleNotificationEvents = "API_STOPPED"
-	ApiV4SpecConsoleNotificationEventsAPIUPDATED              ApiV4SpecConsoleNotificationEvents = "API_UPDATED"
-	ApiV4SpecConsoleNotificationEventsASKFORREVIEW            ApiV4SpecConsoleNotificationEvents = "ASK_FOR_REVIEW"
-	ApiV4SpecConsoleNotificationEventsMESSAGE                 ApiV4SpecConsoleNotificationEvents = "MESSAGE"
-	ApiV4SpecConsoleNotificationEventsNEWRATING               ApiV4SpecConsoleNotificationEvents = "NEW_RATING"
-	ApiV4SpecConsoleNotificationEventsNEWRATINGANSWER         ApiV4SpecConsoleNotificationEvents = "NEW_RATING_ANSWER"
-	ApiV4SpecConsoleNotificationEventsNEWSPECGENERATED        ApiV4SpecConsoleNotificationEvents = "NEW_SPEC_GENERATED"
-	ApiV4SpecConsoleNotificationEventsNEWSUPPORTTICKET        ApiV4SpecConsoleNotificationEvents = "NEW_SUPPORT_TICKET"
-	ApiV4SpecConsoleNotificationEventsREQUESTFORCHANGES       ApiV4SpecConsoleNotificationEvents = "REQUEST_FOR_CHANGES"
-	ApiV4SpecConsoleNotificationEventsREVIEWOK                ApiV4SpecConsoleNotificationEvents = "REVIEW_OK"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONACCEPTED    ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_ACCEPTED"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONCLOSED      ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_CLOSED"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONFAILED      ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_FAILED"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONNEW         ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_NEW"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONPAUSED      ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_PAUSED"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONREJECTED    ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_REJECTED"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONRESUMED     ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_RESUMED"
-	ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONTRANSFERRED ApiV4SpecConsoleNotificationEvents = "SUBSCRIPTION_TRANSFERRED"
+	ApiV4ConsoleNotificationEventAPIDEPLOYED             ApiV4ConsoleNotificationEvent = "API_DEPLOYED"
+	ApiV4ConsoleNotificationEventAPIDEPRECATED           ApiV4ConsoleNotificationEvent = "API_DEPRECATED"
+	ApiV4ConsoleNotificationEventAPIKEYEXPIRED           ApiV4ConsoleNotificationEvent = "APIKEY_EXPIRED"
+	ApiV4ConsoleNotificationEventAPIKEYRENEWED           ApiV4ConsoleNotificationEvent = "APIKEY_RENEWED"
+	ApiV4ConsoleNotificationEventAPIKEYREVOKED           ApiV4ConsoleNotificationEvent = "APIKEY_REVOKED"
+	ApiV4ConsoleNotificationEventAPISTARTED              ApiV4ConsoleNotificationEvent = "API_STARTED"
+	ApiV4ConsoleNotificationEventAPISTOPPED              ApiV4ConsoleNotificationEvent = "API_STOPPED"
+	ApiV4ConsoleNotificationEventAPIUPDATED              ApiV4ConsoleNotificationEvent = "API_UPDATED"
+	ApiV4ConsoleNotificationEventASKFORREVIEW            ApiV4ConsoleNotificationEvent = "ASK_FOR_REVIEW"
+	ApiV4ConsoleNotificationEventMESSAGE                 ApiV4ConsoleNotificationEvent = "MESSAGE"
+	ApiV4ConsoleNotificationEventNEWRATING               ApiV4ConsoleNotificationEvent = "NEW_RATING"
+	ApiV4ConsoleNotificationEventNEWRATINGANSWER         ApiV4ConsoleNotificationEvent = "NEW_RATING_ANSWER"
+	ApiV4ConsoleNotificationEventNEWSPECGENERATED        ApiV4ConsoleNotificationEvent = "NEW_SPEC_GENERATED"
+	ApiV4ConsoleNotificationEventNEWSUPPORTTICKET        ApiV4ConsoleNotificationEvent = "NEW_SUPPORT_TICKET"
+	ApiV4ConsoleNotificationEventREQUESTFORCHANGES       ApiV4ConsoleNotificationEvent = "REQUEST_FOR_CHANGES"
+	ApiV4ConsoleNotificationEventREVIEWOK                ApiV4ConsoleNotificationEvent = "REVIEW_OK"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONACCEPTED    ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_ACCEPTED"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONCLOSED      ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_CLOSED"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONFAILED      ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_FAILED"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONNEW         ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_NEW"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONPAUSED      ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_PAUSED"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONREJECTED    ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_REJECTED"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONRESUMED     ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_RESUMED"
+	ApiV4ConsoleNotificationEventSUBSCRIPTIONTRANSFERRED ApiV4ConsoleNotificationEvent = "SUBSCRIPTION_TRANSFERRED"
 )
 
-// Valid indicates whether the value is a known member of the ApiV4SpecConsoleNotificationEvents enum.
-func (e ApiV4SpecConsoleNotificationEvents) Valid() bool {
+// Valid indicates whether the value is a known member of the ApiV4ConsoleNotificationEvent enum.
+func (e ApiV4ConsoleNotificationEvent) Valid() bool {
 	switch e {
-	case ApiV4SpecConsoleNotificationEventsAPIDEPLOYED:
+	case ApiV4ConsoleNotificationEventAPIDEPLOYED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsAPIDEPRECATED:
+	case ApiV4ConsoleNotificationEventAPIDEPRECATED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsAPIKEYEXPIRED:
+	case ApiV4ConsoleNotificationEventAPIKEYEXPIRED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsAPIKEYRENEWED:
+	case ApiV4ConsoleNotificationEventAPIKEYRENEWED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsAPIKEYREVOKED:
+	case ApiV4ConsoleNotificationEventAPIKEYREVOKED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsAPISTARTED:
+	case ApiV4ConsoleNotificationEventAPISTARTED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsAPISTOPPED:
+	case ApiV4ConsoleNotificationEventAPISTOPPED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsAPIUPDATED:
+	case ApiV4ConsoleNotificationEventAPIUPDATED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsASKFORREVIEW:
+	case ApiV4ConsoleNotificationEventASKFORREVIEW:
 		return true
-	case ApiV4SpecConsoleNotificationEventsMESSAGE:
+	case ApiV4ConsoleNotificationEventMESSAGE:
 		return true
-	case ApiV4SpecConsoleNotificationEventsNEWRATING:
+	case ApiV4ConsoleNotificationEventNEWRATING:
 		return true
-	case ApiV4SpecConsoleNotificationEventsNEWRATINGANSWER:
+	case ApiV4ConsoleNotificationEventNEWRATINGANSWER:
 		return true
-	case ApiV4SpecConsoleNotificationEventsNEWSPECGENERATED:
+	case ApiV4ConsoleNotificationEventNEWSPECGENERATED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsNEWSUPPORTTICKET:
+	case ApiV4ConsoleNotificationEventNEWSUPPORTTICKET:
 		return true
-	case ApiV4SpecConsoleNotificationEventsREQUESTFORCHANGES:
+	case ApiV4ConsoleNotificationEventREQUESTFORCHANGES:
 		return true
-	case ApiV4SpecConsoleNotificationEventsREVIEWOK:
+	case ApiV4ConsoleNotificationEventREVIEWOK:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONACCEPTED:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONACCEPTED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONCLOSED:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONCLOSED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONFAILED:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONFAILED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONNEW:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONNEW:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONPAUSED:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONPAUSED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONREJECTED:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONREJECTED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONRESUMED:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONRESUMED:
 		return true
-	case ApiV4SpecConsoleNotificationEventsSUBSCRIPTIONTRANSFERRED:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ApiV4StateConsoleNotificationEvents.
-const (
-	ApiV4StateConsoleNotificationEventsAPIDEPLOYED             ApiV4StateConsoleNotificationEvents = "API_DEPLOYED"
-	ApiV4StateConsoleNotificationEventsAPIDEPRECATED           ApiV4StateConsoleNotificationEvents = "API_DEPRECATED"
-	ApiV4StateConsoleNotificationEventsAPIKEYEXPIRED           ApiV4StateConsoleNotificationEvents = "APIKEY_EXPIRED"
-	ApiV4StateConsoleNotificationEventsAPIKEYRENEWED           ApiV4StateConsoleNotificationEvents = "APIKEY_RENEWED"
-	ApiV4StateConsoleNotificationEventsAPIKEYREVOKED           ApiV4StateConsoleNotificationEvents = "APIKEY_REVOKED"
-	ApiV4StateConsoleNotificationEventsAPISTARTED              ApiV4StateConsoleNotificationEvents = "API_STARTED"
-	ApiV4StateConsoleNotificationEventsAPISTOPPED              ApiV4StateConsoleNotificationEvents = "API_STOPPED"
-	ApiV4StateConsoleNotificationEventsAPIUPDATED              ApiV4StateConsoleNotificationEvents = "API_UPDATED"
-	ApiV4StateConsoleNotificationEventsASKFORREVIEW            ApiV4StateConsoleNotificationEvents = "ASK_FOR_REVIEW"
-	ApiV4StateConsoleNotificationEventsMESSAGE                 ApiV4StateConsoleNotificationEvents = "MESSAGE"
-	ApiV4StateConsoleNotificationEventsNEWRATING               ApiV4StateConsoleNotificationEvents = "NEW_RATING"
-	ApiV4StateConsoleNotificationEventsNEWRATINGANSWER         ApiV4StateConsoleNotificationEvents = "NEW_RATING_ANSWER"
-	ApiV4StateConsoleNotificationEventsNEWSPECGENERATED        ApiV4StateConsoleNotificationEvents = "NEW_SPEC_GENERATED"
-	ApiV4StateConsoleNotificationEventsNEWSUPPORTTICKET        ApiV4StateConsoleNotificationEvents = "NEW_SUPPORT_TICKET"
-	ApiV4StateConsoleNotificationEventsREQUESTFORCHANGES       ApiV4StateConsoleNotificationEvents = "REQUEST_FOR_CHANGES"
-	ApiV4StateConsoleNotificationEventsREVIEWOK                ApiV4StateConsoleNotificationEvents = "REVIEW_OK"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONACCEPTED    ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_ACCEPTED"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONCLOSED      ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_CLOSED"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONFAILED      ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_FAILED"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONNEW         ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_NEW"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONPAUSED      ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_PAUSED"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONREJECTED    ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_REJECTED"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONRESUMED     ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_RESUMED"
-	ApiV4StateConsoleNotificationEventsSUBSCRIPTIONTRANSFERRED ApiV4StateConsoleNotificationEvents = "SUBSCRIPTION_TRANSFERRED"
-)
-
-// Valid indicates whether the value is a known member of the ApiV4StateConsoleNotificationEvents enum.
-func (e ApiV4StateConsoleNotificationEvents) Valid() bool {
-	switch e {
-	case ApiV4StateConsoleNotificationEventsAPIDEPLOYED:
-		return true
-	case ApiV4StateConsoleNotificationEventsAPIDEPRECATED:
-		return true
-	case ApiV4StateConsoleNotificationEventsAPIKEYEXPIRED:
-		return true
-	case ApiV4StateConsoleNotificationEventsAPIKEYRENEWED:
-		return true
-	case ApiV4StateConsoleNotificationEventsAPIKEYREVOKED:
-		return true
-	case ApiV4StateConsoleNotificationEventsAPISTARTED:
-		return true
-	case ApiV4StateConsoleNotificationEventsAPISTOPPED:
-		return true
-	case ApiV4StateConsoleNotificationEventsAPIUPDATED:
-		return true
-	case ApiV4StateConsoleNotificationEventsASKFORREVIEW:
-		return true
-	case ApiV4StateConsoleNotificationEventsMESSAGE:
-		return true
-	case ApiV4StateConsoleNotificationEventsNEWRATING:
-		return true
-	case ApiV4StateConsoleNotificationEventsNEWRATINGANSWER:
-		return true
-	case ApiV4StateConsoleNotificationEventsNEWSPECGENERATED:
-		return true
-	case ApiV4StateConsoleNotificationEventsNEWSUPPORTTICKET:
-		return true
-	case ApiV4StateConsoleNotificationEventsREQUESTFORCHANGES:
-		return true
-	case ApiV4StateConsoleNotificationEventsREVIEWOK:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONACCEPTED:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONCLOSED:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONFAILED:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONNEW:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONPAUSED:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONREJECTED:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONRESUMED:
-		return true
-	case ApiV4StateConsoleNotificationEventsSUBSCRIPTIONTRANSFERRED:
+	case ApiV4ConsoleNotificationEventSUBSCRIPTIONTRANSFERRED:
 		return true
 	default:
 		return false
@@ -2017,6 +1933,16 @@ func (v AimCatalogMcpServerState) WithDefaults() AimCatalogMcpServerState {
 	return v
 }
 
+// Spec returns the desired state held in s: the fields a PUT of AimCatalogMcpServer sends. Shallow copy.
+func (s AimCatalogMcpServerState) Spec() AimCatalogMcpServer {
+	return AimCatalogMcpServer{
+		Connection:  s.Connection,
+		Description: s.Description,
+		EntityId:    s.EntityId,
+		Hrid:        s.Hrid,
+	}
+}
+
 // AimCatalogMcpServerStatus Platform-discovered facts about a Catalog MCP server; read-only.
 type AimCatalogMcpServerStatus struct {
 	// EnvironmentId The environment ID
@@ -2980,6 +2906,25 @@ func (v AimMcpProxyState) WithDefaults() AimMcpProxyState {
 	return v
 }
 
+// Spec returns the desired state held in s: the fields a PUT of AimMcpProxy sends. Shallow copy.
+func (s AimMcpProxyState) Spec() AimMcpProxy {
+	return AimMcpProxy{
+		ContextPath:       s.ContextPath,
+		Description:       s.Description,
+		EntityId:          s.EntityId,
+		FlowExecution:     s.FlowExecution,
+		Flows:             s.Flows,
+		Hrid:              s.Hrid,
+		IdentityProviders: s.IdentityProviders,
+		Mode:              s.Mode,
+		Name:              s.Name,
+		Plans:             s.Plans,
+		Proxy:             s.Proxy,
+		State:             s.State,
+		Studio:            s.Studio,
+	}
+}
+
 // AimMcpProxyStudio What a `STUDIO` exposes: tools picked from catalog MCP servers of the environment, the credential the
 // gateway presents to each of those servers, and whether the platform's fine-grained authorization runs on
 // tool calls. Tools converge as a set — adding, removing or re-aliasing one replaces the studio's tool
@@ -3202,8 +3147,8 @@ type ApiType string
 // ApiV4Spec ApiV4DefinitionSpec defines the desired state of ApiDefinition.
 type ApiV4Spec = ApiV4
 
-// ApiV4SpecConsoleNotificationEvents defines model for ApiV4Spec.ConsoleNotification.Events.
-type ApiV4SpecConsoleNotificationEvents string
+// ApiV4ConsoleNotificationEvent defines model for ApiV4Spec.consoleNotification.events.
+type ApiV4ConsoleNotificationEvent string
 
 // ApiV4 ApiV4DefinitionSpec defines the desired state of ApiDefinition.
 type ApiV4 struct {
@@ -3224,7 +3169,7 @@ type ApiV4 struct {
 	// ConsoleNotification Console notification configuration.
 	ConsoleNotification *struct {
 		// Events Events on which a notification is created
-		Events []ApiV4SpecConsoleNotificationEvents `drift:"empty-is-nil" json:"events,omitempty"`
+		Events []ApiV4ConsoleNotificationEvent `drift:"empty-is-nil" json:"events,omitempty"`
 
 		// Groups Name, HRID or UUIDs of existing groups (of users) targeted by notifications.
 		Groups []string `drift:"ignore-only:crd,strip-ns" json:"groups,omitempty"`
@@ -3454,7 +3399,7 @@ type ApiV4State struct {
 	// ConsoleNotification Console notification configuration.
 	ConsoleNotification *struct {
 		// Events Events on which a notification is created
-		Events []ApiV4StateConsoleNotificationEvents `drift:"empty-is-nil" json:"events,omitempty"`
+		Events []ApiV4ConsoleNotificationEvent `drift:"empty-is-nil" json:"events,omitempty"`
 
 		// Groups Name, HRID or UUIDs of existing groups (of users) targeted by notifications.
 		Groups []string `drift:"ignore-only:crd,strip-ns" json:"groups,omitempty"`
@@ -3681,8 +3626,44 @@ func (v ApiV4State) WithDefaults() ApiV4State {
 	return v
 }
 
-// ApiV4StateConsoleNotificationEvents defines model for ApiV4State.ConsoleNotification.Events.
-type ApiV4StateConsoleNotificationEvents string
+// Spec returns the desired state held in s: the fields a PUT of ApiV4 sends. Shallow copy.
+func (s ApiV4State) Spec() ApiV4 {
+	return ApiV4{
+		AllowMultiJwtOauth2Subscriptions: s.AllowMultiJwtOauth2Subscriptions,
+		AllowedInApiProducts:             s.AllowedInApiProducts,
+		Analytics:                        s.Analytics,
+		Categories:                       s.Categories,
+		ConsoleNotification:              s.ConsoleNotification,
+		CrossId:                          s.CrossId,
+		Description:                      s.Description,
+		EndpointGroups:                   s.EndpointGroups,
+		Failover:                         s.Failover,
+		FlowExecution:                    s.FlowExecution,
+		Flows:                            s.Flows,
+		Groups:                           s.Groups,
+		Hrid:                             s.Hrid,
+		Labels:                           s.Labels,
+		LifecycleState:                   s.LifecycleState,
+		Listeners:                        s.Listeners,
+		Members:                          s.Members,
+		Metadata:                         s.Metadata,
+		Name:                             s.Name,
+		NotifyMembers:                    s.NotifyMembers,
+		Pages:                            s.Pages,
+		Plans:                            s.Plans,
+		PortalNavigation:                 s.PortalNavigation,
+		PrimaryOwner:                     s.PrimaryOwner,
+		Properties:                       s.Properties,
+		Resources:                        s.Resources,
+		ResponseTemplates:                s.ResponseTemplates,
+		Services:                         s.Services,
+		State:                            s.State,
+		Tags:                             s.Tags,
+		Type:                             s.Type,
+		Version:                          s.Version,
+		Visibility:                       s.Visibility,
+	}
+}
 
 // ApplicationOAuthClientSettings Application OAuth client settings. This require Dynamic Client Registration to be enabled at the environment level.
 type ApplicationOAuthClientSettings struct {
@@ -3976,6 +3957,25 @@ func (v ApplicationState) WithDefaults() ApplicationState {
 		v.Status = new(ApplicationStateStatus("ACTIVE"))
 	}
 	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of Application sends. Shallow copy.
+func (s ApplicationState) Spec() Application {
+	return Application{
+		Background:    s.Background,
+		Description:   s.Description,
+		Domain:        s.Domain,
+		Groups:        s.Groups,
+		Hrid:          s.Hrid,
+		Members:       s.Members,
+		Metadata:      s.Metadata,
+		Name:          s.Name,
+		NotifyMembers: s.NotifyMembers,
+		PictureUrl:    s.PictureUrl,
+		PrimaryOwner:  s.PrimaryOwner,
+		Settings:      s.Settings,
+		Status:        (*ApplicationSpecStatus)(s.Status),
+	}
 }
 
 // ApplicationStateStatus Application are either ACTIVE or ARCHIVED never actually deleted.
@@ -4412,6 +4412,19 @@ func (v DictionaryState) WithDefaults() DictionaryState {
 	return v
 }
 
+// Spec returns the desired state held in s: the fields a PUT of Dictionary sends. Shallow copy.
+func (s DictionaryState) Spec() Dictionary {
+	return Dictionary{
+		Deployed:    s.Deployed,
+		Description: s.Description,
+		Dynamic:     s.Dynamic,
+		Hrid:        s.Hrid,
+		Manual:      s.Manual,
+		Name:        s.Name,
+		Type:        s.Type,
+	}
+}
+
 // DictionaryTrigger Renewal configuration for a 'DYNAMIC' dictionary
 type DictionaryTrigger struct {
 	Rate int64                 `json:"rate"`
@@ -4564,6 +4577,20 @@ func (v DocumentationState) WithDefaults() DocumentationState {
 		v.Errors = &withDefaults
 	}
 	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of Documentation sends. Shallow copy.
+func (s DocumentationState) Spec() Documentation {
+	return Documentation{
+		Area:       s.Area,
+		Content:    s.Content,
+		Hrid:       s.Hrid,
+		Location:   s.Location,
+		Name:       s.Name,
+		Order:      s.Order,
+		Type:       s.Type,
+		Visibility: s.Visibility,
+	}
 }
 
 // DocumentationStatus Status information for a Documentation page after import.
@@ -5122,6 +5149,17 @@ func (v GroupState) WithDefaults() GroupState {
 		v.NotifyMembers = new(bool(true))
 	}
 	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of Group sends. Shallow copy.
+func (s GroupState) Spec() Group {
+	return Group{
+		DefaultMemberRoles: s.DefaultMemberRoles,
+		Hrid:               s.Hrid,
+		Members:            s.Members,
+		Name:               s.Name,
+		NotifyMembers:      s.NotifyMembers,
+	}
 }
 
 // GroupStatus Status information for a group after import.
@@ -6000,6 +6038,18 @@ func (v PortalLinkState) WithDefaults() PortalLinkState {
 	return v
 }
 
+// Spec returns the desired state held in s: the fields a PUT of PortalLink sends. Shallow copy.
+func (s PortalLinkState) Spec() PortalLink {
+	return PortalLink{
+		Href:       s.Href,
+		Hrid:       s.Hrid,
+		Location:   s.Location,
+		Name:       s.Name,
+		Order:      s.Order,
+		Visibility: s.Visibility,
+	}
+}
+
 // PortalLinkStatus Status information for a Portal Link after import.
 // Exactly one of `portalHrid` / `apiHrid` is populated depending on the parent endpoint used.
 type PortalLinkStatus struct {
@@ -6132,6 +6182,14 @@ func (v PortalListingState) WithDefaults() PortalListingState {
 		v.Errors = &withDefaults
 	}
 	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of PortalListing sends. Shallow copy.
+func (s PortalListingState) Spec() PortalListing {
+	return PortalListing{
+		Apis: s.Apis,
+		Hrid: s.Hrid,
+	}
 }
 
 // PortalListingStatus Status information for a Portal Listing after import.
@@ -6396,6 +6454,17 @@ func (v PortalState) WithDefaults() PortalState {
 	return v
 }
 
+// Spec returns the desired state held in s: the fields a PUT of Portal sends. Shallow copy.
+func (s PortalState) Spec() Portal {
+	return Portal{
+		ActiveThemeHrid: s.ActiveThemeHrid,
+		Hrid:            s.Hrid,
+		Name:            s.Name,
+		Navigation:      s.Navigation,
+		Structure:       s.Structure,
+	}
+}
+
 // PortalThemeSpec Specification of a next-gen portal Theme. Applying a Theme through the Automation API
 // makes it the active Theme for the environment; every other Theme in the same environment
 // is disabled.
@@ -6487,6 +6556,19 @@ func (v PortalThemeState) WithDefaults() PortalThemeState {
 		v.Errors = &withDefaults
 	}
 	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of PortalTheme sends. Shallow copy.
+func (s PortalThemeState) Spec() PortalTheme {
+	return PortalTheme{
+		BackgroundImage: s.BackgroundImage,
+		Definition:      s.Definition,
+		Favicon:         s.Favicon,
+		Hrid:            s.Hrid,
+		Logo:            s.Logo,
+		Name:            s.Name,
+		OptionalLogo:    s.OptionalLogo,
+	}
 }
 
 // PortalVisibility Whether the navigation entry is visible to anonymous portal visitors.
@@ -6753,6 +6835,20 @@ func (v SharedPolicyGroupState) WithDefaults() SharedPolicyGroupState {
 	return v
 }
 
+// Spec returns the desired state held in s: the fields a PUT of SharedPolicyGroup sends. Shallow copy.
+func (s SharedPolicyGroupState) Spec() SharedPolicyGroup {
+	return SharedPolicyGroup{
+		ApiType:             s.ApiType,
+		CrossId:             s.CrossId,
+		Description:         s.Description,
+		Hrid:                s.Hrid,
+		Name:                s.Name,
+		Phase:               s.Phase,
+		PrerequisiteMessage: s.PrerequisiteMessage,
+		Steps:               s.Steps,
+	}
+}
+
 // SimpleApplicationSettings Simple application settings
 type SimpleApplicationSettings struct {
 	// ClientId Simple application client ID
@@ -6950,6 +7046,19 @@ func (v SubscriptionState) WithDefaults() SubscriptionState {
 		v.Errors = &withDefaults
 	}
 	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of Subscription sends. Shallow copy.
+func (s SubscriptionState) Spec() Subscription {
+	return Subscription{
+		ApiKeys:               s.ApiKeys,
+		ApplicationHrid:       s.ApplicationHrid,
+		ConsumerConfiguration: s.ConsumerConfiguration,
+		EndingAt:              s.EndingAt,
+		Hrid:                  s.Hrid,
+		Metadata:              s.Metadata,
+		PlanHrid:              s.PlanHrid,
+	}
 }
 
 // SubscriptionStatus Status information for a subscription after import.
