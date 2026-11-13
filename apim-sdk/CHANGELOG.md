@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.1.1...apim-sdk/v0.2.0) (2026-11-13)
+
+
+### Features
+
+* **apim-sdk:** convert each resource State to its PUT payload ([99af048](https://github.com/gravitee-io/gravitee-automation-sdk/commit/99af048d69f244f2e4e16e173f7e106cc3515753))
+* **apim-sdk:** identify every Automation resource by its hrid ([009b141](https://github.com/gravitee-io/gravitee-automation-sdk/commit/009b1411e61220df19167ef8b389ca320b9bb420))
+
+
+### Bug Fixes
+
+* **apim-sdk:** decode error details whatever their invalid value holds ([b76930e](https://github.com/gravitee-io/gravitee-automation-sdk/commit/b76930e2e65bfee41d19105e01cf979bc06a3cad))
+* **deps:** bump common to v1.4.0 ([c0512c7](https://github.com/gravitee-io/gravitee-automation-sdk/commit/c0512c79ffd6ae08aeb7fa0d57c16f42cde94925))
+
 ## [0.1.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.1.0...apim-sdk/v0.1.1) (2026-11-10)
 
 
