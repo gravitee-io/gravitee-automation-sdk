@@ -16,7 +16,8 @@ package sdk
 
 import "strings"
 
-// Identities of list items, the keys GKO's drift pairs them by.
+// Identities of resources and list items: the keys GKO's lifecycle stores resources by
+// and its drift pairs list items by.
 
 // Identity is shared by API and Application members.
 func (m Member) Identity() string {
@@ -42,3 +43,19 @@ func (c ClientCertificate) Identity() string {
 	}
 	return strings.TrimSpace(c.Content)
 }
+
+// A resource is identified by its hrid.
+
+func (a AimCatalogMcpServer) Identity() string { return a.Hrid }
+func (a AimMcpProxy) Identity() string         { return a.Hrid }
+func (a ApiV4) Identity() string               { return a.Hrid }
+func (a Application) Identity() string         { return a.Hrid }
+func (d Dictionary) Identity() string          { return d.Hrid }
+func (d Documentation) Identity() string       { return d.Hrid }
+func (g Group) Identity() string               { return g.Hrid }
+func (p Portal) Identity() string              { return p.Hrid }
+func (p PortalLink) Identity() string          { return p.Hrid }
+func (p PortalListing) Identity() string       { return p.Hrid }
+func (p PortalTheme) Identity() string         { return p.Hrid }
+func (s SharedPolicyGroup) Identity() string   { return s.Hrid }
+func (s Subscription) Identity() string        { return s.Hrid }
