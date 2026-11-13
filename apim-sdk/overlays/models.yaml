@@ -103,6 +103,11 @@ actions:
       x-go-type: interface{}
       x-go-type-skip-optional-pointer: true
 
+  # One enum for both ApiV4 and ApiV4State (the State's allOf would copy it), so ApiV4State.Spec() can assign it.
+  - target: $.components.schemas.ApiV4Spec.properties.consoleNotification.properties.events.items
+    update:
+      x-go-type-name: ApiV4ConsoleNotificationEvent
+
   # Dates stay RFC 3339 strings, as GKO compares them (rfc3339 drift tag); format is kept for OAS validation.
   - target: $.components.schemas.*.properties[?(@.format == "date-time")]
     update:
