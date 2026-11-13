@@ -3,7 +3,7 @@ module github.com/gravitee-io/gravitee-automation-sdk/am-sdk/v2
 go 1.26.1
 
 require (
-	github.com/gravitee-io/gravitee-automation-sdk/common v1.3.0
+	github.com/gravitee-io/gravitee-automation-sdk/common v1.4.0
 	github.com/oapi-codegen/runtime v1.7.0
 	github.com/stretchr/testify v1.12.1
 )
