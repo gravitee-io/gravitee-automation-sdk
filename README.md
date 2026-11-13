@@ -119,10 +119,14 @@ Operations with query parameters (`dryRun`, the legacy UUID params) take a param
   `DynamicDictionary.provider` is an `HttpDictionaryProvider`.
 - `crossId` is writable on `ApiV4` and `SharedPolicyGroup`: APIM honours it on PUT for legacy resources (first created
   with a UUID), though the spec omits it.
+- Required fields are plain values, so an unset one is sent as its zero value instead of being left out (e.g. a group
+  member without `role` is sent with `"role": ""`): check `responseTemplates.*.status`, member `role`, endpoint and
+  page `name` before a PUT.
 - The legacy UUID params (`hridContainsUUID`, `hridContainsApiUUID`, `hridContainsAppUUID`, the `X-Gravitee-Set-Hrid`
-  header) treat an hrid as the UUID of a resource created before the automation API. Only some operations declare them
-  (see "Using the SDK from GKO").
-- Fields carry GKO's drift tags (`overlays/drift.yaml`), ported from its APIM DTOs.
+  header) treat an hrid as the UUID of a resource created before the automation API. The spec declares
+  `hridContainsUUID` only on the API GET and DELETE and on the group and subscription operations: the API PUT and the
+  application, dictionary and shared policy group operations cannot address a legacy resource by its UUID yet.
+- The `drift` struct tags (`overlays/drift.yaml`) are read only by GKO's drift engine.
 
 Calls return the generated `(resp, err)` pair. `err` is transport/construction only.
 
@@ -142,26 +146,6 @@ anywhere, so an API change is a plain `feat` or `fix` commit, never marked `!` o
 v1.
 
 Not an API reference — generated methods and models live in `apim-sdk/pkg/sdk`.
-
-### Using the SDK from GKO
-
-- **Drift on the GET response**: convert the State with `Spec()` (e.g. `ApiV4State.Spec()` → `ApiV4`) before drift.
-  Comparing two different types panics.
-- **Drift engine changes**: `ignore-only` must pair items through `store.Identifiable`; `ignore` must be registered
-  for numeric kinds (`GroupStatus.memberCount`); client-certificate `Expired`/`Scheduled` must move into the engine.
-- **Drift tags beyond GKO's**: `empty-is-nil` on fields that became pointers, `ignore` on `Metadata.key` and on
-  dictionary `encryptedProperties`.
-- **Never call `WithDefaults()` on the CRD side.** Its defaults differ from the CRD's (e.g. API `visibility` PUBLIC
-  vs PRIVATE), and it would defeat `ignore-remote-default` and `empty-is-nil`.
-- **Map flow `connect` to `entrypointConnect`.** GKO sends `connect` today, and APIM ignores it.
-- **Required fields are now sent as zero values** (`responseTemplates.*.status`, member `role`, endpoint and page
-  `name`): the CRD validation must cover them.
-- **Branches**: only GKO master and 4.13.x can adopt it (4.12.x has neither these DTOs nor `internal/drift`).
-  Suggested order: SharedPolicyGroup → Dictionary → Application → API v4.
-- **Keep GKO's HTTP client where the spec lacks `hridContainsUUID`.** It is declared on the API GET and DELETE and on
-  the group and subscription operations, but not yet on the API PUT or on the application, dictionary and shared
-  policy group operations.
-- **Pin the SDK release line** matching the branch's APIM minor.
 
 ### Updating the spec
 
