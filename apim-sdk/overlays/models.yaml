@@ -97,6 +97,12 @@ actions:
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
 
+  # APIM sends the raw invalid value (string, number, object…), not always the object the spec declares.
+  - target: $.components.schemas.HttpError.properties.details.items.properties.invalidValue
+    update:
+      x-go-type: interface{}
+      x-go-type-skip-optional-pointer: true
+
   # Dates stay RFC 3339 strings, as GKO compares them (rfc3339 drift tag); format is kept for OAS validation.
   - target: $.components.schemas.*.properties[?(@.format == "date-time")]
     update:

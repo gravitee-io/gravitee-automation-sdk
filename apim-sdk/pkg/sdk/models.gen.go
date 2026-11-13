@@ -5202,7 +5202,7 @@ type HttpError struct {
 		// InvalidValue The invalid value.
 		//
 		// Examples: $...faulty
-		InvalidValue map[string]interface{} `json:"invalidValue,omitempty"`
+		InvalidValue interface{} `json:"invalidValue,omitempty"`
 
 		// Location The json path of the field in error.
 		//

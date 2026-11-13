@@ -152,6 +152,39 @@ func TestWithHTTPClient_ReturnsNewClientUsingGivenHTTPClient(t *testing.T) {
 	assert.Equal(t, 1, transport.calls, "original client must keep its own HTTP client")
 }
 
+func TestUpsert_DecodesErrorDetailsWhateverTheirInvalidValue(t *testing.T) {
+	tests := []struct {
+		name         string
+		invalidValue string
+		want         interface{}
+	}{
+		{"raw value, as the spec example", `"foo"`, "foo"},
+		{"JsonNullable wrapper, as APIM sends today", `{"present":true,"undefined":false}`,
+			map[string]interface{}{"present": true, "undefined": false}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(`{"httpStatus":400,"message":"Validation error",` +
+					`"details":[{"message":"must not be blank","invalidValue":` + tt.invalidValue + `}]}`))
+			}))
+			defer s.Close()
+			client, err := NewAPIMClient(bearerContext(s.URL))
+			require.NoError(t, err)
+
+			r, err := client.UpsertGroupWithResponse(context.Background(), nil, Group{Hrid: "developers"})
+
+			require.NoError(t, err)
+			assert.Equal(t, http.StatusBadRequest, r.StatusCode())
+			require.NotNil(t, r.JSON400)
+			assert.Equal(t, new("Validation error"), r.JSON400.Message)
+			assert.Equal(t, tt.want, r.JSON400.Details[0].InvalidValue)
+		})
+	}
+}
+
 type countingTransport struct {
 	calls int
 }
