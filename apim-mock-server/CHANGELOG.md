@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.1.1...apim-mock-server/v0.2.0) (2026-11-13)
+
+
+### Features
+
+* **apim-mock-server:** keep group members when ignoreMembers is set ([9ea5bc8](https://github.com/gravitee-io/gravitee-automation-sdk/commit/9ea5bc80748c983ce7b91f094606d8708d401065))
+* **apim-sdk:** convert each resource State to its PUT payload ([99af048](https://github.com/gravitee-io/gravitee-automation-sdk/commit/99af048d69f244f2e4e16e173f7e106cc3515753))
+
+
+### Bug Fixes
+
+* **apim-sdk:** decode error details whatever their invalid value holds ([b76930e](https://github.com/gravitee-io/gravitee-automation-sdk/commit/b76930e2e65bfee41d19105e01cf979bc06a3cad))
+* **deps:** bump apim-sdk to v0.2.0 ([ed0a973](https://github.com/gravitee-io/gravitee-automation-sdk/commit/ed0a9738c915f00f1ef2617c5e1084b90b814fbd))
+* **deps:** bump common to v1.4.0 ([c0512c7](https://github.com/gravitee-io/gravitee-automation-sdk/commit/c0512c79ffd6ae08aeb7fa0d57c16f42cde94925))
+
 ## [0.1.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.1.0...apim-mock-server/v0.1.1) (2026-11-10)
 
 
