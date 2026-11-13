@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.6.0...am-sdk/v2.6.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **deps:** bump common to v1.4.0 ([c0512c7](https://github.com/gravitee-io/gravitee-automation-sdk/commit/c0512c79ffd6ae08aeb7fa0d57c16f42cde94925))
+
 ## [2.6.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.5.1...am-sdk/v2.6.0) (2026-11-10)
 
 
