@@ -119,6 +119,8 @@ Errors and response helpers are the same as the AM SDK's.
   (first created with a UUID), but the spec omits it.
 - **Versioning**: `main` tracks APIM `master`. As a rule, each APIM minor gets its own SDK release line, synced from
   that APIM release branch; pick the line that matches your APIM. Only `main` ships for now.
+- **No breaking-change commits before v1**: the APIM SDK is not used anywhere yet, so an API change is a plain
+  `feat` or `fix`, never marked `!` or `BREAKING CHANGE:`. Drop this rule at v1.
 - **Polymorphic types** (`Listener`, `Selector`, and the AIM `AimCatalogMcpServerAuth`, `AimMcpProxyUpstreamAuth`,
   `AimMcpProxyPlanSecurity`, `AimMcpProxyFlowSelector`, `AimMcpProxyIdentityProvider`) are hand-written `OneOf*` structs
   (`pkg/sdk/oneof.go`) with one pointer per variant. On the wire they are the variant plus `type`; set exactly one.
