@@ -268,3 +268,54 @@ func TestDelete404SDK(t *testing.T) {
 		})
 	}
 }
+
+func TestUpsertGroupSDK_IgnoreMembersKeepsStoredMembers(t *testing.T) {
+	_, srv := createAPIMServer(t)
+	client := newAPIMClient(t, srv)
+	upsertGroup(t, client, nil, "john")
+
+	upsertGroup(t, client, &sdk.UpsertGroupParams{IgnoreMembers: new(true)}, "jane")
+
+	assert.Equal(t, groupMembers("john"), getGroup(t, client).Members)
+}
+
+func TestUpsertGroupSDK_IgnoreMembersCreatesWithoutMembers(t *testing.T) {
+	_, srv := createAPIMServer(t)
+	client := newAPIMClient(t, srv)
+
+	upsertGroup(t, client, &sdk.UpsertGroupParams{IgnoreMembers: new(true)}, "john")
+
+	assert.Empty(t, getGroup(t, client).Members)
+}
+
+func TestUpsertGroupSDK_IgnoreMembersDryRunStoresNothing(t *testing.T) {
+	_, srv := createAPIMServer(t)
+	client := newAPIMClient(t, srv)
+
+	upsertGroup(t, client, &sdk.UpsertGroupParams{IgnoreMembers: new(true), DryRun: new(true)}, "john")
+
+	get, err := client.GetGroupWithResponse(t.Context(), "developers", nil)
+	assertSDK404(t, get, err)
+}
+
+func upsertGroup(t *testing.T, client *sdk.APIMClient, params *sdk.UpsertGroupParams, members ...string) {
+	t.Helper()
+	put, err := client.UpsertGroupWithResponse(t.Context(), params,
+		sdk.Group{Hrid: "developers", Name: "Developers", Members: groupMembers(members...)})
+	assertSDKOK(t, put, err)
+}
+
+func getGroup(t *testing.T, client *sdk.APIMClient) sdk.GroupState {
+	t.Helper()
+	get, err := client.GetGroupWithResponse(t.Context(), "developers", nil)
+	assertSDKOK(t, get, err)
+	return *get.JSON200
+}
+
+func groupMembers(sourceIDs ...string) []sdk.GroupMember {
+	members := make([]sdk.GroupMember, 0, len(sourceIDs))
+	for _, id := range sourceIDs {
+		members = append(members, sdk.GroupMember{Source: "memory", SourceId: id, Roles: map[string]string{"API": "USER"}})
+	}
+	return members
+}

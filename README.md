@@ -199,7 +199,8 @@ returns. Requests are validated against the merged OpenAPI spec, as on the AM mo
 - **Cascades**: deleting an API deletes its subscriptions, documentations and links; deleting a portal deletes its
   listings, documentations and links; deleting an application deletes its subscriptions (APIM closes them instead).
 - **Legacy UUID params** (`hridContainsUUID`, `hridContainsApiUUID`, `hridContainsAppUUID`, the `X-Gravitee-Set-Hrid`
-  header), `ignoreGroups` and `ignoreMembers` are accepted and ignored: an hrid is always an hrid.
+  header) and `ignoreGroups` are accepted and ignored: an hrid is always an hrid.
+- **`ignoreMembers`** is applied on groups, as in APIM: an update keeps the stored members, a new group has none.
 - **Polymorphic fields** (listeners, selectors, the AIM discriminated objects) are stored as unstructured maps, so
   every variant field is kept but no defaults are applied inside them.
 
