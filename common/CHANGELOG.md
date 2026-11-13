@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/common/v1.3.0...common/v1.4.0) (2026-11-13)
+
+
+### Features
+
+* **apim-sdk:** convert each resource State to its PUT payload ([99af048](https://github.com/gravitee-io/gravitee-automation-sdk/commit/99af048d69f244f2e4e16e173f7e106cc3515753))
+
 ## [1.3.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/common/v1.2.0...common/v1.3.0) (2026-11-09)
 
 
