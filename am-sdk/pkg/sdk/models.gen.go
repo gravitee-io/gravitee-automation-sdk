@@ -1571,7 +1571,7 @@ type Domain struct {
 	// Tags Sharding tags that control which gateways deploy this domain.
 	//
 	// Example: ["eu","production"]
-	Tags []string `drift:"set" json:"tags,omitempty"`
+	Tags []string `drift:"set:omitted-is-empty" json:"tags,omitempty"`
 
 	// TokenExchangeSettings OAuth 2.0 Token Exchange (RFC 8693) configuration for the domain, covering impersonation and delegation.
 	TokenExchangeSettings *TokenExchangeSettings `json:"tokenExchangeSettings,omitempty"`
