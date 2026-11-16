@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.6.1...am-sdk/v2.6.2) (2026-11-16)
+
+
+### Bug Fixes
+
+* **am-sdk:** keep drift on domain tags the CRD leaves out ([29d065b](https://github.com/gravitee-io/gravitee-automation-sdk/commit/29d065b3b5bd513b689cecb2f263e75ad81626f5))
+
 ## [2.6.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.6.0...am-sdk/v2.6.1) (2026-11-13)
 
 
