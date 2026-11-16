@@ -158,3 +158,10 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
+
+  # Sharding tags pick the gateways that deploy the domain. A tag added in AM to a domain whose CRD leaves tags out
+  # must still drift: the next apply would drop it and withdraw the domain from those gateways.
+  - target: $.components.schemas.AutomationDomain.properties.tags
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: set:omitted-is-empty
