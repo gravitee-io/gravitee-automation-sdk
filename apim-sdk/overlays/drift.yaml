@@ -53,7 +53,21 @@ actions:
   - target: $.components.schemas.FlowExecution.properties.mode
     update:
       x-oapi-codegen-extra-tags:
-        drift: ignore-remote-default:DEFAULT
+        drift: ignore-remote-default:case-insensitive,DEFAULT
+  # APIM stores AUTO for an entrypoint sent without qos (GKO-3431).
+  - target: $.components.schemas.Entrypoint.properties.qos
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default:AUTO
+  # APIM stores / and STARTS_WITH for an HTTP selector sent without them.
+  - target: $.components.schemas.HttpSelector.allOf[1].properties.path
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default:/
+  - target: $.components.schemas.HttpSelector.allOf[1].properties.pathOperator
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default:STARTS_WITH
   - target: $.components.schemas.FlowV4.properties['selectors','request','response','subscribe','publish','entrypointConnect','interact']
     update:
       x-oapi-codegen-extra-tags:
@@ -84,22 +98,23 @@ actions:
         drift: ignore
 
   # Free-form plugin configurations, typed as unstructured.Unstructured in models.yaml: compared as unstructured objects.
+  # APIM saves the schema default of every plugin field a payload omits, so a key the CRD leaves out is not drift.
   - target: $.components.schemas['APIResource','BaseStep','EndpointV4','PageSource','PlanSecurity','ServiceV4','AimMcpProxyFlowStep'].properties.configuration
     update:
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:ignore-remote-default
   - target: $.components.schemas.EndpointV4.properties.sharedConfigurationOverride
     update:
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:ignore-remote-default
   - target: $.components.schemas.EndpointGroupV4.properties.sharedConfiguration
     update:
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:ignore-remote-default
   - target: $.components.schemas.SubscriptionConsumerConfiguration.properties.entrypointConfiguration
     update:
       x-oapi-codegen-extra-tags:
-        drift: unstructured
+        drift: unstructured:ignore-remote-default
 
   # Read-only next to a $ref: kin-openapi drops the readOnly before the generic rule can see it.
   - target: $.components.schemas['BaseStatus','AimResourceStatus'].properties.errors
