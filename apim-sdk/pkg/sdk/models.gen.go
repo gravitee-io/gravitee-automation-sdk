@@ -1645,7 +1645,7 @@ func (e Visibility) Valid() bool {
 // APIResource API resource
 type APIResource struct {
 	// Configuration JSON Object configuration specific to this resource.
-	Configuration unstructured.Unstructured `drift:"unstructured" json:"configuration"`
+	Configuration unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration"`
 
 	// Enabled Make it available or not.
 	Enabled *bool `json:"enabled,omitempty"`
@@ -2344,7 +2344,7 @@ type AimMcpProxyFlowStep struct {
 	Condition *string `drift:"empty-is-nil" json:"condition,omitempty"`
 
 	// Configuration Configuration of the policy, free-form as the policy's own schema defines it; validated against that schema on apply and dry run
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration,omitempty"`
 
 	// Description Human description of the step
 	Description *string `drift:"empty-is-nil" json:"description,omitempty"`
@@ -4101,7 +4101,7 @@ type BaseStep struct {
 	Condition *string `json:"condition,omitempty"`
 
 	// Configuration JSON Object configuration of the policy used.
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration,omitempty"`
 
 	// Description A description for the step
 	Description *string `json:"description,omitempty"`
@@ -4703,7 +4703,7 @@ type EndpointGroupV4 struct {
 	Services *EndpointGroupServices `json:"services,omitempty"`
 
 	// SharedConfiguration JSON configuration for the `type` of `endpoints` that will be shared across all endpoints.
-	SharedConfiguration *unstructured.Unstructured `drift:"unstructured" json:"sharedConfiguration,omitempty"`
+	SharedConfiguration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"sharedConfiguration,omitempty"`
 
 	// Type The type of the endpoint group
 	//
@@ -4749,7 +4749,7 @@ func (v EndpointServices) WithDefaults() EndpointServices {
 // EndpointV4 API endpoint
 type EndpointV4 struct {
 	// Configuration JSON Configuration specific to this endpoint that cannot be define at the group level.
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration,omitempty"`
 
 	// InheritConfiguration Enables shared configuration inheritance.
 	InheritConfiguration *bool `json:"inheritConfiguration,omitempty"`
@@ -4766,7 +4766,7 @@ type EndpointV4 struct {
 	Services *EndpointServices `json:"services,omitempty"`
 
 	// SharedConfigurationOverride JSON Configuration that replaces the shared configuration defined at the group level.
-	SharedConfigurationOverride *unstructured.Unstructured `drift:"unstructured" json:"sharedConfigurationOverride,omitempty"`
+	SharedConfigurationOverride *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"sharedConfigurationOverride,omitempty"`
 
 	// Tenants The list of Getaway's tenants on which the endpoint can be used.
 	Tenants []string `drift:"empty-is-nil" json:"tenants,omitempty"`
@@ -4813,7 +4813,7 @@ type Entrypoint struct {
 	// Qos Type of the quality of service (for message APIs).
 	//
 	// Examples: NONE
-	Qos *Qos `json:"qos,omitempty"`
+	Qos *Qos `drift:"ignore-remote-default:AUTO" json:"qos,omitempty"`
 
 	// Type The type of the entrypoint
 	//
@@ -4908,7 +4908,7 @@ type FlowExecution struct {
 	// Mode DEFAULT : all flows that match the conditions are executed in the order they are defined BEST_MATCH: only the best matching flow will be executed
 	//
 	// Examples: BEST_MATCH
-	Mode *FlowMode `drift:"ignore-remote-default:DEFAULT" json:"mode,omitempty"`
+	Mode *FlowMode `drift:"ignore-remote-default:case-insensitive,DEFAULT" json:"mode,omitempty"`
 }
 
 // WithDefaults returns a copy of FlowExecution with unset fields set to their OpenAPI defaults.
@@ -5345,12 +5345,12 @@ type HttpSelector struct {
 	// Path The path to match
 	//
 	// Examples: /my/path
-	Path string `json:"path,omitempty"`
+	Path string `drift:"ignore-remote-default:/" json:"path,omitempty"`
 
 	// PathOperator Operator function to match a URI path
 	//
 	// Examples: EQUALS
-	PathOperator Operator `json:"pathOperator,omitempty"`
+	PathOperator Operator `drift:"ignore-remote-default:STARTS_WITH" json:"pathOperator,omitempty"`
 
 	// Type Selector type.
 	//
@@ -5672,7 +5672,7 @@ func (v OtelLogsV4) WithDefaults() OtelLogsV4 {
 // overriding page content each time the source is fetched.
 type PageSource struct {
 	// Configuration JSON object configuration of the fetch plugin.
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration,omitempty"`
 
 	// Type The type of the page source (fetcher plugin ID).
 	//
@@ -5793,7 +5793,7 @@ type PlanMode string
 // PlanSecurity API plan security
 type PlanSecurity struct {
 	// Configuration JSON Object to configure specific attributes of a Plan.
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration,omitempty"`
 
 	// Type API Plan security implementation.
 	//
@@ -6708,7 +6708,7 @@ type Selector = OneOfSelector
 // ServiceV4 Specifies an API property fetch using an external source.
 type ServiceV4 struct {
 	// Configuration JSON configuration of the service.
-	Configuration unstructured.Unstructured `drift:"unstructured" json:"configuration"`
+	Configuration unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration"`
 
 	// Enabled Is the service enabled or not.
 	Enabled *bool `json:"enabled,omitempty"`
@@ -6873,7 +6873,7 @@ type StepV4 struct {
 	Condition *string `json:"condition,omitempty"`
 
 	// Configuration JSON Object configuration of the policy used.
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration,omitempty"`
 
 	// Description A description for the step
 	Description *string `json:"description,omitempty"`
@@ -6902,7 +6902,7 @@ type SubscriptionConsumerConfiguration struct {
 	Channel *string `json:"channel,omitempty"`
 
 	// EntrypointConfiguration The configuration to use at subscription time to push to the target service.
-	EntrypointConfiguration *unstructured.Unstructured `drift:"unstructured" json:"entrypointConfiguration,omitempty"`
+	EntrypointConfiguration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"entrypointConfiguration,omitempty"`
 
 	// EntrypointId The id of the targeted entrypoint
 	EntrypointId string `json:"entrypointId"`
