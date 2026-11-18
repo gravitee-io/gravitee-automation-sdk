@@ -115,3 +115,19 @@ actions:
   - target: $.components.schemas.*.allOf[*].properties[?(@.format == "date-time")]
     update:
       x-go-type: string
+
+  # APIM declares these required but defaults them when absent, and rejects an empty value (pathOperator: "" fails
+  # Selector deserialization with a 400). Leave them out of the payload when unset instead of sending a zero value.
+  # Go types are unchanged.
+  - target: $.components.schemas.HttpSelector.allOf[1].properties['path','pathOperator']
+    update:
+      x-omitempty: true
+  - target: $.components.schemas.ChannelSelector.allOf[1].properties['channel','channelOperator']
+    update:
+      x-omitempty: true
+  - target: $.components.schemas.PathV4.properties.path
+    update:
+      x-omitempty: true
+  - target: $.components.schemas.ResponseTemplate.properties.status
+    update:
+      x-omitempty: true
