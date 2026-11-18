@@ -4126,12 +4126,12 @@ type ChannelSelector struct {
 	// Channel The channel of the selector
 	//
 	// Examples: /my/channel
-	Channel string `json:"channel"`
+	Channel string `json:"channel,omitempty"`
 
 	// ChannelOperator Operator function to match a URI path
 	//
 	// Examples: EQUALS
-	ChannelOperator Operator `json:"channelOperator"`
+	ChannelOperator Operator `json:"channelOperator,omitempty"`
 
 	// Entrypoints Among all entrypoints types, restrict which one will trigger this flow. Unset or empty means "all types".
 	//
@@ -5345,12 +5345,12 @@ type HttpSelector struct {
 	// Path The path to match
 	//
 	// Examples: /my/path
-	Path string `json:"path"`
+	Path string `json:"path,omitempty"`
 
 	// PathOperator Operator function to match a URI path
 	//
 	// Examples: EQUALS
-	PathOperator Operator `json:"pathOperator"`
+	PathOperator Operator `json:"pathOperator,omitempty"`
 
 	// Type Selector type.
 	//
@@ -5774,7 +5774,7 @@ type PathV4 struct {
 
 	// OverrideAccess Override default organization entrypoint with `host`
 	OverrideAccess *bool  `json:"overrideAccess,omitempty"`
-	Path           string `json:"path"`
+	Path           string `json:"path,omitempty"`
 }
 
 // WithDefaults returns a copy of PathV4 with unset fields set to their OpenAPI defaults.
@@ -6659,7 +6659,7 @@ type ResponseTemplate struct {
 	PropagateErrorKeyToLogs *bool `json:"propagateErrorKeyToLogs,omitempty"`
 
 	// Status HTTP Status to return
-	Status int `json:"status"`
+	Status int `json:"status,omitempty"`
 }
 
 // WithDefaults returns a copy of ResponseTemplate with unset fields set to their OpenAPI defaults.
