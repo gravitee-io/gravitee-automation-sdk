@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.2.0...apim-mock-server/v0.2.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **apim-sdk:** accept a response template without status ([50a6e9d](https://github.com/gravitee-io/gravitee-automation-sdk/commit/50a6e9ded098804e3d3ddfe59e8affed6b30b4c5))
+* **apim-sdk:** omit unset required fields APIM defaults ([9110ece](https://github.com/gravitee-io/gravitee-automation-sdk/commit/9110ece2104f78829c34698edb383d574899e0be))
+* **deps:** bump apim-sdk to v0.2.1 ([1c818f4](https://github.com/gravitee-io/gravitee-automation-sdk/commit/1c818f46bc1bc94a391300c2c8b8969ad903a696))
+
 ## [0.2.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.1.1...apim-mock-server/v0.2.0) (2026-11-13)
 
 
