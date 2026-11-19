@@ -37,6 +37,16 @@ func TestUpsertApiRejectsMissingRequiredProperty(t *testing.T) {
 	assertPut400(t, collectionURL(srv, "/apis"), body, `property "version" is missing`)
 }
 
+func TestUpsertApiAcceptsResponseTemplateWithoutStatus(t *testing.T) {
+	_, srv := createAPIMServer(t)
+	body := apiBody("test")
+	body["responseTemplates"] = jsonObject{"DEFAULT": jsonObject{"*/*": jsonObject{"body": "oops"}}}
+
+	resp := httpPut(t, collectionURL(srv, "/apis"), body)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
 func TestUpsertApiRejectsWrongType(t *testing.T) {
 	_, srv := createAPIMServer(t)
 	body := apiBody("test")
