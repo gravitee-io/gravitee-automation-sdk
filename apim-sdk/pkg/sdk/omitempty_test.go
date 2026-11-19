@@ -22,8 +22,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// APIM defaults these required fields when absent and rejects an empty value, so an unset one is left out.
-func TestRequiredFieldsAPIMDefaults_OmittedWhenUnset(t *testing.T) {
+// APIM defaults these required fields when absent and rejects an empty value: an unset one is left out, a set one kept.
+func TestRequiredFieldsAPIMDefaults_Omitempty(t *testing.T) {
 	tests := []struct {
 		name  string
 		value any
@@ -45,14 +45,29 @@ func TestRequiredFieldsAPIMDefaults_OmittedWhenUnset(t *testing.T) {
 			want:  `{"type":"CHANNEL"}`,
 		},
 		{
+			name:  "channel selector with channel and operator",
+			value: OneOfSelector{Channel: &ChannelSelector{Type: "CHANNEL", Channel: "/a", ChannelOperator: "EQUALS"}},
+			want:  `{"type":"CHANNEL","channel":"/a","channelOperator":"EQUALS"}`,
+		},
+		{
 			name:  "listener path without path",
 			value: PathV4{Host: new("api.example.com")},
 			want:  `{"host":"api.example.com"}`,
 		},
 		{
+			name:  "listener path with path",
+			value: PathV4{Path: "/orders"},
+			want:  `{"path":"/orders"}`,
+		},
+		{
 			name:  "response template without status",
 			value: ResponseTemplate{Body: new("oops")},
 			want:  `{"body":"oops"}`,
+		},
+		{
+			name:  "response template with status",
+			value: ResponseTemplate{Status: 503},
+			want:  `{"status":503}`,
 		},
 	}
 	for _, tt := range tests {
