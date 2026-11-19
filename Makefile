@@ -10,7 +10,7 @@ APIM_OAS_BRANCH ?= master
 APIM_OAS_URL := https://raw.githubusercontent.com/gravitee-io/gravitee-api-management/refs/heads/$(APIM_OAS_BRANCH)/gravitee-apim-rest-api/gravitee-apim-rest-api-automation/gravitee-apim-rest-api-automation-rest/src/main/resources/open-api.yaml
 APIM_OAS_FILE := apim-sdk/openapi/sources/apim.yaml
 
-AIM_OAS_REF ?= 5.0.0-alpha.39
+AIM_OAS_REF ?= 5.1.8
 AIM_OAS_FILE := apim-sdk/openapi/sources/aim.yaml
 
 ##@ 🧹 Lint
