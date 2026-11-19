@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package sdk
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSpec_KeepsOnlyTheFieldsAPutSends(t *testing.T) {
@@ -50,4 +51,34 @@ func TestSpec_ConvertsTheApplicationStatus(t *testing.T) {
 	state := ApplicationState{Hrid: "app", Status: new(ApplicationStateStatusARCHIVED)}
 
 	assert.Equal(t, new(ApplicationSpecStatusARCHIVED), state.Spec().Status)
+}
+
+func TestSpec_DropsTheMcpAuthPolicyRefs(t *testing.T) {
+	server := AimCatalogMcpServerState{
+		Hrid:          "github",
+		EntityId:      "mcp-server.github",
+		AuthPolicyRef: new(`MCPServer::"github"`),
+		Tools:         []AimCatalogMcpToolStatus{{Name: new("create_issue"), AuthPolicyRef: new(`MCPTool::"github.create_issue"`)}},
+	}
+	assert.Equal(t, AimCatalogMcpServer{Hrid: "github", EntityId: "mcp-server.github"}, server.Spec())
+
+	proxy := AimMcpProxyState{
+		Hrid:  "studio",
+		Mode:  AimMcpProxyModeSTUDIO,
+		Tools: []AimMcpProxyToolStatus{{Server: new("github"), AuthPolicyRef: new(`MCPTool::"github.create_issue"`)}},
+	}
+	assert.Equal(t, AimMcpProxy{Hrid: "studio", Mode: AimMcpProxyModeSTUDIO}, proxy.Spec())
+}
+
+// GKO falls back on studio.tools when the state has no tools at all, not when it has none to report.
+func TestAimMcpProxyState_KeepsAbsentToolsApartFromEmpty(t *testing.T) {
+	var absent, empty AimMcpProxyState
+	require.NoError(t, json.Unmarshal([]byte(`{"hrid":"studio","mode":"STUDIO"}`), &absent))
+	require.NoError(t, json.Unmarshal([]byte(`{"hrid":"studio","mode":"STUDIO","tools":[]}`), &empty))
+
+	assert.Nil(t, absent.Tools)
+	assert.Nil(t, absent.WithDefaults().Tools)
+	assert.NotNil(t, empty.Tools)
+	assert.Empty(t, empty.Tools)
+	assert.NotNil(t, empty.WithDefaults().Tools)
 }

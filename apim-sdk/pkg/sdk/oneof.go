@@ -60,11 +60,12 @@ func (o *OneOfAimCatalogMcpServerAuth) UnmarshalJSON(data []byte) error {
 
 // OneOfAimMcpProxyUpstreamAuth is an AimMcpProxyUpstreamAuth, typed by its `type`.
 type OneOfAimMcpProxyUpstreamAuth struct {
-	None   *AimMcpProxyNoUpstreamAuth     `oneof:"NONE" json:"none,omitempty"`
-	ApiKey *AimMcpProxyApiKeyUpstreamAuth `oneof:"API_KEY" json:"apiKey,omitempty"`
-	Bearer *AimMcpProxyBearerUpstreamAuth `oneof:"BEARER" json:"bearer,omitempty"`
-	Basic  *AimMcpProxyBasicUpstreamAuth  `oneof:"BASIC" json:"basic,omitempty"`
-	OAuth2 *AimMcpProxyOAuth2UpstreamAuth `oneof:"OAUTH2" json:"oauth2,omitempty"`
+	None        *AimMcpProxyNoUpstreamAuth          `oneof:"NONE" json:"none,omitempty"`
+	Passthrough *AimMcpProxyPassthroughUpstreamAuth `oneof:"PASSTHROUGH" json:"passthrough,omitempty"`
+	ApiKey      *AimMcpProxyApiKeyUpstreamAuth      `oneof:"API_KEY" json:"apiKey,omitempty"`
+	Bearer      *AimMcpProxyBearerUpstreamAuth      `oneof:"BEARER" json:"bearer,omitempty"`
+	Basic       *AimMcpProxyBasicUpstreamAuth       `oneof:"BASIC" json:"basic,omitempty"`
+	OAuth2      *AimMcpProxyOAuth2UpstreamAuth      `oneof:"OAUTH2" json:"oauth2,omitempty"`
 }
 
 func (o OneOfAimMcpProxyUpstreamAuth) MarshalJSON() ([]byte, error) { return marshalOneOf(o) }
