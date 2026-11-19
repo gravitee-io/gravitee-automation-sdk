@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.7.1...am-mock-server/v1.7.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* **deps:** bump am-sdk to v2.6.2 ([f0e4c7a](https://github.com/gravitee-io/gravitee-automation-sdk/commit/f0e4c7af764a5ba96a71d8eee22acd3f0ac65060))
+
 ## [1.7.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-mock-server/v1.7.0...am-mock-server/v1.7.1) (2026-11-13)
 
 
