@@ -150,11 +150,12 @@ func (e AimMcpProxyApiKeyPlanSecurityType) Valid() bool {
 
 // Defines values for AimMcpProxyApiKeyUpstreamAuthType.
 const (
-	AimMcpProxyApiKeyUpstreamAuthTypeAPIKEY AimMcpProxyApiKeyUpstreamAuthType = "API_KEY"
-	AimMcpProxyApiKeyUpstreamAuthTypeBASIC  AimMcpProxyApiKeyUpstreamAuthType = "BASIC"
-	AimMcpProxyApiKeyUpstreamAuthTypeBEARER AimMcpProxyApiKeyUpstreamAuthType = "BEARER"
-	AimMcpProxyApiKeyUpstreamAuthTypeNONE   AimMcpProxyApiKeyUpstreamAuthType = "NONE"
-	AimMcpProxyApiKeyUpstreamAuthTypeOAUTH2 AimMcpProxyApiKeyUpstreamAuthType = "OAUTH2"
+	AimMcpProxyApiKeyUpstreamAuthTypeAPIKEY      AimMcpProxyApiKeyUpstreamAuthType = "API_KEY"
+	AimMcpProxyApiKeyUpstreamAuthTypeBASIC       AimMcpProxyApiKeyUpstreamAuthType = "BASIC"
+	AimMcpProxyApiKeyUpstreamAuthTypeBEARER      AimMcpProxyApiKeyUpstreamAuthType = "BEARER"
+	AimMcpProxyApiKeyUpstreamAuthTypeNONE        AimMcpProxyApiKeyUpstreamAuthType = "NONE"
+	AimMcpProxyApiKeyUpstreamAuthTypeOAUTH2      AimMcpProxyApiKeyUpstreamAuthType = "OAUTH2"
+	AimMcpProxyApiKeyUpstreamAuthTypePASSTHROUGH AimMcpProxyApiKeyUpstreamAuthType = "PASSTHROUGH"
 )
 
 // Valid indicates whether the value is a known member of the AimMcpProxyApiKeyUpstreamAuthType enum.
@@ -169,6 +170,8 @@ func (e AimMcpProxyApiKeyUpstreamAuthType) Valid() bool {
 	case AimMcpProxyApiKeyUpstreamAuthTypeNONE:
 		return true
 	case AimMcpProxyApiKeyUpstreamAuthTypeOAUTH2:
+		return true
+	case AimMcpProxyApiKeyUpstreamAuthTypePASSTHROUGH:
 		return true
 	default:
 		return false
@@ -258,11 +261,12 @@ func (e AimMcpProxyBasePlanSecurityType) Valid() bool {
 
 // Defines values for AimMcpProxyBaseUpstreamAuthType.
 const (
-	AimMcpProxyBaseUpstreamAuthTypeAPIKEY AimMcpProxyBaseUpstreamAuthType = "API_KEY"
-	AimMcpProxyBaseUpstreamAuthTypeBASIC  AimMcpProxyBaseUpstreamAuthType = "BASIC"
-	AimMcpProxyBaseUpstreamAuthTypeBEARER AimMcpProxyBaseUpstreamAuthType = "BEARER"
-	AimMcpProxyBaseUpstreamAuthTypeNONE   AimMcpProxyBaseUpstreamAuthType = "NONE"
-	AimMcpProxyBaseUpstreamAuthTypeOAUTH2 AimMcpProxyBaseUpstreamAuthType = "OAUTH2"
+	AimMcpProxyBaseUpstreamAuthTypeAPIKEY      AimMcpProxyBaseUpstreamAuthType = "API_KEY"
+	AimMcpProxyBaseUpstreamAuthTypeBASIC       AimMcpProxyBaseUpstreamAuthType = "BASIC"
+	AimMcpProxyBaseUpstreamAuthTypeBEARER      AimMcpProxyBaseUpstreamAuthType = "BEARER"
+	AimMcpProxyBaseUpstreamAuthTypeNONE        AimMcpProxyBaseUpstreamAuthType = "NONE"
+	AimMcpProxyBaseUpstreamAuthTypeOAUTH2      AimMcpProxyBaseUpstreamAuthType = "OAUTH2"
+	AimMcpProxyBaseUpstreamAuthTypePASSTHROUGH AimMcpProxyBaseUpstreamAuthType = "PASSTHROUGH"
 )
 
 // Valid indicates whether the value is a known member of the AimMcpProxyBaseUpstreamAuthType enum.
@@ -278,6 +282,8 @@ func (e AimMcpProxyBaseUpstreamAuthType) Valid() bool {
 		return true
 	case AimMcpProxyBaseUpstreamAuthTypeOAUTH2:
 		return true
+	case AimMcpProxyBaseUpstreamAuthTypePASSTHROUGH:
+		return true
 	default:
 		return false
 	}
@@ -285,11 +291,12 @@ func (e AimMcpProxyBaseUpstreamAuthType) Valid() bool {
 
 // Defines values for AimMcpProxyBasicUpstreamAuthType.
 const (
-	AimMcpProxyBasicUpstreamAuthTypeAPIKEY AimMcpProxyBasicUpstreamAuthType = "API_KEY"
-	AimMcpProxyBasicUpstreamAuthTypeBASIC  AimMcpProxyBasicUpstreamAuthType = "BASIC"
-	AimMcpProxyBasicUpstreamAuthTypeBEARER AimMcpProxyBasicUpstreamAuthType = "BEARER"
-	AimMcpProxyBasicUpstreamAuthTypeNONE   AimMcpProxyBasicUpstreamAuthType = "NONE"
-	AimMcpProxyBasicUpstreamAuthTypeOAUTH2 AimMcpProxyBasicUpstreamAuthType = "OAUTH2"
+	AimMcpProxyBasicUpstreamAuthTypeAPIKEY      AimMcpProxyBasicUpstreamAuthType = "API_KEY"
+	AimMcpProxyBasicUpstreamAuthTypeBASIC       AimMcpProxyBasicUpstreamAuthType = "BASIC"
+	AimMcpProxyBasicUpstreamAuthTypeBEARER      AimMcpProxyBasicUpstreamAuthType = "BEARER"
+	AimMcpProxyBasicUpstreamAuthTypeNONE        AimMcpProxyBasicUpstreamAuthType = "NONE"
+	AimMcpProxyBasicUpstreamAuthTypeOAUTH2      AimMcpProxyBasicUpstreamAuthType = "OAUTH2"
+	AimMcpProxyBasicUpstreamAuthTypePASSTHROUGH AimMcpProxyBasicUpstreamAuthType = "PASSTHROUGH"
 )
 
 // Valid indicates whether the value is a known member of the AimMcpProxyBasicUpstreamAuthType enum.
@@ -305,6 +312,8 @@ func (e AimMcpProxyBasicUpstreamAuthType) Valid() bool {
 		return true
 	case AimMcpProxyBasicUpstreamAuthTypeOAUTH2:
 		return true
+	case AimMcpProxyBasicUpstreamAuthTypePASSTHROUGH:
+		return true
 	default:
 		return false
 	}
@@ -312,11 +321,12 @@ func (e AimMcpProxyBasicUpstreamAuthType) Valid() bool {
 
 // Defines values for AimMcpProxyBearerUpstreamAuthType.
 const (
-	AimMcpProxyBearerUpstreamAuthTypeAPIKEY AimMcpProxyBearerUpstreamAuthType = "API_KEY"
-	AimMcpProxyBearerUpstreamAuthTypeBASIC  AimMcpProxyBearerUpstreamAuthType = "BASIC"
-	AimMcpProxyBearerUpstreamAuthTypeBEARER AimMcpProxyBearerUpstreamAuthType = "BEARER"
-	AimMcpProxyBearerUpstreamAuthTypeNONE   AimMcpProxyBearerUpstreamAuthType = "NONE"
-	AimMcpProxyBearerUpstreamAuthTypeOAUTH2 AimMcpProxyBearerUpstreamAuthType = "OAUTH2"
+	AimMcpProxyBearerUpstreamAuthTypeAPIKEY      AimMcpProxyBearerUpstreamAuthType = "API_KEY"
+	AimMcpProxyBearerUpstreamAuthTypeBASIC       AimMcpProxyBearerUpstreamAuthType = "BASIC"
+	AimMcpProxyBearerUpstreamAuthTypeBEARER      AimMcpProxyBearerUpstreamAuthType = "BEARER"
+	AimMcpProxyBearerUpstreamAuthTypeNONE        AimMcpProxyBearerUpstreamAuthType = "NONE"
+	AimMcpProxyBearerUpstreamAuthTypeOAUTH2      AimMcpProxyBearerUpstreamAuthType = "OAUTH2"
+	AimMcpProxyBearerUpstreamAuthTypePASSTHROUGH AimMcpProxyBearerUpstreamAuthType = "PASSTHROUGH"
 )
 
 // Valid indicates whether the value is a known member of the AimMcpProxyBearerUpstreamAuthType enum.
@@ -331,6 +341,8 @@ func (e AimMcpProxyBearerUpstreamAuthType) Valid() bool {
 	case AimMcpProxyBearerUpstreamAuthTypeNONE:
 		return true
 	case AimMcpProxyBearerUpstreamAuthTypeOAUTH2:
+		return true
+	case AimMcpProxyBearerUpstreamAuthTypePASSTHROUGH:
 		return true
 	default:
 		return false
@@ -510,11 +522,12 @@ func (e AimMcpProxyMode) Valid() bool {
 
 // Defines values for AimMcpProxyNoUpstreamAuthType.
 const (
-	AimMcpProxyNoUpstreamAuthTypeAPIKEY AimMcpProxyNoUpstreamAuthType = "API_KEY"
-	AimMcpProxyNoUpstreamAuthTypeBASIC  AimMcpProxyNoUpstreamAuthType = "BASIC"
-	AimMcpProxyNoUpstreamAuthTypeBEARER AimMcpProxyNoUpstreamAuthType = "BEARER"
-	AimMcpProxyNoUpstreamAuthTypeNONE   AimMcpProxyNoUpstreamAuthType = "NONE"
-	AimMcpProxyNoUpstreamAuthTypeOAUTH2 AimMcpProxyNoUpstreamAuthType = "OAUTH2"
+	AimMcpProxyNoUpstreamAuthTypeAPIKEY      AimMcpProxyNoUpstreamAuthType = "API_KEY"
+	AimMcpProxyNoUpstreamAuthTypeBASIC       AimMcpProxyNoUpstreamAuthType = "BASIC"
+	AimMcpProxyNoUpstreamAuthTypeBEARER      AimMcpProxyNoUpstreamAuthType = "BEARER"
+	AimMcpProxyNoUpstreamAuthTypeNONE        AimMcpProxyNoUpstreamAuthType = "NONE"
+	AimMcpProxyNoUpstreamAuthTypeOAUTH2      AimMcpProxyNoUpstreamAuthType = "OAUTH2"
+	AimMcpProxyNoUpstreamAuthTypePASSTHROUGH AimMcpProxyNoUpstreamAuthType = "PASSTHROUGH"
 )
 
 // Valid indicates whether the value is a known member of the AimMcpProxyNoUpstreamAuthType enum.
@@ -529,6 +542,8 @@ func (e AimMcpProxyNoUpstreamAuthType) Valid() bool {
 	case AimMcpProxyNoUpstreamAuthTypeNONE:
 		return true
 	case AimMcpProxyNoUpstreamAuthTypeOAUTH2:
+		return true
+	case AimMcpProxyNoUpstreamAuthTypePASSTHROUGH:
 		return true
 	default:
 		return false
@@ -558,11 +573,12 @@ func (e AimMcpProxyOAuth2PlanSecurityType) Valid() bool {
 
 // Defines values for AimMcpProxyOAuth2UpstreamAuthType.
 const (
-	AimMcpProxyOAuth2UpstreamAuthTypeAPIKEY AimMcpProxyOAuth2UpstreamAuthType = "API_KEY"
-	AimMcpProxyOAuth2UpstreamAuthTypeBASIC  AimMcpProxyOAuth2UpstreamAuthType = "BASIC"
-	AimMcpProxyOAuth2UpstreamAuthTypeBEARER AimMcpProxyOAuth2UpstreamAuthType = "BEARER"
-	AimMcpProxyOAuth2UpstreamAuthTypeNONE   AimMcpProxyOAuth2UpstreamAuthType = "NONE"
-	AimMcpProxyOAuth2UpstreamAuthTypeOAUTH2 AimMcpProxyOAuth2UpstreamAuthType = "OAUTH2"
+	AimMcpProxyOAuth2UpstreamAuthTypeAPIKEY      AimMcpProxyOAuth2UpstreamAuthType = "API_KEY"
+	AimMcpProxyOAuth2UpstreamAuthTypeBASIC       AimMcpProxyOAuth2UpstreamAuthType = "BASIC"
+	AimMcpProxyOAuth2UpstreamAuthTypeBEARER      AimMcpProxyOAuth2UpstreamAuthType = "BEARER"
+	AimMcpProxyOAuth2UpstreamAuthTypeNONE        AimMcpProxyOAuth2UpstreamAuthType = "NONE"
+	AimMcpProxyOAuth2UpstreamAuthTypeOAUTH2      AimMcpProxyOAuth2UpstreamAuthType = "OAUTH2"
+	AimMcpProxyOAuth2UpstreamAuthTypePASSTHROUGH AimMcpProxyOAuth2UpstreamAuthType = "PASSTHROUGH"
 )
 
 // Valid indicates whether the value is a known member of the AimMcpProxyOAuth2UpstreamAuthType enum.
@@ -577,6 +593,38 @@ func (e AimMcpProxyOAuth2UpstreamAuthType) Valid() bool {
 	case AimMcpProxyOAuth2UpstreamAuthTypeNONE:
 		return true
 	case AimMcpProxyOAuth2UpstreamAuthTypeOAUTH2:
+		return true
+	case AimMcpProxyOAuth2UpstreamAuthTypePASSTHROUGH:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AimMcpProxyPassthroughUpstreamAuthType.
+const (
+	AimMcpProxyPassthroughUpstreamAuthTypeAPIKEY      AimMcpProxyPassthroughUpstreamAuthType = "API_KEY"
+	AimMcpProxyPassthroughUpstreamAuthTypeBASIC       AimMcpProxyPassthroughUpstreamAuthType = "BASIC"
+	AimMcpProxyPassthroughUpstreamAuthTypeBEARER      AimMcpProxyPassthroughUpstreamAuthType = "BEARER"
+	AimMcpProxyPassthroughUpstreamAuthTypeNONE        AimMcpProxyPassthroughUpstreamAuthType = "NONE"
+	AimMcpProxyPassthroughUpstreamAuthTypeOAUTH2      AimMcpProxyPassthroughUpstreamAuthType = "OAUTH2"
+	AimMcpProxyPassthroughUpstreamAuthTypePASSTHROUGH AimMcpProxyPassthroughUpstreamAuthType = "PASSTHROUGH"
+)
+
+// Valid indicates whether the value is a known member of the AimMcpProxyPassthroughUpstreamAuthType enum.
+func (e AimMcpProxyPassthroughUpstreamAuthType) Valid() bool {
+	switch e {
+	case AimMcpProxyPassthroughUpstreamAuthTypeAPIKEY:
+		return true
+	case AimMcpProxyPassthroughUpstreamAuthTypeBASIC:
+		return true
+	case AimMcpProxyPassthroughUpstreamAuthTypeBEARER:
+		return true
+	case AimMcpProxyPassthroughUpstreamAuthTypeNONE:
+		return true
+	case AimMcpProxyPassthroughUpstreamAuthTypeOAUTH2:
+		return true
+	case AimMcpProxyPassthroughUpstreamAuthTypePASSTHROUGH:
 		return true
 	default:
 		return false
@@ -1669,7 +1717,7 @@ func (v APIResource) WithDefaults() APIResource {
 
 // AimCatalogMcpPromptStatus A prompt the platform discovered on the upstream server; declared by the server, never by the author
 type AimCatalogMcpPromptStatus struct {
-	// EntityId Composed entity id of the prompt, e.g. `mcp-prompt.github.summarize`
+	// EntityId Composed catalog identity of the prompt, e.g. `mcp-prompt.github.summarize`
 	EntityId *string `json:"entityId,omitempty"`
 	Name     *string `json:"name,omitempty"`
 }
@@ -1681,7 +1729,7 @@ func (v AimCatalogMcpPromptStatus) WithDefaults() AimCatalogMcpPromptStatus {
 
 // AimCatalogMcpResourceStatus A resource the platform discovered on the upstream server; declared by the server, never by the author
 type AimCatalogMcpResourceStatus struct {
-	// EntityId Composed entity id of the resource, e.g. `mcp-resource.github.readme`
+	// EntityId Composed catalog identity of the resource, e.g. `mcp-resource.github.readme`
 	EntityId *string `json:"entityId,omitempty"`
 	Name     *string `json:"name,omitempty"`
 	Uri      *string `json:"uri,omitempty"`
@@ -1826,11 +1874,12 @@ type AimCatalogMcpServer struct {
 	// Examples: GitHub tools for coding agents
 	Description *string `drift:"empty-is-nil" json:"description,omitempty"`
 
-	// EntityId Stable catalog identity of the server, the name authorization policies reference: lowercase, dot-separated
-	// segments, first segment `mcp-server`. Validated, never repaired: an invalid value, or a value already used by
-	// another server of the environment, is rejected. Immutable once the server exists — declaring a different value
-	// is rejected rather than applied, since nothing re-points the policies naming the old one. Delete the server and
-	// declare it again to give it another identity.
+	// EntityId Stable catalog identity of the server: lowercase, dot-separated segments, first segment `mcp-server`.
+	// Policies name the server by the `authPolicyRef` the state derives from it. Validated, never repaired: an
+	// invalid value, or a value already used by another server of the environment, is rejected.
+	// Immutable once the server exists — declaring a different value is rejected rather than applied, since nothing
+	// re-points the policies naming the old reference. Delete the server and declare it again to give it another
+	// identity.
 	//
 	//
 	// Examples: mcp-server.github
@@ -1848,8 +1897,13 @@ func (v AimCatalogMcpServer) WithDefaults() AimCatalogMcpServer {
 	return v
 }
 
-// AimCatalogMcpServerState State of a Catalog MCP server that has been created or updated.
+// AimCatalogMcpServerState State of a Catalog MCP server that has been created or updated: the spec as stored, with its `authPolicyRef`
+// and the discovered tools, prompts and resources as status, which a spec may not carry.
 type AimCatalogMcpServerState struct {
+	// AuthPolicyRef What an authorization policy names the server by: its engine type and the slug of `entityId`, e.g.
+	// `MCPServer::"github"`. Derived from `entityId`; a spec carrying it is rejected.
+	AuthPolicyRef *string `drift:"ignore" json:"authPolicyRef,omitempty"`
+
 	// Connection How the platform reaches the upstream MCP server
 	Connection AimCatalogMcpServerConnection `json:"connection"`
 
@@ -1858,11 +1912,12 @@ type AimCatalogMcpServerState struct {
 	// Examples: GitHub tools for coding agents
 	Description *string `drift:"empty-is-nil" json:"description,omitempty"`
 
-	// EntityId Stable catalog identity of the server, the name authorization policies reference: lowercase, dot-separated
-	// segments, first segment `mcp-server`. Validated, never repaired: an invalid value, or a value already used by
-	// another server of the environment, is rejected. Immutable once the server exists — declaring a different value
-	// is rejected rather than applied, since nothing re-points the policies naming the old one. Delete the server and
-	// declare it again to give it another identity.
+	// EntityId Stable catalog identity of the server: lowercase, dot-separated segments, first segment `mcp-server`.
+	// Policies name the server by the `authPolicyRef` the state derives from it. Validated, never repaired: an
+	// invalid value, or a value already used by another server of the environment, is rejected.
+	// Immutable once the server exists — declaring a different value is rejected rather than applied, since nothing
+	// re-points the policies naming the old reference. Delete the server and declare it again to give it another
+	// identity.
 	//
 	//
 	// Examples: mcp-server.github
@@ -1945,6 +2000,10 @@ func (s AimCatalogMcpServerState) Spec() AimCatalogMcpServer {
 
 // AimCatalogMcpServerStatus Platform-discovered facts about a Catalog MCP server; read-only.
 type AimCatalogMcpServerStatus struct {
+	// AuthPolicyRef What an authorization policy names the server by: its engine type and the slug of `entityId`, e.g.
+	// `MCPServer::"github"`. Derived from `entityId`; a spec carrying it is rejected.
+	AuthPolicyRef *string `drift:"ignore" json:"authPolicyRef,omitempty"`
+
 	// EnvironmentId The environment ID
 	EnvironmentId *string `drift:"ignore" json:"environmentId,omitempty"`
 
@@ -2009,7 +2068,11 @@ type AimCatalogMcpServerTransport string
 
 // AimCatalogMcpToolStatus A tool the platform discovered on the upstream server; declared by the server, never by the author
 type AimCatalogMcpToolStatus struct {
-	// EntityId Composed entity id of the tool, the name an authorization policy references, e.g. `mcp-tool.github.create_issue`
+	// AuthPolicyRef What an authorization policy names the tool by, e.g. `MCPTool::"github.create_issue"`: the resource the
+	// gateway checks on `tools/call` when a studio exposing the tool enables `enableFGA`, whatever its alias
+	AuthPolicyRef *string `drift:"ignore" json:"authPolicyRef,omitempty"`
+
+	// EntityId Composed catalog identity of the tool, e.g. `mcp-tool.github.create_issue`
 	EntityId *string `json:"entityId,omitempty"`
 	Name     *string `json:"name,omitempty"`
 }
@@ -2191,8 +2254,10 @@ type AimMcpProxyBasePlanSecurityType string
 
 // AimMcpProxyBaseUpstreamAuth Authentication the gateway uses against the upstream MCP server, discriminated by `type`. Credential values
 // are stored verbatim: a literal, or a `secret://` URI pointing at a configured secret provider. They are
-// never returned by this API. Omitting `proxy.upstreamAuth`, or declaring `type: NONE`, means the gateway passes
-// the caller's credentials through — and clears any stored upstream authentication.
+// never returned by this API. `NONE` configures no credential of the gateway's own and clears any stored one;
+// omitting `proxy.upstreamAuth` does the same, and a proxy then passes the caller's request through as it came.
+// `PASSTHROUGH` forwards the caller's own credential to a studio's server; a proxy refuses it, `NONE` already
+// letting the caller's request through.
 //
 // Examples: {"token":"secret://kubernetes/github-mcp:token","type":"BEARER"}
 type AimMcpProxyBaseUpstreamAuth struct {
@@ -2344,7 +2409,7 @@ type AimMcpProxyFlowStep struct {
 	Condition *string `drift:"empty-is-nil" json:"condition,omitempty"`
 
 	// Configuration Configuration of the policy, free-form as the policy's own schema defines it; validated against that schema on apply and dry run
-	Configuration *unstructured.Unstructured `drift:"unstructured" json:"configuration,omitempty"`
+	Configuration *unstructured.Unstructured `drift:"unstructured:ignore-remote-default" json:"configuration,omitempty"`
 
 	// Description Human description of the step
 	Description *string `drift:"empty-is-nil" json:"description,omitempty"`
@@ -2405,7 +2470,7 @@ type AimMcpProxyGenericIdentityProvider struct {
 	Type AimMcpProxyGenericIdentityProviderType `json:"type"`
 
 	// UserInfoEndpoint UserInfo endpoint, same rule as `introspectionEndpoint`
-	UserInfoEndpoint *string `drift:"empty-is-nil" json:"userInfoEndpoint,omitempty"`
+	UserInfoEndpoint *string `drift:"ignore-remote-default:,/userinfo" json:"userInfoEndpoint,omitempty"`
 }
 
 // WithDefaults returns a copy of AimMcpProxyGenericIdentityProvider with unset fields set to their OpenAPI defaults.
@@ -2491,7 +2556,7 @@ type AimMcpProxyMcpFlowSelectorType string
 // an existing proxy is rejected, and changing it is a delete and a new declaration.
 type AimMcpProxyMode string
 
-// AimMcpProxyNoUpstreamAuth No upstream authentication; the gateway passes the caller's credentials through
+// AimMcpProxyNoUpstreamAuth No upstream authentication; the gateway presents no credential of its own
 type AimMcpProxyNoUpstreamAuth struct {
 	// Type Type of upstream authentication
 	Type AimMcpProxyNoUpstreamAuthType `json:"type"`
@@ -2559,6 +2624,20 @@ func (v AimMcpProxyOAuth2UpstreamAuth) WithDefaults() AimMcpProxyOAuth2UpstreamA
 // AimMcpProxyOAuth2UpstreamAuthType Type of upstream authentication
 type AimMcpProxyOAuth2UpstreamAuthType string
 
+// AimMcpProxyPassthroughUpstreamAuth The gateway forwards the caller's own credential to the server; for a studio's servers only
+type AimMcpProxyPassthroughUpstreamAuth struct {
+	// Type Type of upstream authentication
+	Type AimMcpProxyPassthroughUpstreamAuthType `json:"type"`
+}
+
+// WithDefaults returns a copy of AimMcpProxyPassthroughUpstreamAuth with unset fields set to their OpenAPI defaults.
+func (v AimMcpProxyPassthroughUpstreamAuth) WithDefaults() AimMcpProxyPassthroughUpstreamAuth {
+	return v
+}
+
+// AimMcpProxyPassthroughUpstreamAuthType Type of upstream authentication
+type AimMcpProxyPassthroughUpstreamAuthType string
+
 // AimMcpProxyPlan A plan consumers subscribe to; identified by its name within the proxy
 type AimMcpProxyPlan struct {
 	// Flows Policy flows of the plan, in execution order, run before the proxy's own on requests the plan
@@ -2600,8 +2679,10 @@ type AimMcpProxyProxy struct {
 
 	// UpstreamAuth Authentication the gateway uses against the upstream MCP server, discriminated by `type`. Credential values
 	// are stored verbatim: a literal, or a `secret://` URI pointing at a configured secret provider. They are
-	// never returned by this API. Omitting `proxy.upstreamAuth`, or declaring `type: NONE`, means the gateway passes
-	// the caller's credentials through — and clears any stored upstream authentication.
+	// never returned by this API. `NONE` configures no credential of the gateway's own and clears any stored one;
+	// omitting `proxy.upstreamAuth` does the same, and a proxy then passes the caller's request through as it came.
+	// `PASSTHROUGH` forwards the caller's own credential to a studio's server; a proxy refuses it, `NONE` already
+	// letting the caller's request through.
 	UpstreamAuth *AimMcpProxyUpstreamAuth `drift:"empty-is-nil" json:"upstreamAuth,omitempty"`
 }
 
@@ -2637,10 +2718,9 @@ type AimMcpProxy struct {
 	// Examples: GitHub tools proxied through the gateway
 	Description *string `drift:"empty-is-nil" json:"description,omitempty"`
 
-	// EntityId Stable identity of the proxy, the name authorization policies reference: lowercase, dot-separated
-	// segments, first segment `mcp-proxy`. Required. Validated,
-	// never repaired: an invalid value, or a value already used by another MCP proxy of the environment, is
-	// rejected. Immutable once the proxy exists — declaring a different value is rejected rather than
+	// EntityId Stable identity of the proxy: lowercase, dot-separated segments, first segment `mcp-proxy`. Required.
+	// Validated, never repaired: an invalid value, or a value already used by another MCP proxy of the
+	// environment, is rejected. Immutable once the proxy exists — declaring a different value is rejected rather than
 	// applied. Delete the proxy and declare it again to give it another identity. Uniqueness across the
 	// environment is checked at apply time, not enforced by the store (AIAM-242): two concurrent applies
 	// of the same entityId can both pass.
@@ -2761,7 +2841,7 @@ func (v AimMcpProxy) WithDefaults() AimMcpProxy {
 // defaults. For a `STUDIO`, `studio.tools` is read off the stored specification with each tool's
 // `entityId` and sorted by server then tool, `studio.upstreamAuth` off the stored backends without
 // credentials, and `studio.enableFGA` off the API's flows, which `flows` reports without the platform's
-// authorization flow.
+// authorization flow. `tools` lists the same tools in the same order, with their `authPolicyRef`.
 type AimMcpProxyState struct {
 	// ContextPath Context path the gateway serves the proxy on; must be available in the environment
 	//
@@ -2773,10 +2853,9 @@ type AimMcpProxyState struct {
 	// Examples: GitHub tools proxied through the gateway
 	Description *string `drift:"empty-is-nil" json:"description,omitempty"`
 
-	// EntityId Stable identity of the proxy, the name authorization policies reference: lowercase, dot-separated
-	// segments, first segment `mcp-proxy`. Required. Validated,
-	// never repaired: an invalid value, or a value already used by another MCP proxy of the environment, is
-	// rejected. Immutable once the proxy exists — declaring a different value is rejected rather than
+	// EntityId Stable identity of the proxy: lowercase, dot-separated segments, first segment `mcp-proxy`. Required.
+	// Validated, never repaired: an invalid value, or a value already used by another MCP proxy of the
+	// environment, is rejected. Immutable once the proxy exists — declaring a different value is rejected rather than
 	// applied. Delete the proxy and declare it again to give it another identity. Uniqueness across the
 	// environment is checked at apply time, not enforced by the store (AIAM-242): two concurrent applies
 	// of the same entityId can both pass.
@@ -2866,6 +2945,10 @@ type AimMcpProxyState struct {
 	// tool calls. Tools converge as a set — adding, removing or re-aliasing one replaces the studio's tool
 	// surface — and `upstreamAuth` converges per server.
 	Studio *AimMcpProxyStudio `drift:"empty-is-nil" json:"studio,omitempty"`
+
+	// Tools For a `STUDIO`, the tools it exposes, in the order of `studio.tools`, each with the identifiers the
+	// platform derives for it. Absent for a `PROXY`.
+	Tools []AimMcpProxyToolStatus `drift:"ignore" json:"tools,omitempty"`
 }
 
 // WithDefaults returns a copy of AimMcpProxyState with unset fields set to their OpenAPI defaults.
@@ -2903,6 +2986,13 @@ func (v AimMcpProxyState) WithDefaults() AimMcpProxyState {
 		withDefaults := v.Studio.WithDefaults()
 		v.Studio = &withDefaults
 	}
+	if v.Tools != nil {
+		items := make([]AimMcpProxyToolStatus, len(v.Tools))
+		for i, item := range v.Tools {
+			items[i] = item.WithDefaults()
+		}
+		v.Tools = items
+	}
 	return v
 }
 
@@ -2925,13 +3015,49 @@ func (s AimMcpProxyState) Spec() AimMcpProxy {
 	}
 }
 
+// AimMcpProxyStatus Platform-derived facts about an MCP proxy; read-only.
+type AimMcpProxyStatus struct {
+	// EnvironmentId The environment ID
+	EnvironmentId *string `drift:"ignore" json:"environmentId,omitempty"`
+
+	// Errors Findings about the applied spec
+	Errors *AimErrors `drift:"ignore" json:"errors,omitempty"`
+
+	// Id Resource UUID
+	Id *string `drift:"ignore" json:"id,omitempty"`
+
+	// OrganizationId The organization ID
+	OrganizationId *string `drift:"ignore" json:"organizationId,omitempty"`
+
+	// Tools For a `STUDIO`, the tools it exposes, in the order of `studio.tools`, each with the identifiers the
+	// platform derives for it. Absent for a `PROXY`.
+	Tools []AimMcpProxyToolStatus `drift:"ignore" json:"tools,omitempty"`
+}
+
+// WithDefaults returns a copy of AimMcpProxyStatus with unset fields set to their OpenAPI defaults.
+func (v AimMcpProxyStatus) WithDefaults() AimMcpProxyStatus {
+	if v.Errors != nil {
+		withDefaults := v.Errors.WithDefaults()
+		v.Errors = &withDefaults
+	}
+	if v.Tools != nil {
+		items := make([]AimMcpProxyToolStatus, len(v.Tools))
+		for i, item := range v.Tools {
+			items[i] = item.WithDefaults()
+		}
+		v.Tools = items
+	}
+	return v
+}
+
 // AimMcpProxyStudio What a `STUDIO` exposes: tools picked from catalog MCP servers of the environment, the credential the
 // gateway presents to each of those servers, and whether the platform's fine-grained authorization runs on
 // tool calls. Tools converge as a set — adding, removing or re-aliasing one replaces the studio's tool
 // surface — and `upstreamAuth` converges per server.
 type AimMcpProxyStudio struct {
 	// EnableFGA Inserts the platform's fine-grained authorization flow, which runs the `authz-pep` policy on
-	// `tools/call` with the called tool as the resource; `false` removes it. That flow belongs to the
+	// `tools/call` with the called tool as the resource, named by its `authPolicyRef` in the state's
+	// `tools`, an alias resolved to the tool it renames; `false` removes it. That flow belongs to the
 	// platform: `flows` may not carry an `authz-pep` step themselves, and the state reports the declared
 	// flows without it.
 	EnableFGA *bool `json:"enableFGA,omitempty"`
@@ -2943,7 +3069,8 @@ type AimMcpProxyStudio struct {
 	Tools []AimMcpProxyStudioTool `json:"tools"`
 
 	// UpstreamAuth One entry per catalog server a tool comes from: the credential the gateway presents to that server,
-	// stored verbatim and never returned, or `type: NONE` to say the server needs none. Nothing is inferred
+	// stored verbatim and never returned, `type: NONE` to say the server needs none, or
+	// `type: PASSTHROUGH` to forward the caller's own credential to it. Nothing is inferred
 	// from the credential the catalog synced the server with. An entry for a server no tool uses, a server
 	// without an entry, or two entries for one server are rejected.
 	UpstreamAuth []AimMcpProxyStudioUpstreamAuth `json:"upstreamAuth"`
@@ -2980,7 +3107,9 @@ type AimMcpProxyStudioTool struct {
 	// Examples: gh_create_issue
 	Alias *string `drift:"empty-is-nil" json:"alias,omitempty"`
 
-	// EntityId Composed entity id of the tool, the name an authorization policy references, e.g. `mcp-tool.github.create_issue`
+	// EntityId Catalog identity of the tool, e.g. `mcp-tool.github.create_issue`. Set by the platform and reported in the
+	// state; a spec carrying it is rejected, so a state re-applied as a spec leaves it out first. The state's
+	// `tools` repeat it next to the tool's `authPolicyRef`.
 	EntityId *string `drift:"ignore" json:"entityId,omitempty"`
 
 	// Server HRID of the `catalog/mcp-servers` resource of this environment the tool comes from
@@ -3003,8 +3132,10 @@ func (v AimMcpProxyStudioTool) WithDefaults() AimMcpProxyStudioTool {
 type AimMcpProxyStudioUpstreamAuth struct {
 	// Auth Authentication the gateway uses against the upstream MCP server, discriminated by `type`. Credential values
 	// are stored verbatim: a literal, or a `secret://` URI pointing at a configured secret provider. They are
-	// never returned by this API. Omitting `proxy.upstreamAuth`, or declaring `type: NONE`, means the gateway passes
-	// the caller's credentials through — and clears any stored upstream authentication.
+	// never returned by this API. `NONE` configures no credential of the gateway's own and clears any stored one;
+	// omitting `proxy.upstreamAuth` does the same, and a proxy then passes the caller's request through as it came.
+	// `PASSTHROUGH` forwards the caller's own credential to a studio's server; a proxy refuses it, `NONE` already
+	// letting the caller's request through.
 	Auth AimMcpProxyUpstreamAuth `json:"auth"`
 
 	// Server HRID of the `catalog/mcp-servers` resource the credential is for
@@ -3018,10 +3149,43 @@ func (v AimMcpProxyStudioUpstreamAuth) WithDefaults() AimMcpProxyStudioUpstreamA
 	return v
 }
 
+// AimMcpProxyToolStatus A tool a studio exposes, with the identifiers the platform derives for it
+type AimMcpProxyToolStatus struct {
+	// Alias Name the studio exposes the tool under, when one is declared
+	//
+	// Examples: gh_create_issue
+	Alias *string `json:"alias,omitempty"`
+
+	// AuthPolicyRef What an authorization policy names the tool by, e.g. `MCPTool::"github.create_issue"`: the resource the
+	// gateway checks on `tools/call` when `studio.enableFGA` is set. An aliased tool keeps the reference of the
+	// tool it exposes. Absent for a tool that does not come from a catalog MCP server.
+	AuthPolicyRef *string `drift:"ignore" json:"authPolicyRef,omitempty"`
+
+	// EntityId Catalog identity of the tool, e.g. `mcp-tool.github.create_issue`
+	EntityId *string `drift:"ignore" json:"entityId,omitempty"`
+
+	// Server Reference of the catalog MCP server the tool comes from, as `studio.tools` reports it
+	//
+	// Examples: github-mcp
+	Server *string `json:"server,omitempty"`
+
+	// Tool Runtime name of the tool on its server
+	//
+	// Examples: create_issue
+	Tool *string `json:"tool,omitempty"`
+}
+
+// WithDefaults returns a copy of AimMcpProxyToolStatus with unset fields set to their OpenAPI defaults.
+func (v AimMcpProxyToolStatus) WithDefaults() AimMcpProxyToolStatus {
+	return v
+}
+
 // AimMcpProxyUpstreamAuth Authentication the gateway uses against the upstream MCP server, discriminated by `type`. Credential values
 // are stored verbatim: a literal, or a `secret://` URI pointing at a configured secret provider. They are
-// never returned by this API. Omitting `proxy.upstreamAuth`, or declaring `type: NONE`, means the gateway passes
-// the caller's credentials through — and clears any stored upstream authentication.
+// never returned by this API. `NONE` configures no credential of the gateway's own and clears any stored one;
+// omitting `proxy.upstreamAuth` does the same, and a proxy then passes the caller's request through as it came.
+// `PASSTHROUGH` forwards the caller's own credential to a studio's server; a proxy refuses it, `NONE` already
+// letting the caller's request through.
 type AimMcpProxyUpstreamAuth = OneOfAimMcpProxyUpstreamAuth
 
 // AimResourceStatus Envelope the Automation API stamps on every state; read-only.

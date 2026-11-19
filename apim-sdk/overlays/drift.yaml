@@ -84,10 +84,14 @@ actions:
         drift: ignore
 
   # Free-form plugin configurations, typed as unstructured.Unstructured in models.yaml: compared as unstructured objects.
-  - target: $.components.schemas['APIResource','BaseStep','EndpointV4','PageSource','PlanSecurity','ServiceV4','AimMcpProxyFlowStep'].properties.configuration
+  - target: $.components.schemas['APIResource','BaseStep','EndpointV4','PageSource','PlanSecurity','ServiceV4'].properties.configuration
     update:
       x-oapi-codegen-extra-tags:
         drift: unstructured
+  - target: $.components.schemas.AimMcpProxyFlowStep.properties.configuration
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: unstructured:ignore-remote-default
   - target: $.components.schemas.EndpointV4.properties.sharedConfigurationOverride
     update:
       x-oapi-codegen-extra-tags:
@@ -287,10 +291,15 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
-  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[1].properties['clientId','userInfoEndpoint']
+  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[1].properties.clientId
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
+  # APIM saves /userinfo when the field is left out.
+  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[1].properties.userInfoEndpoint
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default:,/userinfo
   - target: $.components.schemas.AimMcpProxyMcpFlowSelector.allOf[1].properties.methods
     update:
       x-oapi-codegen-extra-tags:

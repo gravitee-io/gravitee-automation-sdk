@@ -54,6 +54,12 @@ func TestOneOf_RoundTrip(t *testing.T) {
 			variant: func(v any) any { return v.(*OneOfAimMcpProxyUpstreamAuth).ApiKey },
 		},
 		{
+			name:    "MCP proxy passthrough upstream auth",
+			wire:    `{"type":"PASSTHROUGH"}`,
+			value:   &OneOfAimMcpProxyUpstreamAuth{},
+			variant: func(v any) any { return v.(*OneOfAimMcpProxyUpstreamAuth).Passthrough },
+		},
+		{
 			name:    "MCP proxy plan security",
 			wire:    `{"type":"API_KEY","source":"HEADER","apiKeyHeader":"X-Key","propagateApiKey":true}`,
 			value:   &OneOfAimMcpProxyPlanSecurity{},

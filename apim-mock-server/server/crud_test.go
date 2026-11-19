@@ -319,3 +319,24 @@ func groupMembers(sourceIDs ...string) []sdk.GroupMember {
 	}
 	return members
 }
+
+func TestUpsertAimMcpProxySDK_PassthroughUpstreamAuthRoundTrips(t *testing.T) {
+	_, srv := createAPIMServer(t)
+	client := newAPIMClient(t, srv)
+	proxy := as[sdk.AimMcpProxy](t, aimMcpProxyBody("studio"))
+	proxy.Mode = sdk.AimMcpProxyModeSTUDIO
+	proxy.Studio = &sdk.AimMcpProxyStudio{
+		Tools: []sdk.AimMcpProxyStudioTool{{Server: "github", Tool: "create_issue"}},
+		UpstreamAuth: []sdk.AimMcpProxyStudioUpstreamAuth{{
+			Server: "github",
+			Auth:   sdk.AimMcpProxyUpstreamAuth{Passthrough: &sdk.AimMcpProxyPassthroughUpstreamAuth{}},
+		}},
+	}
+
+	put, err := client.UpsertAimMcpProxyWithResponse(t.Context(), nil, proxy)
+	assertSDKOK(t, put, err)
+
+	get, err := client.GetAimMcpProxyWithResponse(t.Context(), "studio")
+	assertSDKOK(t, get, err)
+	assert.NotNil(t, get.JSON200.Studio.UpstreamAuth[0].Auth.Passthrough)
+}

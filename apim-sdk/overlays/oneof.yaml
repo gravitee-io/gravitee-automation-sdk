@@ -51,6 +51,9 @@ actions:
   - target: $.components.schemas.AimMcpProxyNoUpstreamAuth.allOf[0]
     update:
       $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
+  - target: $.components.schemas.AimMcpProxyPassthroughUpstreamAuth.allOf[0]
+    update:
+      $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
   - target: $.components.schemas.AimMcpProxyApiKeyUpstreamAuth.allOf[0]
     update:
       $ref: '#/components/schemas/AimMcpProxyBaseUpstreamAuth'
@@ -69,6 +72,7 @@ actions:
     update:
       oneOf:
         - $ref: '#/components/schemas/AimMcpProxyNoUpstreamAuth'
+        - $ref: '#/components/schemas/AimMcpProxyPassthroughUpstreamAuth'
         - $ref: '#/components/schemas/AimMcpProxyApiKeyUpstreamAuth'
         - $ref: '#/components/schemas/AimMcpProxyBearerUpstreamAuth'
         - $ref: '#/components/schemas/AimMcpProxyBasicUpstreamAuth'
