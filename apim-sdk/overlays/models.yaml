@@ -115,3 +115,25 @@ actions:
   - target: $.components.schemas.*.allOf[*].properties[?(@.format == "date-time")]
     update:
       x-go-type: string
+
+  # APIM declares these required but defaults them when absent, and rejects an empty value (pathOperator: "" fails
+  # Selector deserialization with a 400). Leave them out of the payload when unset instead of sending a zero value.
+  - target: $.components.schemas.HttpSelector.allOf[1].properties['path','pathOperator']
+    update:
+      x-omitempty: true
+  - target: $.components.schemas.ChannelSelector.allOf[1].properties['channel','channelOperator']
+    update:
+      x-omitempty: true
+  - target: $.components.schemas.PathV4.properties.path
+    update:
+      x-omitempty: true
+  - target: $.components.schemas.ResponseTemplate.properties.status
+    update:
+      x-omitempty: true
+  # A response template may leave status out (GKO's ApiV4Definition does), so the mock must not require it. Keep the
+  # Go field a plain int rather than the pointer an optional property gets.
+  - target: $.components.schemas.ResponseTemplate.required
+    remove: true
+  - target: $.components.schemas.ResponseTemplate.properties.status
+    update:
+      x-go-type-skip-optional-pointer: true

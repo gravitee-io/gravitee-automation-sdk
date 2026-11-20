@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.2.0...apim-sdk/v0.2.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **apim-sdk:** accept a response template without status ([50a6e9d](https://github.com/gravitee-io/gravitee-automation-sdk/commit/50a6e9ded098804e3d3ddfe59e8affed6b30b4c5))
+* **apim-sdk:** drift tags at GKO parity for v4 APIs ([63a2fb8](https://github.com/gravitee-io/gravitee-automation-sdk/commit/63a2fb896d4c5cf46bbdb2eecfa190eb24511300))
+* **apim-sdk:** omit unset required fields APIM defaults ([9110ece](https://github.com/gravitee-io/gravitee-automation-sdk/commit/9110ece2104f78829c34698edb383d574899e0be))
+
 ## [0.2.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.1.1...apim-sdk/v0.2.0) (2026-11-13)
 
 
