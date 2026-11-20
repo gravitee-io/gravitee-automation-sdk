@@ -4299,11 +4299,12 @@ components:
         entityId:
           type: string
           description: |
-            Stable catalog identity of the server, the name authorization policies reference: lowercase, dot-separated
-            segments, first segment `mcp-server`. Validated, never repaired: an invalid value, or a value already used by
-            another server of the environment, is rejected. Immutable once the server exists — declaring a different value
-            is rejected rather than applied, since nothing re-points the policies naming the old one. Delete the server and
-            declare it again to give it another identity.
+            Stable catalog identity of the server: lowercase, dot-separated segments, first segment `mcp-server`.
+            Policies name the server by the `authPolicyRef` the state derives from it. Validated, never repaired: an
+            invalid value, or a value already used by another server of the environment, is rejected.
+            Immutable once the server exists — declaring a different value is rejected rather than applied, since nothing
+            re-points the policies naming the old reference. Delete the server and declare it again to give it another
+            identity.
           pattern: '^mcp-server\.[a-z0-9_-]+(\.[a-z0-9_-]+)*$'
           maxLength: 255
           examples:
@@ -4466,6 +4467,12 @@ components:
               type: string
               readOnly: true
               description: MCP protocol version negotiated with the server
+            authPolicyRef:
+              type: string
+              readOnly: true
+              description: |
+                What an authorization policy names the server by: its engine type and the slug of `entityId`, e.g.
+                `MCPServer::"github"`. Derived from `entityId`; a spec carrying it is rejected.
             tools:
               type: array
               readOnly: true
@@ -4497,7 +4504,13 @@ components:
           type: string
         entityId:
           type: string
-          description: Composed entity id of the tool, the name an authorization policy references, e.g. `mcp-tool.github.create_issue`
+          description: Composed catalog identity of the tool, e.g. `mcp-tool.github.create_issue`
+        authPolicyRef:
+          type: string
+          readOnly: true
+          description: |
+            What an authorization policy names the tool by, e.g. `MCPTool::"github.create_issue"`: the resource the
+            gateway checks on `tools/call` when a studio exposing the tool enables `enableFGA`, whatever its alias
     AimCatalogMcpPromptStatus:
       type: object
       description: A prompt the platform discovered on the upstream server; declared by the server, never by the author
@@ -4506,7 +4519,7 @@ components:
           type: string
         entityId:
           type: string
-          description: Composed entity id of the prompt, e.g. `mcp-prompt.github.summarize`
+          description: Composed catalog identity of the prompt, e.g. `mcp-prompt.github.summarize`
     AimCatalogMcpResourceStatus:
       type: object
       description: A resource the platform discovered on the upstream server; declared by the server, never by the author
@@ -4517,9 +4530,11 @@ components:
           type: string
         entityId:
           type: string
-          description: Composed entity id of the resource, e.g. `mcp-resource.github.readme`
+          description: Composed catalog identity of the resource, e.g. `mcp-resource.github.readme`
     AimCatalogMcpServerState:
-      description: State of a Catalog MCP server that has been created or updated.
+      description: |
+        State of a Catalog MCP server that has been created or updated: the spec as stored, with its `authPolicyRef`
+        and the discovered tools, prompts and resources as status, which a spec may not carry.
       allOf:
         - $ref: '#/components/schemas/AimCatalogMcpServerSpec'
         - $ref: '#/components/schemas/AimCatalogMcpServerStatus'
@@ -4539,10 +4554,9 @@ components:
         entityId:
           type: string
           description: |
-            Stable identity of the proxy, the name authorization policies reference: lowercase, dot-separated
-            segments, first segment `mcp-proxy`. Required. Validated,
-            never repaired: an invalid value, or a value already used by another MCP proxy of the environment, is
-            rejected. Immutable once the proxy exists — declaring a different value is rejected rather than
+            Stable identity of the proxy: lowercase, dot-separated segments, first segment `mcp-proxy`. Required.
+            Validated, never repaired: an invalid value, or a value already used by another MCP proxy of the
+            environment, is rejected. Immutable once the proxy exists — declaring a different value is rejected rather than
             applied. Delete the proxy and declare it again to give it another identity. Uniqueness across the
             environment is checked at apply time, not enforced by the store (AIAM-242): two concurrent applies
             of the same entityId can both pass.
@@ -4701,7 +4715,8 @@ components:
           type: array
           description: |
             One entry per catalog server a tool comes from: the credential the gateway presents to that server,
-            stored verbatim and never returned, or `type: NONE` to say the server needs none. Nothing is inferred
+            stored verbatim and never returned, `type: NONE` to say the server needs none, or
+            `type: PASSTHROUGH` to forward the caller's own credential to it. Nothing is inferred
             from the credential the catalog synced the server with. An entry for a server no tool uses, a server
             without an entry, or two entries for one server are rejected.
           items:
@@ -4710,7 +4725,8 @@ components:
           type: boolean
           description: |
             Inserts the platform's fine-grained authorization flow, which runs the `authz-pep` policy on
-            `tools/call` with the called tool as the resource; `false` removes it. That flow belongs to the
+            `tools/call` with the called tool as the resource, named by its `authPolicyRef` in the state's
+            `tools`, an alias resolved to the tool it renames; `false` removes it. That flow belongs to the
             platform: `flows` may not carry an `authz-pep` step themselves, and the state reports the declared
             flows without it.
           default: false
@@ -4741,7 +4757,10 @@ components:
             - gh_create_issue
         entityId:
           type: string
-          description: Composed entity id of the tool, the name an authorization policy references, e.g. `mcp-tool.github.create_issue`
+          description: |
+            Catalog identity of the tool, e.g. `mcp-tool.github.create_issue`. Set by the platform and reported in the
+            state; a spec carrying it is rejected, so a state re-applied as a spec leaves it out first. The state's
+            `tools` repeat it next to the tool's `authPolicyRef`.
           readOnly: true
       required:
         - server
@@ -4765,14 +4784,17 @@ components:
       description: |
         Authentication the gateway uses against the upstream MCP server, discriminated by `type`. Credential values
         are stored verbatim: a literal, or a `secret://` URI pointing at a configured secret provider. They are
-        never returned by this API. Omitting `proxy.upstreamAuth`, or declaring `type: NONE`, means the gateway passes
-        the caller's credentials through — and clears any stored upstream authentication.
+        never returned by this API. `NONE` configures no credential of the gateway's own and clears any stored one;
+        omitting `proxy.upstreamAuth` does the same, and a proxy then passes the caller's request through as it came.
+        `PASSTHROUGH` forwards the caller's own credential to a studio's server; a proxy refuses it, `NONE` already
+        letting the caller's request through.
       properties:
         type:
           type: string
           description: Type of upstream authentication
           enum:
             - NONE
+            - PASSTHROUGH
             - API_KEY
             - BEARER
             - BASIC
@@ -4783,6 +4805,7 @@ components:
         propertyName: type
         mapping:
           NONE: '#/components/schemas/AimMcpProxyNoUpstreamAuth'
+          PASSTHROUGH: '#/components/schemas/AimMcpProxyPassthroughUpstreamAuth'
           API_KEY: '#/components/schemas/AimMcpProxyApiKeyUpstreamAuth'
           BEARER: '#/components/schemas/AimMcpProxyBearerUpstreamAuth'
           BASIC: '#/components/schemas/AimMcpProxyBasicUpstreamAuth'
@@ -4791,7 +4814,12 @@ components:
         - type: BEARER
           token: 'secret://kubernetes/github-mcp:token'
     AimMcpProxyNoUpstreamAuth:
-      description: No upstream authentication; the gateway passes the caller's credentials through
+      description: No upstream authentication; the gateway presents no credential of its own
+      allOf:
+        - $ref: '#/components/schemas/AimMcpProxyUpstreamAuth'
+        - type: object
+    AimMcpProxyPassthroughUpstreamAuth:
+      description: The gateway forwards the caller's own credential to the server; for a studio's servers only
       allOf:
         - $ref: '#/components/schemas/AimMcpProxyUpstreamAuth'
         - type: object
@@ -5196,6 +5224,50 @@ components:
           required:
             - domain
             - audience
+    AimMcpProxyStatus:
+      description: Platform-derived facts about an MCP proxy; read-only.
+      allOf:
+        - $ref: '#/components/schemas/AimResourceStatus'
+        - type: object
+          properties:
+            tools:
+              type: array
+              readOnly: true
+              description: |
+                For a `STUDIO`, the tools it exposes, in the order of `studio.tools`, each with the identifiers the
+                platform derives for it. Absent for a `PROXY`.
+              items:
+                $ref: '#/components/schemas/AimMcpProxyToolStatus'
+    AimMcpProxyToolStatus:
+      type: object
+      description: A tool a studio exposes, with the identifiers the platform derives for it
+      properties:
+        server:
+          type: string
+          description: Reference of the catalog MCP server the tool comes from, as `studio.tools` reports it
+          examples:
+            - github-mcp
+        tool:
+          type: string
+          description: Runtime name of the tool on its server
+          examples:
+            - create_issue
+        alias:
+          type: string
+          description: Name the studio exposes the tool under, when one is declared
+          examples:
+            - gh_create_issue
+        entityId:
+          type: string
+          readOnly: true
+          description: Catalog identity of the tool, e.g. `mcp-tool.github.create_issue`
+        authPolicyRef:
+          type: string
+          readOnly: true
+          description: |
+            What an authorization policy names the tool by, e.g. `MCPTool::"github.create_issue"`: the resource the
+            gateway checks on `tools/call` when `studio.enableFGA` is set. An aliased tool keeps the reference of the
+            tool it exposes. Absent for a tool that does not come from a catalog MCP server.
     AimMcpProxyState:
       description: |
         State of an MCP proxy that has been created or updated, in the shape of its spec. Identity providers are
@@ -5205,10 +5277,10 @@ components:
         defaults. For a `STUDIO`, `studio.tools` is read off the stored specification with each tool's
         `entityId` and sorted by server then tool, `studio.upstreamAuth` off the stored backends without
         credentials, and `studio.enableFGA` off the API's flows, which `flows` reports without the platform's
-        authorization flow.
+        authorization flow. `tools` lists the same tools in the same order, with their `authPolicyRef`.
       allOf:
         - $ref: '#/components/schemas/AimMcpProxySpec'
-        - $ref: '#/components/schemas/AimResourceStatus'
+        - $ref: '#/components/schemas/AimMcpProxyStatus'
     AimHttpError:
       type: object
       description: An error returned by the Automation API when a request could not be served.

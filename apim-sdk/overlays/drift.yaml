@@ -278,6 +278,15 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
+  # GKO sends false where the state may leave the flag out.
+  - target: $.components.schemas.AimMcpProxyStudio.properties.enableFGA
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AimMcpProxyFlowExecution.properties.matchRequired
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
   - target: $.components.schemas.AimMcpProxyPlan.properties.flows
     update:
       x-oapi-codegen-extra-tags:
@@ -302,10 +311,15 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
-  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[1].properties['clientId','userInfoEndpoint']
+  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[1].properties.clientId
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
+  # APIM saves /userinfo when the field is left out.
+  - target: $.components.schemas.AimMcpProxyGenericIdentityProvider.allOf[1].properties.userInfoEndpoint
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore-remote-default:,/userinfo
   - target: $.components.schemas.AimMcpProxyMcpFlowSelector.allOf[1].properties.methods
     update:
       x-oapi-codegen-extra-tags:
