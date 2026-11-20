@@ -34,6 +34,7 @@ func TestDriftTags_RemoteDefaults(t *testing.T) {
 		{HttpSelector{}, "PathOperator", "ignore-remote-default:STARTS_WITH"},
 		{Entrypoint{}, "Qos", "ignore-remote-default:AUTO"},
 		{FlowExecution{}, "Mode", "ignore-remote-default:case-insensitive,DEFAULT"},
+		{AimMcpProxyGenericIdentityProvider{}, "UserInfoEndpoint", "ignore-remote-default:,/userinfo"},
 		{APIResource{}, "Configuration", pluginConfig},
 		{BaseStep{}, "Configuration", pluginConfig},
 		{StepV4{}, "Configuration", pluginConfig},
