@@ -25,11 +25,7 @@ import (
 // on every update.
 func TestDriftTags_RemoteDefaults(t *testing.T) {
 	const pluginConfig = "unstructured:ignore-remote-default"
-	tests := []struct {
-		value any
-		field string
-		want  string
-	}{
+	tests := []driftTag{
 		{HttpSelector{}, "Path", "ignore-remote-default:/"},
 		{HttpSelector{}, "PathOperator", "ignore-remote-default:STARTS_WITH"},
 		{Entrypoint{}, "Qos", "ignore-remote-default:AUTO"},
@@ -47,6 +43,25 @@ func TestDriftTags_RemoteDefaults(t *testing.T) {
 		{AimMcpProxyFlowStep{}, "Configuration", pluginConfig},
 		{SubscriptionConsumerConfiguration{}, "EntrypointConfiguration", pluginConfig},
 	}
+	assertDriftTags(t, tests)
+}
+
+// GKO sends false for these MCP proxy flags; a state that leaves them out must not drift.
+func TestDriftTags_McpProxyFalseIsUnset(t *testing.T) {
+	assertDriftTags(t, []driftTag{
+		{AimMcpProxyStudio{}, "EnableFGA", "empty-is-nil"},
+		{AimMcpProxyFlowExecution{}, "MatchRequired", "empty-is-nil"},
+	})
+}
+
+type driftTag struct {
+	value any
+	field string
+	want  string
+}
+
+func assertDriftTags(t *testing.T, tests []driftTag) {
+	t.Helper()
 	for _, tt := range tests {
 		typ := reflect.TypeOf(tt.value)
 		t.Run(typ.Name()+"."+tt.field, func(t *testing.T) {

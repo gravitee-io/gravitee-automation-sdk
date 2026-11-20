@@ -2380,7 +2380,7 @@ func (v AimMcpProxyFlow) WithDefaults() AimMcpProxyFlow {
 // reports no execution block.
 type AimMcpProxyFlowExecution struct {
 	// MatchRequired Reject a request no flow matches; false when omitted
-	MatchRequired *bool `json:"matchRequired,omitempty"`
+	MatchRequired *bool `drift:"empty-is-nil" json:"matchRequired,omitempty"`
 
 	// Mode Flow selection mode
 	Mode *AimMcpProxyFlowExecutionMode `json:"mode,omitempty"`
@@ -3060,7 +3060,7 @@ type AimMcpProxyStudio struct {
 	// `tools`, an alias resolved to the tool it renames; `false` removes it. That flow belongs to the
 	// platform: `flows` may not carry an `authz-pep` step themselves, and the state reports the declared
 	// flows without it.
-	EnableFGA *bool `json:"enableFGA,omitempty"`
+	EnableFGA *bool `drift:"empty-is-nil" json:"enableFGA,omitempty"`
 
 	// Tools The tools the studio exposes, each named by the catalog server it comes from and its runtime name.
 	// Every server named here needs an `upstreamAuth` entry. On a studio created with a `GRAVITEE_AM`
