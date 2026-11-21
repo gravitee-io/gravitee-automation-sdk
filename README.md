@@ -106,9 +106,9 @@ Operations with query parameters (`dryRun`, the legacy UUID params) take a param
 **Models**
 
 - `ApiV4` is the PUT body, `ApiV4State` the response: resource types drop `Spec` and keep `State`. Each State's
-  `Spec()` returns the PUT body it holds (a shallow copy), e.g. `GroupState.Spec()` → `Group`. Nested read-only
-  fields come along: clear `studio.tools[].entityId` before sending an `AimMcpProxyState.Spec()`, which AIM 5.1.2+
-  refuses with `studio.tools[i].entityId: set by the platform and reported in the state`.
+  `Spec()` returns the PUT body it holds (a shallow copy), e.g. `GroupState.Spec()` → `Group`, less the nested
+  read-only fields the platform refuses on PUT: `AimMcpProxyState.Spec()` drops `studio.tools[].entityId` from a copy,
+  so the State keeps it.
 - `WithDefaults()` fills unset pointers, slices and maps with their OpenAPI defaults, nested structs included. It never
   sets non-pointer scalars (a `false` stays `false`) and never recurses into anonymous structs.
 - Resources (by hrid) and list items with an identity (`Member`, `GroupMember`, `Metadata`, `ApiKey`,

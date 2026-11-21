@@ -2003,14 +2003,20 @@ func (v AimCatalogMcpServerState) WithDefaults() AimCatalogMcpServerState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of AimCatalogMcpServer sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of AimCatalogMcpServer sends. Shallow copy, then a
+// clearReadOnly method on *AimCatalogMcpServer, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s AimCatalogMcpServerState) Spec() AimCatalogMcpServer {
-	return AimCatalogMcpServer{
+	spec := AimCatalogMcpServer{
 		Connection:  s.Connection,
 		Description: s.Description,
 		EntityId:    s.EntityId,
 		Hrid:        s.Hrid,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // AimCatalogMcpServerStatus Platform-discovered facts about a Catalog MCP server; read-only.
@@ -3011,9 +3017,11 @@ func (v AimMcpProxyState) WithDefaults() AimMcpProxyState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of AimMcpProxy sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of AimMcpProxy sends. Shallow copy, then a
+// clearReadOnly method on *AimMcpProxy, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s AimMcpProxyState) Spec() AimMcpProxy {
-	return AimMcpProxy{
+	spec := AimMcpProxy{
 		ContextPath:       s.ContextPath,
 		Description:       s.Description,
 		EntityId:          s.EntityId,
@@ -3028,6 +3036,10 @@ func (s AimMcpProxyState) Spec() AimMcpProxy {
 		State:             s.State,
 		Studio:            s.Studio,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // AimMcpProxyStatus Platform-derived facts about an MCP proxy; read-only.
@@ -3805,9 +3817,11 @@ func (v ApiV4State) WithDefaults() ApiV4State {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of ApiV4 sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of ApiV4 sends. Shallow copy, then a
+// clearReadOnly method on *ApiV4, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s ApiV4State) Spec() ApiV4 {
-	return ApiV4{
+	spec := ApiV4{
 		AllowMultiJwtOauth2Subscriptions: s.AllowMultiJwtOauth2Subscriptions,
 		AllowedInApiProducts:             s.AllowedInApiProducts,
 		Analytics:                        s.Analytics,
@@ -3842,6 +3856,10 @@ func (s ApiV4State) Spec() ApiV4 {
 		Version:                          s.Version,
 		Visibility:                       s.Visibility,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // ApplicationOAuthClientSettings Application OAuth client settings. This require Dynamic Client Registration to be enabled at the environment level.
@@ -4138,9 +4156,11 @@ func (v ApplicationState) WithDefaults() ApplicationState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of Application sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of Application sends. Shallow copy, then a
+// clearReadOnly method on *Application, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s ApplicationState) Spec() Application {
-	return Application{
+	spec := Application{
 		Background:    s.Background,
 		Description:   s.Description,
 		Domain:        s.Domain,
@@ -4155,6 +4175,10 @@ func (s ApplicationState) Spec() Application {
 		Settings:      s.Settings,
 		Status:        (*ApplicationSpecStatus)(s.Status),
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // ApplicationStateStatus Application are either ACTIVE or ARCHIVED never actually deleted.
@@ -4591,9 +4615,11 @@ func (v DictionaryState) WithDefaults() DictionaryState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of Dictionary sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of Dictionary sends. Shallow copy, then a
+// clearReadOnly method on *Dictionary, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s DictionaryState) Spec() Dictionary {
-	return Dictionary{
+	spec := Dictionary{
 		Deployed:    s.Deployed,
 		Description: s.Description,
 		Dynamic:     s.Dynamic,
@@ -4602,6 +4628,10 @@ func (s DictionaryState) Spec() Dictionary {
 		Name:        s.Name,
 		Type:        s.Type,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // DictionaryTrigger Renewal configuration for a 'DYNAMIC' dictionary
@@ -4758,9 +4788,11 @@ func (v DocumentationState) WithDefaults() DocumentationState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of Documentation sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of Documentation sends. Shallow copy, then a
+// clearReadOnly method on *Documentation, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s DocumentationState) Spec() Documentation {
-	return Documentation{
+	spec := Documentation{
 		Area:       s.Area,
 		Content:    s.Content,
 		Hrid:       s.Hrid,
@@ -4770,6 +4802,10 @@ func (s DocumentationState) Spec() Documentation {
 		Type:       s.Type,
 		Visibility: s.Visibility,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // DocumentationStatus Status information for a Documentation page after import.
@@ -5330,15 +5366,21 @@ func (v GroupState) WithDefaults() GroupState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of Group sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of Group sends. Shallow copy, then a
+// clearReadOnly method on *Group, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s GroupState) Spec() Group {
-	return Group{
+	spec := Group{
 		DefaultMemberRoles: s.DefaultMemberRoles,
 		Hrid:               s.Hrid,
 		Members:            s.Members,
 		Name:               s.Name,
 		NotifyMembers:      s.NotifyMembers,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // GroupStatus Status information for a group after import.
@@ -6217,9 +6259,11 @@ func (v PortalLinkState) WithDefaults() PortalLinkState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of PortalLink sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of PortalLink sends. Shallow copy, then a
+// clearReadOnly method on *PortalLink, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s PortalLinkState) Spec() PortalLink {
-	return PortalLink{
+	spec := PortalLink{
 		Href:       s.Href,
 		Hrid:       s.Hrid,
 		Location:   s.Location,
@@ -6227,6 +6271,10 @@ func (s PortalLinkState) Spec() PortalLink {
 		Order:      s.Order,
 		Visibility: s.Visibility,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // PortalLinkStatus Status information for a Portal Link after import.
@@ -6363,12 +6411,18 @@ func (v PortalListingState) WithDefaults() PortalListingState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of PortalListing sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of PortalListing sends. Shallow copy, then a
+// clearReadOnly method on *PortalListing, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s PortalListingState) Spec() PortalListing {
-	return PortalListing{
+	spec := PortalListing{
 		Apis: s.Apis,
 		Hrid: s.Hrid,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // PortalListingStatus Status information for a Portal Listing after import.
@@ -6633,15 +6687,21 @@ func (v PortalState) WithDefaults() PortalState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of Portal sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of Portal sends. Shallow copy, then a
+// clearReadOnly method on *Portal, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s PortalState) Spec() Portal {
-	return Portal{
+	spec := Portal{
 		ActiveThemeHrid: s.ActiveThemeHrid,
 		Hrid:            s.Hrid,
 		Name:            s.Name,
 		Navigation:      s.Navigation,
 		Structure:       s.Structure,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // PortalThemeSpec Specification of a next-gen portal Theme. Applying a Theme through the Automation API
@@ -6737,9 +6797,11 @@ func (v PortalThemeState) WithDefaults() PortalThemeState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of PortalTheme sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of PortalTheme sends. Shallow copy, then a
+// clearReadOnly method on *PortalTheme, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s PortalThemeState) Spec() PortalTheme {
-	return PortalTheme{
+	spec := PortalTheme{
 		BackgroundImage: s.BackgroundImage,
 		Definition:      s.Definition,
 		Favicon:         s.Favicon,
@@ -6748,6 +6810,10 @@ func (s PortalThemeState) Spec() PortalTheme {
 		Name:            s.Name,
 		OptionalLogo:    s.OptionalLogo,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // PortalVisibility Whether the navigation entry is visible to anonymous portal visitors.
@@ -7014,9 +7080,11 @@ func (v SharedPolicyGroupState) WithDefaults() SharedPolicyGroupState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of SharedPolicyGroup sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of SharedPolicyGroup sends. Shallow copy, then a
+// clearReadOnly method on *SharedPolicyGroup, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s SharedPolicyGroupState) Spec() SharedPolicyGroup {
-	return SharedPolicyGroup{
+	spec := SharedPolicyGroup{
 		ApiType:             s.ApiType,
 		CrossId:             s.CrossId,
 		Description:         s.Description,
@@ -7026,6 +7094,10 @@ func (s SharedPolicyGroupState) Spec() SharedPolicyGroup {
 		PrerequisiteMessage: s.PrerequisiteMessage,
 		Steps:               s.Steps,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // SimpleApplicationSettings Simple application settings
@@ -7227,9 +7299,11 @@ func (v SubscriptionState) WithDefaults() SubscriptionState {
 	return v
 }
 
-// Spec returns the desired state held in s: the fields a PUT of Subscription sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of Subscription sends. Shallow copy, then a
+// clearReadOnly method on *Subscription, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s SubscriptionState) Spec() Subscription {
-	return Subscription{
+	spec := Subscription{
 		ApiKeys:               s.ApiKeys,
 		ApplicationHrid:       s.ApplicationHrid,
 		ConsumerConfiguration: s.ConsumerConfiguration,
@@ -7238,6 +7312,10 @@ func (s SubscriptionState) Spec() Subscription {
 		Metadata:              s.Metadata,
 		PlanHrid:              s.PlanHrid,
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 
 // SubscriptionStatus Status information for a subscription after import.

@@ -48,9 +48,11 @@ func (v {{.TypeName}}) WithDefaults() {{.TypeName}} {
 {{- if and (not .IsAlias) (eq (printf "%sState" .TypeName) $state.TypeName)}}
 {{- $spec := .}}
 
-// Spec returns the desired state held in s: the fields a PUT of {{$spec.TypeName}} sends. Shallow copy.
+// Spec returns the desired state held in s: the fields a PUT of {{$spec.TypeName}} sends. Shallow copy, then a
+// clearReadOnly method on *{{$spec.TypeName}}, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
 func (s {{$state.TypeName}}) Spec() {{$spec.TypeName}} {
-	return {{$spec.TypeName}}{
+	spec := {{$spec.TypeName}}{
 {{- range $spec.Schema.Properties}}
 {{- $field := .}}{{$value := printf "s.%s" .GoFieldName}}
 {{- range $state.Schema.Properties}}
@@ -59,6 +61,10 @@ func (s {{$state.TypeName}}) Spec() {{$spec.TypeName}} {
 		{{.GoFieldName}}: {{$value}},
 {{- end}}
 	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
 }
 {{- end}}
 {{- end}}

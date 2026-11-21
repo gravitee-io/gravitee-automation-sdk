@@ -70,6 +70,45 @@ func TestSpec_DropsTheMcpAuthPolicyRefs(t *testing.T) {
 	assert.Equal(t, AimMcpProxy{Hrid: "studio", Mode: AimMcpProxyModeSTUDIO}, proxy.Spec())
 }
 
+// AIM 5.1.2+ refuses a PUT carrying a studio tool's entityId, which GKO still reads off the State.
+func TestSpec_DropsTheStudioToolEntityIdsOffACopy(t *testing.T) {
+	studioState := func() AimMcpProxyState {
+		return AimMcpProxyState{
+			Hrid: "studio",
+			Mode: AimMcpProxyModeSTUDIO,
+			Studio: &AimMcpProxyStudio{
+				EnableFGA: new(true),
+				Tools: []AimMcpProxyStudioTool{
+					{Server: "github", Tool: "create_issue", EntityId: new("mcp-tool.github.create_issue")},
+					{Server: "github", Tool: "list_issues", Alias: new("issues"), EntityId: new("mcp-tool.github.list_issues")},
+				},
+				UpstreamAuth: []AimMcpProxyStudioUpstreamAuth{{Server: "github"}},
+			},
+		}
+	}
+	state := studioState()
+
+	assert.Equal(t, &AimMcpProxyStudio{
+		EnableFGA: new(true),
+		Tools: []AimMcpProxyStudioTool{
+			{Server: "github", Tool: "create_issue"},
+			{Server: "github", Tool: "list_issues", Alias: new("issues")},
+		},
+		UpstreamAuth: []AimMcpProxyStudioUpstreamAuth{{Server: "github"}},
+	}, state.Spec().Studio)
+	assert.Equal(t, studioState(), state)
+}
+
+// An absent list and [] keep their JSON form: the body still sends "tools": [].
+func TestSpec_KeepsEmptyStudioToolsApartFromAbsent(t *testing.T) {
+	absent := AimMcpProxyState{Hrid: "studio", Mode: AimMcpProxyModeSTUDIO, Studio: &AimMcpProxyStudio{}}
+	empty := AimMcpProxyState{Hrid: "studio", Mode: AimMcpProxyModeSTUDIO, Studio: &AimMcpProxyStudio{Tools: []AimMcpProxyStudioTool{}}}
+
+	assert.Nil(t, absent.Spec().Studio.Tools)
+	assert.NotNil(t, empty.Spec().Studio.Tools)
+	assert.Empty(t, empty.Spec().Studio.Tools)
+}
+
 // GKO falls back on studio.tools when the state has no tools at all, not when it has none to report.
 func TestAimMcpProxyState_KeepsAbsentToolsApartFromEmpty(t *testing.T) {
 	var absent, empty AimMcpProxyState
