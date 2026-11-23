@@ -10,7 +10,7 @@ Aim: talk to AM the same way GKO does (idempotent PUT, org/env scoped), and test
 common/            shared: API context, errors, response helpers, in-memory store
 am-sdk/            AM Automation client (generated + thin facade)
 am-mock-server/    in-memory HTTP mock of the same API
-apim-sdk/          APIM Automation client (generated, core APIM + AIM)
+apim-sdk/          APIM Automation client (generated, core APIM + AIM + AuthZ)
 apim-mock-server/  in-memory HTTP mock of the APIM Automation API
 ```
 
@@ -97,6 +97,7 @@ With `CloudToken`, `Auth.BearerToken` is a Gravitee Cloud token (GKO's rules):
 |----------|--------|
 | APIs (v4), applications, groups, dictionaries, shared policy groups, portals, portal themes | environment |
 | AIM catalog MCP servers, AIM MCP proxies | environment |
+| AuthZ schemas, PDP gateways, entities, policies | environment |
 | Subscriptions, documentations, links | API |
 | Listings, documentations, links | portal |
 
@@ -153,17 +154,22 @@ Not an API reference — generated methods and models live in `apim-sdk/pkg/sdk`
 
 ### Updating the spec
 
-The spec has two sources, merged by `common/cmd/mergespec` into `apim-sdk/openapi/openapi.yaml`: core APIM
-(`gravitee-api-management` `master`, `make sync-oas`, checked by `make check-oas`) and the AIM fragment (private
-`gravitee-gamma-module-aim`, pinned by `AIM_OAS_REF` in the `Makefile`). `make sync-aim-oas` and
-`make verify-aim-oas` need a `gh` login with access to the AIM repo. Every target reads its source through the GitHub
-API, so `make sync-oas` and `make check-oas` need one too (`gravitee-access-management` is private). CI runs every
-check in CircleCI, which holds the token in Keeper (as terraform-provider-apim does).
+The spec has three sources, merged by `common/cmd/mergespec` into `apim-sdk/openapi/openapi.yaml`:
 
-Nothing bumps the AIM fragment automatically, and `make verify-aim-oas` only checks the committed file against its
-tag. To move it:
+| Source | Origin | Sync | Check |
+|--------|--------|------|-------|
+| `sources/apim.yaml` | `gravitee-api-management` `master` | `make sync-oas` | `make check-oas` |
+| `sources/aim.yaml` | private `gravitee-gamma-module-aim`, at `AIM_OAS_REF` | `make sync-aim-oas` | `make verify-aim-oas` |
+| `sources/authz.yaml` | private `gravitee-gamma-module-authz`, at `AUTHZ_OAS_REF` | `make sync-authz-oas` | `make verify-authz-oas` |
 
-1. Set `AIM_OAS_REF` to the new tag, then run `make sync-aim-oas generate`.
+Every target reads its source through the GitHub API, so it needs a `gh` login (or `GH_TOKEN`) with access to the
+source repo: `gravitee-access-management` and the gamma modules are private. CI runs every check in CircleCI, which
+holds the token in Keeper (as terraform-provider-apim does).
+
+Nothing bumps a fragment automatically, and `make verify-<module>-oas` only checks the committed file against its
+tag. To move one:
+
+1. Set `AIM_OAS_REF` or `AUTHZ_OAS_REF` to the new tag, then run `make sync-<module>-oas generate`.
 2. If a discriminated type gained a variant (e.g. a new upstream auth `type`), add it to `overlays/oneof.yaml` and to
    its `OneOf*` struct in `pkg/sdk/oneof.go`, with a round-trip test. Decoding an unknown `type` fails, so a missing
    variant breaks every resource that uses it. The AIM discriminators have no `oneOf` upstream: the overlay moves
@@ -188,7 +194,7 @@ go run ./apim-mock-server --dry-run-reject
 | `--auth-file` | | Auth YAML (optional). Sample: `apim-mock-server/examples/auth.yaml` |
 | `--dry-run-reject` | off | PUT `?dryRun=true` answers `200` with the message in `errors.severe`, and persists nothing. |
 
-It serves every APIM SDK operation, AIM included, at `/automation/organizations/{orgId}/environments/{envId}/…`.
+It serves every APIM SDK operation, AIM and AuthZ included, at `/automation/organizations/{orgId}/environments/{envId}/…`.
 Requests are validated against the merged OpenAPI spec: an invalid body or parameter gets a `400` with the failing
 field.
 
@@ -212,6 +218,9 @@ It behaves like APIM:
   header) and `ignoreGroups` are accepted and ignored: an hrid is always an hrid.
 - **Polymorphic fields** (listeners, selectors, the AIM discriminated objects) are stored as unstructured maps, so
   every variant field is kept but no defaults are applied inside them.
+- **AuthZ deletes** of a PDP gateway, an entity or a policy answer `?dryRun=true` with the stored state and delete
+  nothing. The mock derives none of the read-only fields AuthZ fills in (`routingScope`, `wellKnownPath`,
+  `policyStatus`), cascades no entity delete, and refuses no delete with a `409` or `413`.
 
 ## Prerequisites
 
@@ -224,6 +233,7 @@ go test ./am-sdk/... ./apim-sdk/... ./am-mock-server/... ./apim-mock-server/... 
 go test ./am-mock-server/server/...
 make sync-oas          # AM_OAS_BRANCH / APIM_OAS_BRANCH to override; needs a gh login with access to gravitee-access-management
 make sync-aim-oas      # AIM_OAS_REF to override; needs a gh login with access to gravitee-gamma-module-aim
+make sync-authz-oas    # AUTHZ_OAS_REF to override; needs a gh login with access to gravitee-gamma-module-authz
 make generate
 ```
 

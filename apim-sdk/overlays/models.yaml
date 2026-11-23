@@ -73,6 +73,18 @@ actions:
   - target: $.components.schemas.AimMcpProxySpec
     update:
       x-go-type-name: AimMcpProxy
+  - target: $.components.schemas.AuthzSchemaSpec
+    update:
+      x-go-type-name: AuthzSchema
+  - target: $.components.schemas.AuthzPdpSpec
+    update:
+      x-go-type-name: AuthzPdp
+  - target: $.components.schemas.AuthzEntitySpec
+    update:
+      x-go-type-name: AuthzEntity
+  - target: $.components.schemas.AuthzPolicySpec
+    update:
+      x-go-type-name: AuthzPolicy
 
   # Free-form plugin configurations: typed as unstructured objects, which GKO's drift compares as such
   # (a plain map[string]interface{} would make it panic).
@@ -92,6 +104,12 @@ actions:
       x-go-type-import:
         path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
   - target: $.components.schemas.SubscriptionConsumerConfiguration.properties.entrypointConfiguration
+    update:
+      x-go-type: unstructured.Unstructured
+      x-go-type-import:
+        path: github.com/gravitee-io/gravitee-automation-sdk/common/pkg/unstructured
+  # Free-form entity attributes, compared as an unstructured object like the configurations above.
+  - target: $.components.schemas.AuthzEntitySpec.properties.attributes
     update:
       x-go-type: unstructured.Unstructured
       x-go-type-import:

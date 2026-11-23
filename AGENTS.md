@@ -25,19 +25,22 @@ If you are an AI agent operating in this repository:
 make tools
 
 # Every OAS is read through the GitHub API, so every sync and check target needs a gh login (or GH_TOKEN) with access
-# to the source repos, some of them private (gravitee-access-management, gravitee-gamma-module-aim)
+# to the source repos, some of them private (gravitee-access-management, the gamma modules)
 
 # Sync AM and APIM Automation OAS (AM_OAS_BRANCH / APIM_OAS_BRANCH, default master)
 make sync-oas
 
-# Sync the AIM fragment from the private gravitee-gamma-module-aim (AIM_OAS_REF)
+# Sync the AIM and AuthZ fragments from the private gravitee-gamma-module-aim (AIM_OAS_REF) and
+# gravitee-gamma-module-authz (AUTHZ_OAS_REF)
 make sync-aim-oas
+make sync-authz-oas
 
-# Fail if the committed AM or APIM OAS differs from its branch, or the AIM fragment from AIM_OAS_REF. CI runs them in
-# CircleCI (.circleci/config.yml), triggered by the oas and aim-oas GitHub Actions jobs through
+# Fail if the committed AM or APIM OAS differs from its branch, or a fragment from its ref. CI runs them in CircleCI
+# (.circleci/config.yml), triggered by the oas, aim-oas and authz-oas GitHub Actions jobs through
 # hack/scripts/verify-oas.mjs, because only CircleCI holds (in Keeper) the token that reads the private repos
 make check-oas
 make verify-aim-oas
+make verify-authz-oas
 
 # Regenerate all code (overlays + oapi-codegen)
 make generate
@@ -90,14 +93,14 @@ A Go workspace with five modules:
 | `common` | Shared utilities: `apicontext` (auth + base URL), `response` (status helpers + generic `Payload[T]` extractor), `store` (channel-based in-memory generic store), `errors`, `refs` |
 | `am-sdk` | Generated SDK clients for AM resources (domains, data planes, applications, certificates, identity providers, reporters). All resources are generated into the single `am-sdk/pkg/sdk` package |
 | `am-mock-server` | Standalone mock HTTP server implementing the same OpenAPI spec with strict-server codegen. Used for integration-testing the SDK |
-| `apim-sdk` | Generated SDK client for the APIM Automation API (core APIM + the AIM fragment) in `apim-sdk/pkg/sdk`, with hand-written `oneof.go` (polymorphic types), `identifiable.go` (resource and list item identities), `certificate.go` (client certificate `Expired`/`Scheduled`) and `apicontext.go` (`APIContext` with cloud-token resolution) |
+| `apim-sdk` | Generated SDK client for the APIM Automation API (core APIM + the AIM and AuthZ fragments) in `apim-sdk/pkg/sdk`, with hand-written `oneof.go` (polymorphic types), `identifiable.go` (resource and list item identities), `certificate.go` (client certificate `Expired`/`Scheduled`) and `apicontext.go` (`APIContext` with cloud-token resolution) |
 | `apim-mock-server` | Standalone mock HTTP server for the APIM Automation API (strict-server codegen from the merged APIM spec). Mirrors real APIM where the AM mock differs: 404 on missing hrids, deterministic ids, PUT returns the State, dry run in the handlers, parent and subscription reference checks, cascades |
 
 ---
 
 ## 3. Code Generation Pipeline
 
-AM code comes from the OpenAPI spec at `am-sdk/openapi/openapi.yaml`, APIM code from `apim-sdk/openapi/openapi.yaml`. The APIM spec is itself generated: `common/cmd/mergespec` merges `apim-sdk/openapi/sources/apim.yaml` (core APIM) and `sources/aim.yaml` (AIM) into it (`apim-sdk/openapi/generate.go`), and it is committed. Generation is driven by `//go:generate` directives in `generate.go` files and involves two steps:
+AM code comes from the OpenAPI spec at `am-sdk/openapi/openapi.yaml`, APIM code from `apim-sdk/openapi/openapi.yaml`. The APIM spec is itself generated: `common/cmd/mergespec` merges `apim-sdk/openapi/sources/apim.yaml` (core APIM), `sources/aim.yaml` (AIM) and `sources/authz.yaml` (AuthZ) into it (`apim-sdk/openapi/generate.go`), and it is committed. Generation is driven by `//go:generate` directives in `generate.go` files and involves two steps:
 
 1. **Overlay merge** — `common/cmd/mergeoverlay` is a CLI tool that merges multiple YAML overlay files into one. Overlays rename models (strip `Automation` prefix via `x-go-type-name`), standardize operationIds (`get`, `list`, `upsert`, `delete`), and (for SDK clients) rewrite paths to bake `orgId`/`envId` into the server URL.
 2. **oapi-codegen** — Generates typed Go clients or strict servers from the overlaid spec. Configs live under `<module>/gen/` so package directories only hold Go files (the SDK uses `am-sdk/gen/models.cfg.yaml` → `models.gen.go` and `am-sdk/gen/client.cfg.yaml` → `client.gen.go`; the mock server uses `am-mock-server/gen/server/cfg.yaml`). The experimental CRD package keeps its config and overlay in place. Paths inside a config are relative to the package directory, where `go generate` runs.

@@ -39,6 +39,10 @@ type tenant struct {
 	PortalThemes         *store.Store[PortalThemeState]
 	AimCatalogMcpServers *store.Store[AimCatalogMcpServerState]
 	AimMcpProxies        *store.Store[AimMcpProxyState]
+	AuthzSchemas         *store.Store[AuthzSchemaState]
+	AuthzPdps            *store.Store[AuthzPdpState]
+	AuthzEntities        *store.Store[AuthzEntityState]
+	AuthzPolicies        *store.Store[AuthzPolicyState]
 	Subscriptions        *store.Store[Child[SubscriptionState]]
 	ApiDocumentations    *store.Store[Child[DocumentationState]]
 	ApiLinks             *store.Store[Child[PortalLinkState]]
@@ -58,6 +62,10 @@ func newTenant() *tenant {
 		PortalThemes:         store.NewStore[PortalThemeState](),
 		AimCatalogMcpServers: store.NewStore[AimCatalogMcpServerState](),
 		AimMcpProxies:        store.NewStore[AimMcpProxyState](),
+		AuthzSchemas:         store.NewStore[AuthzSchemaState](),
+		AuthzPdps:            store.NewStore[AuthzPdpState](),
+		AuthzEntities:        store.NewStore[AuthzEntityState](),
+		AuthzPolicies:        store.NewStore[AuthzPolicyState](),
 		Subscriptions:        store.NewStore[Child[SubscriptionState]](),
 		ApiDocumentations:    store.NewStore[Child[DocumentationState]](),
 		ApiLinks:             store.NewStore[Child[PortalLinkState]](),
@@ -273,6 +281,111 @@ func (m *MockAPIM) DeleteAimMcpProxy(_ context.Context, req DeleteAimMcpProxyReq
 		return DeleteAimMcpProxy404JSONResponse{AimNotFoundJSONResponse(aimHridNotFound(req.Hrid))}, nil
 	}
 	return DeleteAimMcpProxy204Response{}, nil
+}
+
+// AuthZ schemas, PDP gateways, entities and policies. The mock derives none of the platform's read-only fields
+// (routingScope, wellKnownPath, policyStatus) and refuses no delete (409, 413).
+
+func (m *MockAPIM) UpsertAuthzSchema(_ context.Context, req UpsertAuthzSchemaRequestObject) (UpsertAuthzSchemaResponseObject, error) {
+	status := m.status(at(req.OrgId, req.EnvId, "authz-schema"), req.Body.Hrid, req.Params.DryRun)
+	schema := state[AuthzSchemaState](req.Body.WithDefaults(), status)
+	save(m.tenant(req.OrgId, req.EnvId).AuthzSchemas, schema, req.Params.DryRun)
+	return UpsertAuthzSchema200JSONResponse(schema), nil
+}
+
+func (m *MockAPIM) GetAuthzSchema(_ context.Context, req GetAuthzSchemaRequestObject) (GetAuthzSchemaResponseObject, error) {
+	if schema, ok := m.tenant(req.OrgId, req.EnvId).AuthzSchemas.Get(req.Hrid); ok {
+		return GetAuthzSchema200JSONResponse(schema), nil
+	}
+	return GetAuthzSchema404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
+}
+
+func (m *MockAPIM) DeleteAuthzSchema(_ context.Context, req DeleteAuthzSchemaRequestObject) (DeleteAuthzSchemaResponseObject, error) {
+	if !remove(m.tenant(req.OrgId, req.EnvId).AuthzSchemas, req.Hrid) {
+		return DeleteAuthzSchema404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
+	}
+	return DeleteAuthzSchema204Response{}, nil
+}
+
+func (m *MockAPIM) UpsertAuthzPdp(_ context.Context, req UpsertAuthzPdpRequestObject) (UpsertAuthzPdpResponseObject, error) {
+	status := m.status(at(req.OrgId, req.EnvId, "authz-pdp"), req.Body.Hrid, req.Params.DryRun)
+	pdp := state[AuthzPdpState](req.Body.WithDefaults(), status)
+	save(m.tenant(req.OrgId, req.EnvId).AuthzPdps, pdp, req.Params.DryRun)
+	return UpsertAuthzPdp200JSONResponse(pdp), nil
+}
+
+func (m *MockAPIM) GetAuthzPdp(_ context.Context, req GetAuthzPdpRequestObject) (GetAuthzPdpResponseObject, error) {
+	if pdp, ok := m.tenant(req.OrgId, req.EnvId).AuthzPdps.Get(req.Hrid); ok {
+		return GetAuthzPdp200JSONResponse(pdp), nil
+	}
+	return GetAuthzPdp404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
+}
+
+// DeleteAuthzPdp answers a dry run with the stored state and deletes nothing.
+func (m *MockAPIM) DeleteAuthzPdp(_ context.Context, req DeleteAuthzPdpRequestObject) (DeleteAuthzPdpResponseObject, error) {
+	pdps := m.tenant(req.OrgId, req.EnvId).AuthzPdps
+	if isDryRun(req.Params.DryRun) {
+		if pdp, ok := pdps.Get(req.Hrid); ok {
+			return DeleteAuthzPdp200JSONResponse(pdp), nil
+		}
+	} else if remove(pdps, req.Hrid) {
+		return DeleteAuthzPdp204Response{}, nil
+	}
+	return DeleteAuthzPdp404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
+}
+
+func (m *MockAPIM) UpsertAuthzEntity(_ context.Context, req UpsertAuthzEntityRequestObject) (UpsertAuthzEntityResponseObject, error) {
+	status := m.status(at(req.OrgId, req.EnvId, "authz-entity"), req.Body.Hrid, req.Params.DryRun)
+	entity := state[AuthzEntityState](req.Body.WithDefaults(), status)
+	save(m.tenant(req.OrgId, req.EnvId).AuthzEntities, entity, req.Params.DryRun)
+	return UpsertAuthzEntity200JSONResponse(entity), nil
+}
+
+func (m *MockAPIM) GetAuthzEntity(_ context.Context, req GetAuthzEntityRequestObject) (GetAuthzEntityResponseObject, error) {
+	if entity, ok := m.tenant(req.OrgId, req.EnvId).AuthzEntities.Get(req.Hrid); ok {
+		return GetAuthzEntity200JSONResponse(entity), nil
+	}
+	return GetAuthzEntity404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
+}
+
+// DeleteAuthzEntity answers a dry run with the stored state and deletes nothing. It cascades to no other entity.
+func (m *MockAPIM) DeleteAuthzEntity(_ context.Context, req DeleteAuthzEntityRequestObject) (DeleteAuthzEntityResponseObject, error) {
+	entities := m.tenant(req.OrgId, req.EnvId).AuthzEntities
+	if isDryRun(req.Params.DryRun) {
+		if entity, ok := entities.Get(req.Hrid); ok {
+			return DeleteAuthzEntity200JSONResponse(entity), nil
+		}
+	} else if remove(entities, req.Hrid) {
+		return DeleteAuthzEntity204Response{}, nil
+	}
+	return DeleteAuthzEntity404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
+}
+
+func (m *MockAPIM) UpsertAuthzPolicy(_ context.Context, req UpsertAuthzPolicyRequestObject) (UpsertAuthzPolicyResponseObject, error) {
+	status := m.status(at(req.OrgId, req.EnvId, "authz-policy"), req.Body.Hrid, req.Params.DryRun)
+	policy := state[AuthzPolicyState](req.Body.WithDefaults(), status)
+	save(m.tenant(req.OrgId, req.EnvId).AuthzPolicies, policy, req.Params.DryRun)
+	return UpsertAuthzPolicy200JSONResponse(policy), nil
+}
+
+func (m *MockAPIM) GetAuthzPolicy(_ context.Context, req GetAuthzPolicyRequestObject) (GetAuthzPolicyResponseObject, error) {
+	if policy, ok := m.tenant(req.OrgId, req.EnvId).AuthzPolicies.Get(req.Hrid); ok {
+		return GetAuthzPolicy200JSONResponse(policy), nil
+	}
+	return GetAuthzPolicy404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
+}
+
+// DeleteAuthzPolicy answers a dry run with the stored state and deletes nothing.
+func (m *MockAPIM) DeleteAuthzPolicy(_ context.Context, req DeleteAuthzPolicyRequestObject) (DeleteAuthzPolicyResponseObject, error) {
+	policies := m.tenant(req.OrgId, req.EnvId).AuthzPolicies
+	if isDryRun(req.Params.DryRun) {
+		if policy, ok := policies.Get(req.Hrid); ok {
+			return DeleteAuthzPolicy200JSONResponse(policy), nil
+		}
+	} else if remove(policies, req.Hrid) {
+		return DeleteAuthzPolicy204Response{}, nil
+	}
+	return DeleteAuthzPolicy404JSONResponse{AuthzNotFoundJSONResponse(authzHridNotFound(req.Hrid))}, nil
 }
 
 // Shared policy groups

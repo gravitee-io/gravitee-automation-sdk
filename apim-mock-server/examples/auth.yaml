@@ -39,6 +39,10 @@ users:
       - PORTAL_THEME_READ
       - AIM_CATALOG_MCP_SERVER_READ
       - AIM_MCP_PROXY_READ
+      - AUTHZ_SCHEMA_READ
+      - AUTHZ_PDP_READ
+      - AUTHZ_ENTITY_READ
+      - AUTHZ_POLICY_READ
       - API_SUBSCRIPTION_READ
       - API_DOCUMENTATION_READ
       - API_LINK_READ
@@ -58,6 +62,10 @@ users:
       - PORTAL_THEME_UPDATE
       - AIM_CATALOG_MCP_SERVER_UPDATE
       - AIM_MCP_PROXY_UPDATE
+      - AUTHZ_SCHEMA_UPDATE
+      - AUTHZ_PDP_UPDATE
+      - AUTHZ_ENTITY_UPDATE
+      - AUTHZ_POLICY_UPDATE
       - API_SUBSCRIPTION_UPDATE
       - API_DOCUMENTATION_UPDATE
       - API_LINK_UPDATE
@@ -111,6 +119,26 @@ permissions:
   - path: /organizations/{orgId}/environments/{envId}/aim/mcp-proxies/{hrid}
     get: AIM_MCP_PROXY_READ
     delete: AIM_MCP_PROXY_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/authz/schemas
+    put: AUTHZ_SCHEMA_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/authz/schemas/{hrid}
+    get: AUTHZ_SCHEMA_READ
+    delete: AUTHZ_SCHEMA_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/authz/pdps
+    put: AUTHZ_PDP_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/authz/pdps/{hrid}
+    get: AUTHZ_PDP_READ
+    delete: AUTHZ_PDP_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/authz/entities
+    put: AUTHZ_ENTITY_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/authz/entities/{hrid}
+    get: AUTHZ_ENTITY_READ
+    delete: AUTHZ_ENTITY_DELETE
+  - path: /organizations/{orgId}/environments/{envId}/authz/policies
+    put: AUTHZ_POLICY_UPDATE
+  - path: /organizations/{orgId}/environments/{envId}/authz/policies/{hrid}
+    get: AUTHZ_POLICY_READ
+    delete: AUTHZ_POLICY_DELETE
   - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/subscriptions
     put: API_SUBSCRIPTION_UPDATE
   - path: /organizations/{orgId}/environments/{envId}/apis/{apiHrid}/subscriptions/{hrid}

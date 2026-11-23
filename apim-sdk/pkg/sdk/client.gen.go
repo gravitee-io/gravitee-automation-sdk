@@ -407,6 +407,295 @@ type ClientInterface interface {
 	// Corresponds with GET /applications/{hrid} (the `GetApplication` operationId).
 	GetApplication(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// UpsertAuthzEntityWithBody Create or update an authorization entity from its spec
+	//
+	// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+	// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+	// `kind` and `entityType` are fixed at creation.
+	//
+	// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+	// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+	// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+	// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+	// to `automation` on the next apply, with the rest of the spec.
+	//
+	// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+	// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+	// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+	// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+	// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+	// is persisted. A dry run performs the same checks.
+	//
+	// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+	// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+	// and may name one that does not exist.
+	//
+	// The message of a schema violation names the schema's types and attributes only for a caller that can
+	// read schemas.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+	UpsertAuthzEntityWithBody(ctx context.Context, params *UpsertAuthzEntityParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertAuthzEntity Create or update an authorization entity from its spec
+	//
+	// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+	// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+	// `kind` and `entityType` are fixed at creation.
+	//
+	// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+	// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+	// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+	// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+	// to `automation` on the next apply, with the rest of the spec.
+	//
+	// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+	// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+	// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+	// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+	// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+	// is persisted. A dry run performs the same checks.
+	//
+	// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+	// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+	// and may name one that does not exist.
+	//
+	// The message of a schema violation names the schema's types and attributes only for a caller that can
+	// read schemas.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+	UpsertAuthzEntity(ctx context.Context, params *UpsertAuthzEntityParams, body UpsertAuthzEntityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteAuthzEntity Delete one authorization entity
+	//
+	// Delete an authorization entity using its HRID, and withdraw it from the PDP gateways it targets.
+	//
+	// The delete cascades, as in the Console: the RESOURCE entities that have it as a parent are deleted with
+	// it (an MCP server takes its tools), and the PRINCIPAL entities that have it as a parent are kept and
+	// lose that parent (a group does not take its members). Policies are never deleted; a policy that names
+	// the entity keeps its text. A delete that would remove or detach more entities than the cascade limit
+	// is refused with a `413`; the members a deleted PRINCIPAL lets go of do not count, so a group can be
+	// deleted however many members it has.
+	//
+	// Other manifests that declare an entity the delete removed or detached then differ from the platform
+	// until their next apply. With `dryRun=true` nothing is deleted, and the answer lists each entity the
+	// delete would remove or detach, with its `source`, one `errors.warning` per entity. It names at most as
+	// many entities as the cascade limit, then counts the rest in one more warning: a group's members do not
+	// count against the limit, so there can be more. A dry run over the cascade limit answers one
+	// `errors.severe` that counts them instead.
+	//
+	// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the entity,
+	// with its cascade.
+	//
+	// Corresponds with DELETE /authz/entities/{hrid} (the `DeleteAuthzEntity` operationId).
+	DeleteAuthzEntity(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzEntityParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAuthzEntity Get one authorization entity
+	//
+	// Get an authorization entity using its HRID. The state is a valid spec: `targets`, `parents` and the
+	// keys of `attributes` are sorted, and the attributes the module manages itself (keys that start with
+	// `_`) are left out.
+	//
+	// Corresponds with GET /authz/entities/{hrid} (the `GetAuthzEntity` operationId).
+	GetAuthzEntity(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertAuthzPdpWithBody Create or update a PDP gateway from its spec
+	//
+	// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+	// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+	// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+	// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+	// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+	// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+	// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+	// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+	// permissions; a new PDP that agrees with its engine does not.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+	UpsertAuthzPdpWithBody(ctx context.Context, params *UpsertAuthzPdpParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertAuthzPdp Create or update a PDP gateway from its spec
+	//
+	// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+	// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+	// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+	// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+	// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+	// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+	// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+	// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+	// permissions; a new PDP that agrees with its engine does not.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+	UpsertAuthzPdp(ctx context.Context, params *UpsertAuthzPdpParams, body UpsertAuthzPdpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteAuthzPdp Delete one PDP gateway
+	//
+	// Delete a PDP gateway and its endpoint, using its HRID. The policies, entities and schemas that targeted
+	// its routing scope stop targeting it; a declared one that still names it is refused on its next apply.
+	// A delete that would leave a policy or an entity with no target, which moves it to the default engine on
+	// every gateway, is refused with a `409`, and nothing is deleted. Deleting the untagged `default` PDP
+	// gateway is never refused, and narrows no schema.
+	//
+	// With `dryRun=true` nothing is deleted, and the answer is the PDP gateway's state with one
+	// `errors.warning` per endpoint the delete would remove, then one per policy, entity and schema whose
+	// `targets` would lose the routing scope, naming its id, and an entity's `source`. It names at most 20
+	// policies, entities and schemas, then counts the rest in one more warning. A kind the caller cannot read
+	// (`ENVIRONMENT_AUTHZ_POLICIES`, `ENVIRONMENT_AUTHZ_ENTITIES`, `ENVIRONMENT_AUTHZ_SCHEMA`) is counted in
+	// one warning instead of named. A dry run of a delete that would be refused answers one `errors.severe`
+	// carrying the reason the `409` gives.
+	//
+	// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the PDP
+	// gateway.
+	//
+	// Corresponds with DELETE /authz/pdps/{hrid} (the `DeleteAuthzPdp` operationId).
+	DeleteAuthzPdp(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPdpParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAuthzPdp Get one PDP gateway
+	//
+	// Get a PDP gateway, with its endpoint, using its HRID.
+	//
+	// Corresponds with GET /authz/pdps/{hrid} (the `GetAuthzPdp` operationId).
+	GetAuthzPdp(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertAuthzPolicyWithBody Create or update an authorization policy from its spec, and deploy it
+	//
+	// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+	// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+	// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+	// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+	// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+	// `policyType` are fixed at creation.
+	//
+	// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+	// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+	// policy.
+	//
+	// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+	// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+	// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+	// persisted. A dry run performs the same checks.
+	//
+	// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+	// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+	// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+	// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+	//
+	// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+	// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+	// caller that can read schemas.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+	UpsertAuthzPolicyWithBody(ctx context.Context, params *UpsertAuthzPolicyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertAuthzPolicy Create or update an authorization policy from its spec, and deploy it
+	//
+	// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+	// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+	// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+	// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+	// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+	// `policyType` are fixed at creation.
+	//
+	// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+	// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+	// policy.
+	//
+	// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+	// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+	// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+	// persisted. A dry run performs the same checks.
+	//
+	// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+	// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+	// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+	// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+	//
+	// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+	// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+	// caller that can read schemas.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+	UpsertAuthzPolicy(ctx context.Context, params *UpsertAuthzPolicyParams, body UpsertAuthzPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteAuthzPolicy Delete one authorization policy
+	//
+	// Withdraw an authorization policy from the PDP gateways it targets and delete it, using its HRID. The
+	// entities it names are kept. With `dryRun=true` nothing is deleted, and the answer is the policy's state:
+	// the delete takes nothing else with it. The dry run needs APIM 4.14: a 4.13 host ignores `dryRun` on a
+	// delete, and deletes the policy.
+	//
+	// Withdrawing a `DEPLOYED` policy needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's
+	// disable does, dry run included: deleting a `forbid` widens access. A policy no gateway enforces needs
+	// only the permission to delete policies.
+	//
+	// Corresponds with DELETE /authz/policies/{hrid} (the `DeleteAuthzPolicy` operationId).
+	DeleteAuthzPolicy(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPolicyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAuthzPolicy Get one authorization policy
+	//
+	// Get an authorization policy using its HRID. The state is a valid spec, with `targets` sorted, and
+	// `policyStatus` tells whether the PDP gateways enforce it: `DISABLED` after a disable in the Console,
+	// until the next apply.
+	//
+	// Corresponds with GET /authz/policies/{hrid} (the `GetAuthzPolicy` operationId).
+	GetAuthzPolicy(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertAuthzSchemaWithBody Create or update an authorization schema from its spec
+	//
+	// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+	// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+	// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+	// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+	// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+	UpsertAuthzSchemaWithBody(ctx context.Context, params *UpsertAuthzSchemaParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpsertAuthzSchema Create or update an authorization schema from its spec
+	//
+	// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+	// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+	// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+	// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+	// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+	UpsertAuthzSchema(ctx context.Context, params *UpsertAuthzSchemaParams, body UpsertAuthzSchemaJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteAuthzSchema Delete one authorization schema
+	//
+	// Withdraw an authorization schema from the PDP gateway it targets and delete it, using its HRID.
+	//
+	// Corresponds with DELETE /authz/schemas/{hrid} (the `DeleteAuthzSchema` operationId).
+	DeleteAuthzSchema(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAuthzSchema Get one authorization schema
+	//
+	// Get an authorization schema using its HRID.
+	//
+	// Corresponds with GET /authz/schemas/{hrid} (the `GetAuthzSchema` operationId).
+	GetAuthzSchema(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UpsertDictionaryWithBody Create or update Dictionaries from Dictionaries Spec
 	//
 	// Create/update Dictionaries from Dictionaries Spec.
@@ -1217,6 +1506,455 @@ func (c *Client) DeleteApplication(ctx context.Context, hrid HridParam, reqEdito
 // Corresponds with GET /applications/{hrid} (the `GetApplication` operationId).
 func (c *Client) GetApplication(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetApplicationRequest(c.Server, hrid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzEntityWithBody Create or update an authorization entity from its spec
+//
+// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+// `kind` and `entityType` are fixed at creation.
+//
+// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+// to `automation` on the next apply, with the rest of the spec.
+//
+// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+// is persisted. A dry run performs the same checks.
+//
+// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+// and may name one that does not exist.
+//
+// The message of a schema violation names the schema's types and attributes only for a caller that can
+// read schemas.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+func (c *Client) UpsertAuthzEntityWithBody(ctx context.Context, params *UpsertAuthzEntityParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzEntityRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzEntity Create or update an authorization entity from its spec
+//
+// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+// `kind` and `entityType` are fixed at creation.
+//
+// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+// to `automation` on the next apply, with the rest of the spec.
+//
+// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+// is persisted. A dry run performs the same checks.
+//
+// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+// and may name one that does not exist.
+//
+// The message of a schema violation names the schema's types and attributes only for a caller that can
+// read schemas.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+func (c *Client) UpsertAuthzEntity(ctx context.Context, params *UpsertAuthzEntityParams, body UpsertAuthzEntityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzEntityRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteAuthzEntity Delete one authorization entity
+//
+// Delete an authorization entity using its HRID, and withdraw it from the PDP gateways it targets.
+//
+// The delete cascades, as in the Console: the RESOURCE entities that have it as a parent are deleted with
+// it (an MCP server takes its tools), and the PRINCIPAL entities that have it as a parent are kept and
+// lose that parent (a group does not take its members). Policies are never deleted; a policy that names
+// the entity keeps its text. A delete that would remove or detach more entities than the cascade limit
+// is refused with a `413`; the members a deleted PRINCIPAL lets go of do not count, so a group can be
+// deleted however many members it has.
+//
+// Other manifests that declare an entity the delete removed or detached then differ from the platform
+// until their next apply. With `dryRun=true` nothing is deleted, and the answer lists each entity the
+// delete would remove or detach, with its `source`, one `errors.warning` per entity. It names at most as
+// many entities as the cascade limit, then counts the rest in one more warning: a group's members do not
+// count against the limit, so there can be more. A dry run over the cascade limit answers one
+// `errors.severe` that counts them instead.
+//
+// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the entity,
+// with its cascade.
+//
+// Corresponds with DELETE /authz/entities/{hrid} (the `DeleteAuthzEntity` operationId).
+func (c *Client) DeleteAuthzEntity(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzEntityParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteAuthzEntityRequest(c.Server, hrid, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetAuthzEntity Get one authorization entity
+//
+// Get an authorization entity using its HRID. The state is a valid spec: `targets`, `parents` and the
+// keys of `attributes` are sorted, and the attributes the module manages itself (keys that start with
+// `_`) are left out.
+//
+// Corresponds with GET /authz/entities/{hrid} (the `GetAuthzEntity` operationId).
+func (c *Client) GetAuthzEntity(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAuthzEntityRequest(c.Server, hrid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzPdpWithBody Create or update a PDP gateway from its spec
+//
+// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+// permissions; a new PDP that agrees with its engine does not.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+func (c *Client) UpsertAuthzPdpWithBody(ctx context.Context, params *UpsertAuthzPdpParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzPdpRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzPdp Create or update a PDP gateway from its spec
+//
+// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+// permissions; a new PDP that agrees with its engine does not.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+func (c *Client) UpsertAuthzPdp(ctx context.Context, params *UpsertAuthzPdpParams, body UpsertAuthzPdpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzPdpRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteAuthzPdp Delete one PDP gateway
+//
+// Delete a PDP gateway and its endpoint, using its HRID. The policies, entities and schemas that targeted
+// its routing scope stop targeting it; a declared one that still names it is refused on its next apply.
+// A delete that would leave a policy or an entity with no target, which moves it to the default engine on
+// every gateway, is refused with a `409`, and nothing is deleted. Deleting the untagged `default` PDP
+// gateway is never refused, and narrows no schema.
+//
+// With `dryRun=true` nothing is deleted, and the answer is the PDP gateway's state with one
+// `errors.warning` per endpoint the delete would remove, then one per policy, entity and schema whose
+// `targets` would lose the routing scope, naming its id, and an entity's `source`. It names at most 20
+// policies, entities and schemas, then counts the rest in one more warning. A kind the caller cannot read
+// (`ENVIRONMENT_AUTHZ_POLICIES`, `ENVIRONMENT_AUTHZ_ENTITIES`, `ENVIRONMENT_AUTHZ_SCHEMA`) is counted in
+// one warning instead of named. A dry run of a delete that would be refused answers one `errors.severe`
+// carrying the reason the `409` gives.
+//
+// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the PDP
+// gateway.
+//
+// Corresponds with DELETE /authz/pdps/{hrid} (the `DeleteAuthzPdp` operationId).
+func (c *Client) DeleteAuthzPdp(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPdpParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteAuthzPdpRequest(c.Server, hrid, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetAuthzPdp Get one PDP gateway
+//
+// Get a PDP gateway, with its endpoint, using its HRID.
+//
+// Corresponds with GET /authz/pdps/{hrid} (the `GetAuthzPdp` operationId).
+func (c *Client) GetAuthzPdp(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAuthzPdpRequest(c.Server, hrid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzPolicyWithBody Create or update an authorization policy from its spec, and deploy it
+//
+// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+// `policyType` are fixed at creation.
+//
+// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+// policy.
+//
+// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+// persisted. A dry run performs the same checks.
+//
+// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+//
+// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+// caller that can read schemas.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+func (c *Client) UpsertAuthzPolicyWithBody(ctx context.Context, params *UpsertAuthzPolicyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzPolicyRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzPolicy Create or update an authorization policy from its spec, and deploy it
+//
+// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+// `policyType` are fixed at creation.
+//
+// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+// policy.
+//
+// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+// persisted. A dry run performs the same checks.
+//
+// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+//
+// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+// caller that can read schemas.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+func (c *Client) UpsertAuthzPolicy(ctx context.Context, params *UpsertAuthzPolicyParams, body UpsertAuthzPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzPolicyRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteAuthzPolicy Delete one authorization policy
+//
+// Withdraw an authorization policy from the PDP gateways it targets and delete it, using its HRID. The
+// entities it names are kept. With `dryRun=true` nothing is deleted, and the answer is the policy's state:
+// the delete takes nothing else with it. The dry run needs APIM 4.14: a 4.13 host ignores `dryRun` on a
+// delete, and deletes the policy.
+//
+// Withdrawing a `DEPLOYED` policy needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's
+// disable does, dry run included: deleting a `forbid` widens access. A policy no gateway enforces needs
+// only the permission to delete policies.
+//
+// Corresponds with DELETE /authz/policies/{hrid} (the `DeleteAuthzPolicy` operationId).
+func (c *Client) DeleteAuthzPolicy(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPolicyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteAuthzPolicyRequest(c.Server, hrid, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetAuthzPolicy Get one authorization policy
+//
+// Get an authorization policy using its HRID. The state is a valid spec, with `targets` sorted, and
+// `policyStatus` tells whether the PDP gateways enforce it: `DISABLED` after a disable in the Console,
+// until the next apply.
+//
+// Corresponds with GET /authz/policies/{hrid} (the `GetAuthzPolicy` operationId).
+func (c *Client) GetAuthzPolicy(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAuthzPolicyRequest(c.Server, hrid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzSchemaWithBody Create or update an authorization schema from its spec
+//
+// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+func (c *Client) UpsertAuthzSchemaWithBody(ctx context.Context, params *UpsertAuthzSchemaParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzSchemaRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpsertAuthzSchema Create or update an authorization schema from its spec
+//
+// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+func (c *Client) UpsertAuthzSchema(ctx context.Context, params *UpsertAuthzSchemaParams, body UpsertAuthzSchemaJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpsertAuthzSchemaRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteAuthzSchema Delete one authorization schema
+//
+// Withdraw an authorization schema from the PDP gateway it targets and delete it, using its HRID.
+//
+// Corresponds with DELETE /authz/schemas/{hrid} (the `DeleteAuthzSchema` operationId).
+func (c *Client) DeleteAuthzSchema(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteAuthzSchemaRequest(c.Server, hrid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetAuthzSchema Get one authorization schema
+//
+// Get an authorization schema using its HRID.
+//
+// Corresponds with GET /authz/schemas/{hrid} (the `GetAuthzSchema` operationId).
+func (c *Client) GetAuthzSchema(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAuthzSchemaRequest(c.Server, hrid)
 	if err != nil {
 		return nil, err
 	}
@@ -3006,6 +3744,627 @@ func NewGetApplicationRequest(server string, hrid HridParam) (*http.Request, err
 	return req, nil
 }
 
+// NewUpsertAuthzEntityRequest calls the generic UpsertAuthzEntity builder with application/json body
+func NewUpsertAuthzEntityRequest(server string, params *UpsertAuthzEntityParams, body UpsertAuthzEntityJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpsertAuthzEntityRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpsertAuthzEntityRequestWithBody constructs an http.Request for the UpsertAuthzEntity method, with any body, and a specified content type
+func NewUpsertAuthzEntityRequestWithBody(server string, params *UpsertAuthzEntityParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/entities")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteAuthzEntityRequest constructs an http.Request for the DeleteAuthzEntity method
+func NewDeleteAuthzEntityRequest(server string, hrid AuthzHridParam, params *DeleteAuthzEntityParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/entities/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAuthzEntityRequest constructs an http.Request for the GetAuthzEntity method
+func NewGetAuthzEntityRequest(server string, hrid AuthzHridParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/entities/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpsertAuthzPdpRequest calls the generic UpsertAuthzPdp builder with application/json body
+func NewUpsertAuthzPdpRequest(server string, params *UpsertAuthzPdpParams, body UpsertAuthzPdpJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpsertAuthzPdpRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpsertAuthzPdpRequestWithBody constructs an http.Request for the UpsertAuthzPdp method, with any body, and a specified content type
+func NewUpsertAuthzPdpRequestWithBody(server string, params *UpsertAuthzPdpParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/pdps")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteAuthzPdpRequest constructs an http.Request for the DeleteAuthzPdp method
+func NewDeleteAuthzPdpRequest(server string, hrid AuthzHridParam, params *DeleteAuthzPdpParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/pdps/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAuthzPdpRequest constructs an http.Request for the GetAuthzPdp method
+func NewGetAuthzPdpRequest(server string, hrid AuthzHridParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/pdps/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpsertAuthzPolicyRequest calls the generic UpsertAuthzPolicy builder with application/json body
+func NewUpsertAuthzPolicyRequest(server string, params *UpsertAuthzPolicyParams, body UpsertAuthzPolicyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpsertAuthzPolicyRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpsertAuthzPolicyRequestWithBody constructs an http.Request for the UpsertAuthzPolicy method, with any body, and a specified content type
+func NewUpsertAuthzPolicyRequestWithBody(server string, params *UpsertAuthzPolicyParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/policies")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteAuthzPolicyRequest constructs an http.Request for the DeleteAuthzPolicy method
+func NewDeleteAuthzPolicyRequest(server string, hrid AuthzHridParam, params *DeleteAuthzPolicyParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/policies/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAuthzPolicyRequest constructs an http.Request for the GetAuthzPolicy method
+func NewGetAuthzPolicyRequest(server string, hrid AuthzHridParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/policies/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpsertAuthzSchemaRequest calls the generic UpsertAuthzSchema builder with application/json body
+func NewUpsertAuthzSchemaRequest(server string, params *UpsertAuthzSchemaParams, body UpsertAuthzSchemaJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpsertAuthzSchemaRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpsertAuthzSchemaRequestWithBody constructs an http.Request for the UpsertAuthzSchema method, with any body, and a specified content type
+func NewUpsertAuthzSchemaRequestWithBody(server string, params *UpsertAuthzSchemaParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/schemas")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.DryRun != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "dryRun", *params.DryRun, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteAuthzSchemaRequest constructs an http.Request for the DeleteAuthzSchema method
+func NewDeleteAuthzSchemaRequest(server string, hrid AuthzHridParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/schemas/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAuthzSchemaRequest constructs an http.Request for the GetAuthzSchema method
+func NewGetAuthzSchemaRequest(server string, hrid AuthzHridParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "hrid", hrid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/authz/schemas/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUpsertDictionaryRequest calls the generic UpsertDictionary builder with application/json body
 func NewUpsertDictionaryRequest(server string, params *UpsertDictionaryParams, body UpsertDictionaryJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -4608,6 +5967,311 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with GET /applications/{hrid} (the `GetApplication` operationId).
 	GetApplicationWithResponse(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*GetApplicationResponse, error)
+
+	// UpsertAuthzEntityWithBodyWithResponse Create or update an authorization entity from its spec
+	//
+	// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+	// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+	// `kind` and `entityType` are fixed at creation.
+	//
+	// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+	// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+	// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+	// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+	// to `automation` on the next apply, with the rest of the spec.
+	//
+	// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+	// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+	// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+	// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+	// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+	// is persisted. A dry run performs the same checks.
+	//
+	// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+	// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+	// and may name one that does not exist.
+	//
+	// The message of a schema violation names the schema's types and attributes only for a caller that can
+	// read schemas.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+	UpsertAuthzEntityWithBodyWithResponse(ctx context.Context, params *UpsertAuthzEntityParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzEntityResponse, error)
+
+	// UpsertAuthzEntityWithResponse Create or update an authorization entity from its spec
+	//
+	// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+	// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+	// `kind` and `entityType` are fixed at creation.
+	//
+	// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+	// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+	// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+	// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+	// to `automation` on the next apply, with the rest of the spec.
+	//
+	// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+	// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+	// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+	// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+	// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+	// is persisted. A dry run performs the same checks.
+	//
+	// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+	// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+	// and may name one that does not exist.
+	//
+	// The message of a schema violation names the schema's types and attributes only for a caller that can
+	// read schemas.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+	UpsertAuthzEntityWithResponse(ctx context.Context, params *UpsertAuthzEntityParams, body UpsertAuthzEntityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzEntityResponse, error)
+
+	// DeleteAuthzEntityWithResponse Delete one authorization entity
+	//
+	// Delete an authorization entity using its HRID, and withdraw it from the PDP gateways it targets.
+	//
+	// The delete cascades, as in the Console: the RESOURCE entities that have it as a parent are deleted with
+	// it (an MCP server takes its tools), and the PRINCIPAL entities that have it as a parent are kept and
+	// lose that parent (a group does not take its members). Policies are never deleted; a policy that names
+	// the entity keeps its text. A delete that would remove or detach more entities than the cascade limit
+	// is refused with a `413`; the members a deleted PRINCIPAL lets go of do not count, so a group can be
+	// deleted however many members it has.
+	//
+	// Other manifests that declare an entity the delete removed or detached then differ from the platform
+	// until their next apply. With `dryRun=true` nothing is deleted, and the answer lists each entity the
+	// delete would remove or detach, with its `source`, one `errors.warning` per entity. It names at most as
+	// many entities as the cascade limit, then counts the rest in one more warning: a group's members do not
+	// count against the limit, so there can be more. A dry run over the cascade limit answers one
+	// `errors.severe` that counts them instead.
+	//
+	// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the entity,
+	// with its cascade.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /authz/entities/{hrid} (the `DeleteAuthzEntity` operationId).
+	DeleteAuthzEntityWithResponse(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzEntityParams, reqEditors ...RequestEditorFn) (*DeleteAuthzEntityResponse, error)
+
+	// GetAuthzEntityWithResponse Get one authorization entity
+	//
+	// Get an authorization entity using its HRID. The state is a valid spec: `targets`, `parents` and the
+	// keys of `attributes` are sorted, and the attributes the module manages itself (keys that start with
+	// `_`) are left out.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /authz/entities/{hrid} (the `GetAuthzEntity` operationId).
+	GetAuthzEntityWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzEntityResponse, error)
+
+	// UpsertAuthzPdpWithBodyWithResponse Create or update a PDP gateway from its spec
+	//
+	// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+	// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+	// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+	// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+	// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+	// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+	// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+	// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+	// permissions; a new PDP that agrees with its engine does not.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+	UpsertAuthzPdpWithBodyWithResponse(ctx context.Context, params *UpsertAuthzPdpParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzPdpResponse, error)
+
+	// UpsertAuthzPdpWithResponse Create or update a PDP gateway from its spec
+	//
+	// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+	// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+	// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+	// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+	// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+	// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+	// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+	// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+	// permissions; a new PDP that agrees with its engine does not.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+	UpsertAuthzPdpWithResponse(ctx context.Context, params *UpsertAuthzPdpParams, body UpsertAuthzPdpJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzPdpResponse, error)
+
+	// DeleteAuthzPdpWithResponse Delete one PDP gateway
+	//
+	// Delete a PDP gateway and its endpoint, using its HRID. The policies, entities and schemas that targeted
+	// its routing scope stop targeting it; a declared one that still names it is refused on its next apply.
+	// A delete that would leave a policy or an entity with no target, which moves it to the default engine on
+	// every gateway, is refused with a `409`, and nothing is deleted. Deleting the untagged `default` PDP
+	// gateway is never refused, and narrows no schema.
+	//
+	// With `dryRun=true` nothing is deleted, and the answer is the PDP gateway's state with one
+	// `errors.warning` per endpoint the delete would remove, then one per policy, entity and schema whose
+	// `targets` would lose the routing scope, naming its id, and an entity's `source`. It names at most 20
+	// policies, entities and schemas, then counts the rest in one more warning. A kind the caller cannot read
+	// (`ENVIRONMENT_AUTHZ_POLICIES`, `ENVIRONMENT_AUTHZ_ENTITIES`, `ENVIRONMENT_AUTHZ_SCHEMA`) is counted in
+	// one warning instead of named. A dry run of a delete that would be refused answers one `errors.severe`
+	// carrying the reason the `409` gives.
+	//
+	// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the PDP
+	// gateway.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /authz/pdps/{hrid} (the `DeleteAuthzPdp` operationId).
+	DeleteAuthzPdpWithResponse(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPdpParams, reqEditors ...RequestEditorFn) (*DeleteAuthzPdpResponse, error)
+
+	// GetAuthzPdpWithResponse Get one PDP gateway
+	//
+	// Get a PDP gateway, with its endpoint, using its HRID.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /authz/pdps/{hrid} (the `GetAuthzPdp` operationId).
+	GetAuthzPdpWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzPdpResponse, error)
+
+	// UpsertAuthzPolicyWithBodyWithResponse Create or update an authorization policy from its spec, and deploy it
+	//
+	// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+	// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+	// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+	// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+	// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+	// `policyType` are fixed at creation.
+	//
+	// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+	// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+	// policy.
+	//
+	// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+	// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+	// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+	// persisted. A dry run performs the same checks.
+	//
+	// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+	// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+	// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+	// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+	//
+	// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+	// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+	// caller that can read schemas.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+	UpsertAuthzPolicyWithBodyWithResponse(ctx context.Context, params *UpsertAuthzPolicyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzPolicyResponse, error)
+
+	// UpsertAuthzPolicyWithResponse Create or update an authorization policy from its spec, and deploy it
+	//
+	// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+	// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+	// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+	// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+	// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+	// `policyType` are fixed at creation.
+	//
+	// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+	// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+	// policy.
+	//
+	// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+	// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+	// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+	// persisted. A dry run performs the same checks.
+	//
+	// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+	// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+	// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+	// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+	//
+	// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+	// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+	// caller that can read schemas.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+	UpsertAuthzPolicyWithResponse(ctx context.Context, params *UpsertAuthzPolicyParams, body UpsertAuthzPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzPolicyResponse, error)
+
+	// DeleteAuthzPolicyWithResponse Delete one authorization policy
+	//
+	// Withdraw an authorization policy from the PDP gateways it targets and delete it, using its HRID. The
+	// entities it names are kept. With `dryRun=true` nothing is deleted, and the answer is the policy's state:
+	// the delete takes nothing else with it. The dry run needs APIM 4.14: a 4.13 host ignores `dryRun` on a
+	// delete, and deletes the policy.
+	//
+	// Withdrawing a `DEPLOYED` policy needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's
+	// disable does, dry run included: deleting a `forbid` widens access. A policy no gateway enforces needs
+	// only the permission to delete policies.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /authz/policies/{hrid} (the `DeleteAuthzPolicy` operationId).
+	DeleteAuthzPolicyWithResponse(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPolicyParams, reqEditors ...RequestEditorFn) (*DeleteAuthzPolicyResponse, error)
+
+	// GetAuthzPolicyWithResponse Get one authorization policy
+	//
+	// Get an authorization policy using its HRID. The state is a valid spec, with `targets` sorted, and
+	// `policyStatus` tells whether the PDP gateways enforce it: `DISABLED` after a disable in the Console,
+	// until the next apply.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /authz/policies/{hrid} (the `GetAuthzPolicy` operationId).
+	GetAuthzPolicyWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzPolicyResponse, error)
+
+	// UpsertAuthzSchemaWithBodyWithResponse Create or update an authorization schema from its spec
+	//
+	// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+	// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+	// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+	// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+	// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+	UpsertAuthzSchemaWithBodyWithResponse(ctx context.Context, params *UpsertAuthzSchemaParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzSchemaResponse, error)
+
+	// UpsertAuthzSchemaWithResponse Create or update an authorization schema from its spec
+	//
+	// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+	// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+	// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+	// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+	// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+	// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+	UpsertAuthzSchemaWithResponse(ctx context.Context, params *UpsertAuthzSchemaParams, body UpsertAuthzSchemaJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzSchemaResponse, error)
+
+	// DeleteAuthzSchemaWithResponse Delete one authorization schema
+	//
+	// Withdraw an authorization schema from the PDP gateway it targets and delete it, using its HRID.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /authz/schemas/{hrid} (the `DeleteAuthzSchema` operationId).
+	DeleteAuthzSchemaWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*DeleteAuthzSchemaResponse, error)
+
+	// GetAuthzSchemaWithResponse Get one authorization schema
+	//
+	// Get an authorization schema using its HRID.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /authz/schemas/{hrid} (the `GetAuthzSchema` operationId).
+	GetAuthzSchemaWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzSchemaResponse, error)
 
 	// UpsertDictionaryWithBodyWithResponse Create or update Dictionaries from Dictionaries Spec
 	//
@@ -6320,6 +7984,869 @@ func (r GetApplicationResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r GetApplicationResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpsertAuthzEntityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzEntityState
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *AuthzEntityState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpsertAuthzEntityResponse) GetJSON200() *AuthzEntityState {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r UpsertAuthzEntityResponse) GetJSON400() *AuthzEntityState {
+	return r.JSON400
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r UpsertAuthzEntityResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r UpsertAuthzEntityResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r UpsertAuthzEntityResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r UpsertAuthzEntityResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r UpsertAuthzEntityResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpsertAuthzEntityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpsertAuthzEntityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpsertAuthzEntityResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteAuthzEntityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzEntityState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSON413 the response for an HTTP 413 `application/json` response
+	JSON413 *AuthzAutomationHttpError
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeleteAuthzEntityResponse) GetJSON200() *AuthzEntityState {
+	return r.JSON200
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r DeleteAuthzEntityResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r DeleteAuthzEntityResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r DeleteAuthzEntityResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSON413 returns the response for an HTTP 413 `application/json` response
+func (r DeleteAuthzEntityResponse) GetJSON413() *AuthzAutomationHttpError {
+	return r.JSON413
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r DeleteAuthzEntityResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteAuthzEntityResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteAuthzEntityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteAuthzEntityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteAuthzEntityResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetAuthzEntityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzEntityState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetAuthzEntityResponse) GetJSON200() *AuthzEntityState {
+	return r.JSON200
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r GetAuthzEntityResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r GetAuthzEntityResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r GetAuthzEntityResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r GetAuthzEntityResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r GetAuthzEntityResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAuthzEntityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAuthzEntityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetAuthzEntityResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpsertAuthzPdpResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzPdpState
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *AuthzPdpState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpsertAuthzPdpResponse) GetJSON200() *AuthzPdpState {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r UpsertAuthzPdpResponse) GetJSON400() *AuthzPdpState {
+	return r.JSON400
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r UpsertAuthzPdpResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r UpsertAuthzPdpResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r UpsertAuthzPdpResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r UpsertAuthzPdpResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r UpsertAuthzPdpResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpsertAuthzPdpResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpsertAuthzPdpResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpsertAuthzPdpResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteAuthzPdpResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzPdpState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSON409 the response for an HTTP 409 `application/json` response
+	JSON409 *AuthzAutomationHttpError
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeleteAuthzPdpResponse) GetJSON200() *AuthzPdpState {
+	return r.JSON200
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r DeleteAuthzPdpResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r DeleteAuthzPdpResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r DeleteAuthzPdpResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSON409 returns the response for an HTTP 409 `application/json` response
+func (r DeleteAuthzPdpResponse) GetJSON409() *AuthzAutomationHttpError {
+	return r.JSON409
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r DeleteAuthzPdpResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteAuthzPdpResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteAuthzPdpResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteAuthzPdpResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteAuthzPdpResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetAuthzPdpResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzPdpState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetAuthzPdpResponse) GetJSON200() *AuthzPdpState {
+	return r.JSON200
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r GetAuthzPdpResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r GetAuthzPdpResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r GetAuthzPdpResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r GetAuthzPdpResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r GetAuthzPdpResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAuthzPdpResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAuthzPdpResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetAuthzPdpResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpsertAuthzPolicyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzPolicyState
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *AuthzPolicyState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpsertAuthzPolicyResponse) GetJSON200() *AuthzPolicyState {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r UpsertAuthzPolicyResponse) GetJSON400() *AuthzPolicyState {
+	return r.JSON400
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r UpsertAuthzPolicyResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r UpsertAuthzPolicyResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r UpsertAuthzPolicyResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r UpsertAuthzPolicyResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r UpsertAuthzPolicyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpsertAuthzPolicyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpsertAuthzPolicyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpsertAuthzPolicyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteAuthzPolicyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzPolicyState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeleteAuthzPolicyResponse) GetJSON200() *AuthzPolicyState {
+	return r.JSON200
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r DeleteAuthzPolicyResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r DeleteAuthzPolicyResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r DeleteAuthzPolicyResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r DeleteAuthzPolicyResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteAuthzPolicyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteAuthzPolicyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteAuthzPolicyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteAuthzPolicyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetAuthzPolicyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzPolicyState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetAuthzPolicyResponse) GetJSON200() *AuthzPolicyState {
+	return r.JSON200
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r GetAuthzPolicyResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r GetAuthzPolicyResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r GetAuthzPolicyResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r GetAuthzPolicyResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r GetAuthzPolicyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAuthzPolicyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAuthzPolicyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetAuthzPolicyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpsertAuthzSchemaResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzSchemaState
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *AuthzSchemaState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpsertAuthzSchemaResponse) GetJSON200() *AuthzSchemaState {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r UpsertAuthzSchemaResponse) GetJSON400() *AuthzSchemaState {
+	return r.JSON400
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r UpsertAuthzSchemaResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r UpsertAuthzSchemaResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r UpsertAuthzSchemaResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r UpsertAuthzSchemaResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r UpsertAuthzSchemaResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpsertAuthzSchemaResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpsertAuthzSchemaResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpsertAuthzSchemaResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteAuthzSchemaResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r DeleteAuthzSchemaResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r DeleteAuthzSchemaResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r DeleteAuthzSchemaResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r DeleteAuthzSchemaResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteAuthzSchemaResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteAuthzSchemaResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteAuthzSchemaResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteAuthzSchemaResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetAuthzSchemaResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AuthzSchemaState
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *AuthzUnauthenticated
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *AuthzUnauthorized
+	// JSON404 the response for an HTTP 404 `application/json` response
+	JSON404 *AuthzNotFound
+	// JSONDefault the response for an HTTP default `application/json` response
+	JSONDefault *AuthzError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetAuthzSchemaResponse) GetJSON200() *AuthzSchemaState {
+	return r.JSON200
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r GetAuthzSchemaResponse) GetJSON401() *AuthzUnauthenticated {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r GetAuthzSchemaResponse) GetJSON403() *AuthzUnauthorized {
+	return r.JSON403
+}
+
+// GetJSON404 returns the response for an HTTP 404 `application/json` response
+func (r GetAuthzSchemaResponse) GetJSON404() *AuthzNotFound {
+	return r.JSON404
+}
+
+// GetJSONDefault returns the response for an HTTP default `application/json` response
+func (r GetAuthzSchemaResponse) GetJSONDefault() *AuthzError {
+	return r.JSONDefault
+}
+
+// GetBody returns the raw response body bytes
+func (r GetAuthzSchemaResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAuthzSchemaResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAuthzSchemaResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetAuthzSchemaResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -8426,6 +10953,407 @@ func (c *ClientWithResponses) GetApplicationWithResponse(ctx context.Context, hr
 	return ParseGetApplicationResponse(rsp)
 }
 
+// UpsertAuthzEntityWithBodyWithResponse Create or update an authorization entity from its spec
+//
+// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+// `kind` and `entityType` are fixed at creation.
+//
+// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+// to `automation` on the next apply, with the rest of the spec.
+//
+// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+// is persisted. A dry run performs the same checks.
+//
+// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+// and may name one that does not exist.
+//
+// The message of a schema violation names the schema's types and attributes only for a caller that can
+// read schemas.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+func (c *ClientWithResponses) UpsertAuthzEntityWithBodyWithResponse(ctx context.Context, params *UpsertAuthzEntityParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzEntityResponse, error) {
+	rsp, err := c.UpsertAuthzEntityWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzEntityResponse(rsp)
+}
+
+// UpsertAuthzEntityWithResponse Create or update an authorization entity from its spec
+//
+// Create or update an authorization entity, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. `parents`, `attributes`, `targets` and `active` apply exactly as declared;
+// an empty `targets` falls back to the default engine on every gateway, as in the Console. `entityId`,
+// `kind` and `entityType` are fixed at creation.
+//
+// An entity is created here, and only an entity created here is managed here: a spec whose `entityId` is
+// held by another entity is refused, and the finding names that entity's `source` (`automation` for the
+// ones declared here, `local` for the Console, `scim.*`, `gravitee_am`, `gravitee-catalog`, and so on for
+// the others). An entity declared here that a Console edit or the AM sync relabelled gets its `source` back
+// to `automation` on the next apply, with the rest of the spec.
+//
+// Refused, never repaired: an `entityType` that is not spelled the way the engine spells it, a `kind` that
+// contradicts the type, duplicate or cyclic `parents`, a parent of a `RESOURCE` that names no existing
+// entity of that type, an `Action` entity with `targets`, an attribute key that starts with `_`
+// (reserved to the module), a target no PDP gateway answers to, and a violation of the schema of a strict
+// PDP gateway. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing
+// is persisted. A dry run performs the same checks.
+//
+// A `RESOURCE` is deleted with its parent, so it is not declared under one that does not exist: declare
+// the parent first. A parent the stored entity already holds is kept. A `PRINCIPAL` outlives its parent
+// and may name one that does not exist.
+//
+// The message of a schema violation names the schema's types and attributes only for a caller that can
+// read schemas.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/entities (the `UpsertAuthzEntity` operationId).
+func (c *ClientWithResponses) UpsertAuthzEntityWithResponse(ctx context.Context, params *UpsertAuthzEntityParams, body UpsertAuthzEntityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzEntityResponse, error) {
+	rsp, err := c.UpsertAuthzEntity(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzEntityResponse(rsp)
+}
+
+// DeleteAuthzEntityWithResponse Delete one authorization entity
+//
+// Delete an authorization entity using its HRID, and withdraw it from the PDP gateways it targets.
+//
+// The delete cascades, as in the Console: the RESOURCE entities that have it as a parent are deleted with
+// it (an MCP server takes its tools), and the PRINCIPAL entities that have it as a parent are kept and
+// lose that parent (a group does not take its members). Policies are never deleted; a policy that names
+// the entity keeps its text. A delete that would remove or detach more entities than the cascade limit
+// is refused with a `413`; the members a deleted PRINCIPAL lets go of do not count, so a group can be
+// deleted however many members it has.
+//
+// Other manifests that declare an entity the delete removed or detached then differ from the platform
+// until their next apply. With `dryRun=true` nothing is deleted, and the answer lists each entity the
+// delete would remove or detach, with its `source`, one `errors.warning` per entity. It names at most as
+// many entities as the cascade limit, then counts the rest in one more warning: a group's members do not
+// count against the limit, so there can be more. A dry run over the cascade limit answers one
+// `errors.severe` that counts them instead.
+//
+// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the entity,
+// with its cascade.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /authz/entities/{hrid} (the `DeleteAuthzEntity` operationId).
+func (c *ClientWithResponses) DeleteAuthzEntityWithResponse(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzEntityParams, reqEditors ...RequestEditorFn) (*DeleteAuthzEntityResponse, error) {
+	rsp, err := c.DeleteAuthzEntity(ctx, hrid, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteAuthzEntityResponse(rsp)
+}
+
+// GetAuthzEntityWithResponse Get one authorization entity
+//
+// Get an authorization entity using its HRID. The state is a valid spec: `targets`, `parents` and the
+// keys of `attributes` are sorted, and the attributes the module manages itself (keys that start with
+// `_`) are left out.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /authz/entities/{hrid} (the `GetAuthzEntity` operationId).
+func (c *ClientWithResponses) GetAuthzEntityWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzEntityResponse, error) {
+	rsp, err := c.GetAuthzEntity(ctx, hrid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAuthzEntityResponse(rsp)
+}
+
+// UpsertAuthzPdpWithBodyWithResponse Create or update a PDP gateway from its spec
+//
+// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+// permissions; a new PDP that agrees with its engine does not.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+func (c *ClientWithResponses) UpsertAuthzPdpWithBodyWithResponse(ctx context.Context, params *UpsertAuthzPdpParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzPdpResponse, error) {
+	rsp, err := c.UpsertAuthzPdpWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzPdpResponse(rsp)
+}
+
+// UpsertAuthzPdpWithResponse Create or update a PDP gateway from its spec
+//
+// Create or update a PDP gateway, identified by the `hrid` carried in the body. Re-applying an unchanged spec
+// is a no-op. `targetPdpId` and `tag` are fixed at creation; a renamed PDP is republished; a `strict` change
+// applies to every PDP of the targetPdpId; the endpoint is created, replaced or deleted to match `endpoint`.
+// Findings that prevent the apply — a changed `targetPdpId` or `tag`, a routing scope another PDP holds, a
+// `strict` that disagrees with the registered PDPs of the targetPdpId on create, an endpoint path another API
+// uses — are reported in `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same
+// checks. Changing the strict value of the engine, by declaring `strict: true` on the first PDP of a
+// targetPdpId or another value on an existing PDP, also needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` and `READ`
+// permissions; a new PDP that agrees with its engine does not.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/pdps (the `UpsertAuthzPdp` operationId).
+func (c *ClientWithResponses) UpsertAuthzPdpWithResponse(ctx context.Context, params *UpsertAuthzPdpParams, body UpsertAuthzPdpJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzPdpResponse, error) {
+	rsp, err := c.UpsertAuthzPdp(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzPdpResponse(rsp)
+}
+
+// DeleteAuthzPdpWithResponse Delete one PDP gateway
+//
+// Delete a PDP gateway and its endpoint, using its HRID. The policies, entities and schemas that targeted
+// its routing scope stop targeting it; a declared one that still names it is refused on its next apply.
+// A delete that would leave a policy or an entity with no target, which moves it to the default engine on
+// every gateway, is refused with a `409`, and nothing is deleted. Deleting the untagged `default` PDP
+// gateway is never refused, and narrows no schema.
+//
+// With `dryRun=true` nothing is deleted, and the answer is the PDP gateway's state with one
+// `errors.warning` per endpoint the delete would remove, then one per policy, entity and schema whose
+// `targets` would lose the routing scope, naming its id, and an entity's `source`. It names at most 20
+// policies, entities and schemas, then counts the rest in one more warning. A kind the caller cannot read
+// (`ENVIRONMENT_AUTHZ_POLICIES`, `ENVIRONMENT_AUTHZ_ENTITIES`, `ENVIRONMENT_AUTHZ_SCHEMA`) is counted in
+// one warning instead of named. A dry run of a delete that would be refused answers one `errors.severe`
+// carrying the reason the `409` gives.
+//
+// **The dry run needs APIM 4.14 or later.** APIM 4.13 ignores `dryRun` on a delete and deletes the PDP
+// gateway.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /authz/pdps/{hrid} (the `DeleteAuthzPdp` operationId).
+func (c *ClientWithResponses) DeleteAuthzPdpWithResponse(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPdpParams, reqEditors ...RequestEditorFn) (*DeleteAuthzPdpResponse, error) {
+	rsp, err := c.DeleteAuthzPdp(ctx, hrid, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteAuthzPdpResponse(rsp)
+}
+
+// GetAuthzPdpWithResponse Get one PDP gateway
+//
+// Get a PDP gateway, with its endpoint, using its HRID.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /authz/pdps/{hrid} (the `GetAuthzPdp` operationId).
+func (c *ClientWithResponses) GetAuthzPdpWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzPdpResponse, error) {
+	rsp, err := c.GetAuthzPdp(ctx, hrid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAuthzPdpResponse(rsp)
+}
+
+// UpsertAuthzPolicyWithBodyWithResponse Create or update an authorization policy from its spec, and deploy it
+//
+// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+// `policyType` are fixed at creation.
+//
+// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+// policy.
+//
+// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+// persisted. A dry run performs the same checks.
+//
+// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+//
+// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+// caller that can read schemas.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+func (c *ClientWithResponses) UpsertAuthzPolicyWithBodyWithResponse(ctx context.Context, params *UpsertAuthzPolicyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzPolicyResponse, error) {
+	rsp, err := c.UpsertAuthzPolicyWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzPolicyResponse(rsp)
+}
+
+// UpsertAuthzPolicyWithResponse Create or update an authorization policy from its spec, and deploy it
+//
+// Create or update an authorization policy, identified by the `hrid` carried in the body, and deploy it to
+// the PDP gateways its `targets` name. Every apply leaves the policy `DEPLOYED`: a policy disabled in the
+// Console is deployed again by the next apply, with a warning that says so. Re-applying an unchanged spec
+// of a deployed policy is a no-op. `name`, `policyText` and `targets` apply exactly as declared; an empty
+// `targets` falls back to the default engine on every gateway, as in the Console. `entityId` and
+// `policyType` are fixed at creation.
+//
+// The manifest names the `entityId`, which the Console derives from the name. It is held by one policy of
+// the environment: a spec whose `entityId` another policy holds is refused, and the finding names that
+// policy.
+//
+// Refused, never repaired: a `policyText` that does not parse, a template (`?principal`, `?resource`), a
+// target no PDP gateway answers to, and a violation of the schema of a strict PDP gateway among the
+// targets. Findings that prevent the apply are reported in `errors.severe` with a `400`, and nothing is
+// persisted. A dry run performs the same checks.
+//
+// Reported in `errors.warning`, without stopping the apply: a policy that names `MCPServer` or `MCPTool`
+// and whose `targets` leave out `default` and `*`, since an MCP proxy asks the default engine only; and a
+// catalog item written with its catalog id, `MCPTool::"mcp-tool.postman-studio.read_wiki_structure"`, with
+// the `authPolicyRef` the gateway asks about, `MCPTool::"postman-studio.read_wiki_structure"`.
+//
+// Deploying needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's deploy does, on every
+// apply and dry run. The message of a schema violation names the schema's types and attributes only for a
+// caller that can read schemas.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/policies (the `UpsertAuthzPolicy` operationId).
+func (c *ClientWithResponses) UpsertAuthzPolicyWithResponse(ctx context.Context, params *UpsertAuthzPolicyParams, body UpsertAuthzPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzPolicyResponse, error) {
+	rsp, err := c.UpsertAuthzPolicy(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzPolicyResponse(rsp)
+}
+
+// DeleteAuthzPolicyWithResponse Delete one authorization policy
+//
+// Withdraw an authorization policy from the PDP gateways it targets and delete it, using its HRID. The
+// entities it names are kept. With `dryRun=true` nothing is deleted, and the answer is the policy's state:
+// the delete takes nothing else with it. The dry run needs APIM 4.14: a 4.13 host ignores `dryRun` on a
+// delete, and deletes the policy.
+//
+// Withdrawing a `DEPLOYED` policy needs the `ENVIRONMENT_AUTHZ_PDP` `UPDATE` permission, as the Console's
+// disable does, dry run included: deleting a `forbid` widens access. A policy no gateway enforces needs
+// only the permission to delete policies.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /authz/policies/{hrid} (the `DeleteAuthzPolicy` operationId).
+func (c *ClientWithResponses) DeleteAuthzPolicyWithResponse(ctx context.Context, hrid AuthzHridParam, params *DeleteAuthzPolicyParams, reqEditors ...RequestEditorFn) (*DeleteAuthzPolicyResponse, error) {
+	rsp, err := c.DeleteAuthzPolicy(ctx, hrid, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteAuthzPolicyResponse(rsp)
+}
+
+// GetAuthzPolicyWithResponse Get one authorization policy
+//
+// Get an authorization policy using its HRID. The state is a valid spec, with `targets` sorted, and
+// `policyStatus` tells whether the PDP gateways enforce it: `DISABLED` after a disable in the Console,
+// until the next apply.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /authz/policies/{hrid} (the `GetAuthzPolicy` operationId).
+func (c *ClientWithResponses) GetAuthzPolicyWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzPolicyResponse, error) {
+	rsp, err := c.GetAuthzPolicy(ctx, hrid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAuthzPolicyResponse(rsp)
+}
+
+// UpsertAuthzSchemaWithBodyWithResponse Create or update an authorization schema from its spec
+//
+// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+func (c *ClientWithResponses) UpsertAuthzSchemaWithBodyWithResponse(ctx context.Context, params *UpsertAuthzSchemaParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpsertAuthzSchemaResponse, error) {
+	rsp, err := c.UpsertAuthzSchemaWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzSchemaResponse(rsp)
+}
+
+// UpsertAuthzSchemaWithResponse Create or update an authorization schema from its spec
+//
+// Create or update a GAPL schema document, identified by the `hrid` carried in the body. Re-applying an
+// unchanged spec is a no-op. The document is replaced whole and published to the PDP gateway its `target`
+// names; a document without a target is stored and published nowhere. Findings that prevent the apply — a
+// document that does not parse, a target no PDP gateway answers to, a gateway that already holds another
+// document, a declaration that conflicts with a document composed on the same PDP — are reported in
+// `errors.severe` with a `400`, and nothing is persisted. A dry run performs the same checks.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /authz/schemas (the `UpsertAuthzSchema` operationId).
+func (c *ClientWithResponses) UpsertAuthzSchemaWithResponse(ctx context.Context, params *UpsertAuthzSchemaParams, body UpsertAuthzSchemaJSONRequestBody, reqEditors ...RequestEditorFn) (*UpsertAuthzSchemaResponse, error) {
+	rsp, err := c.UpsertAuthzSchema(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpsertAuthzSchemaResponse(rsp)
+}
+
+// DeleteAuthzSchemaWithResponse Delete one authorization schema
+//
+// Withdraw an authorization schema from the PDP gateway it targets and delete it, using its HRID.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /authz/schemas/{hrid} (the `DeleteAuthzSchema` operationId).
+func (c *ClientWithResponses) DeleteAuthzSchemaWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*DeleteAuthzSchemaResponse, error) {
+	rsp, err := c.DeleteAuthzSchema(ctx, hrid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteAuthzSchemaResponse(rsp)
+}
+
+// GetAuthzSchemaWithResponse Get one authorization schema
+//
+// Get an authorization schema using its HRID.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /authz/schemas/{hrid} (the `GetAuthzSchema` operationId).
+func (c *ClientWithResponses) GetAuthzSchemaWithResponse(ctx context.Context, hrid AuthzHridParam, reqEditors ...RequestEditorFn) (*GetAuthzSchemaResponse, error) {
+	rsp, err := c.GetAuthzSchema(ctx, hrid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAuthzSchemaResponse(rsp)
+}
+
 // UpsertDictionaryWithBodyWithResponse Create or update Dictionaries from Dictionaries Spec
 //
 // Create/update Dictionaries from Dictionaries Spec.
@@ -10030,6 +12958,701 @@ func ParseGetApplicationResponse(rsp *http.Response) (*GetApplicationResponse, e
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpsertAuthzEntityResponse parses an HTTP response from a UpsertAuthzEntityWithResponse call
+func ParseUpsertAuthzEntityResponse(rsp *http.Response) (*UpsertAuthzEntityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpsertAuthzEntityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzEntityState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest AuthzEntityState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteAuthzEntityResponse parses an HTTP response from a DeleteAuthzEntityWithResponse call
+func ParseDeleteAuthzEntityResponse(rsp *http.Response) (*DeleteAuthzEntityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteAuthzEntityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzEntityState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case rsp.StatusCode == 204:
+		break // No content-type
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 413:
+		var dest AuthzAutomationHttpError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON413 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAuthzEntityResponse parses an HTTP response from a GetAuthzEntityWithResponse call
+func ParseGetAuthzEntityResponse(rsp *http.Response) (*GetAuthzEntityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAuthzEntityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzEntityState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpsertAuthzPdpResponse parses an HTTP response from a UpsertAuthzPdpWithResponse call
+func ParseUpsertAuthzPdpResponse(rsp *http.Response) (*UpsertAuthzPdpResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpsertAuthzPdpResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzPdpState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest AuthzPdpState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteAuthzPdpResponse parses an HTTP response from a DeleteAuthzPdpWithResponse call
+func ParseDeleteAuthzPdpResponse(rsp *http.Response) (*DeleteAuthzPdpResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteAuthzPdpResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzPdpState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case rsp.StatusCode == 204:
+		break // No content-type
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest AuthzAutomationHttpError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAuthzPdpResponse parses an HTTP response from a GetAuthzPdpWithResponse call
+func ParseGetAuthzPdpResponse(rsp *http.Response) (*GetAuthzPdpResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAuthzPdpResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzPdpState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpsertAuthzPolicyResponse parses an HTTP response from a UpsertAuthzPolicyWithResponse call
+func ParseUpsertAuthzPolicyResponse(rsp *http.Response) (*UpsertAuthzPolicyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpsertAuthzPolicyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzPolicyState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest AuthzPolicyState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteAuthzPolicyResponse parses an HTTP response from a DeleteAuthzPolicyWithResponse call
+func ParseDeleteAuthzPolicyResponse(rsp *http.Response) (*DeleteAuthzPolicyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteAuthzPolicyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzPolicyState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case rsp.StatusCode == 204:
+		break // No content-type
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAuthzPolicyResponse parses an HTTP response from a GetAuthzPolicyWithResponse call
+func ParseGetAuthzPolicyResponse(rsp *http.Response) (*GetAuthzPolicyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAuthzPolicyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzPolicyState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpsertAuthzSchemaResponse parses an HTTP response from a UpsertAuthzSchemaWithResponse call
+func ParseUpsertAuthzSchemaResponse(rsp *http.Response) (*UpsertAuthzSchemaResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpsertAuthzSchemaResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzSchemaState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest AuthzSchemaState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteAuthzSchemaResponse parses an HTTP response from a DeleteAuthzSchemaWithResponse call
+func ParseDeleteAuthzSchemaResponse(rsp *http.Response) (*DeleteAuthzSchemaResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteAuthzSchemaResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case rsp.StatusCode == 204:
+		break // No content-type
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAuthzSchemaResponse parses an HTTP response from a GetAuthzSchemaWithResponse call
+func ParseGetAuthzSchemaResponse(rsp *http.Response) (*GetAuthzSchemaResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAuthzSchemaResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthzSchemaState
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest AuthzUnauthenticated
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest AuthzUnauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest AuthzNotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest AuthzError
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

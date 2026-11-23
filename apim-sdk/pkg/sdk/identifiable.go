@@ -50,6 +50,10 @@ func (a AimCatalogMcpServer) Identity() string { return a.Hrid }
 func (a AimMcpProxy) Identity() string         { return a.Hrid }
 func (a ApiV4) Identity() string               { return a.Hrid }
 func (a Application) Identity() string         { return a.Hrid }
+func (a AuthzEntity) Identity() string         { return a.Hrid }
+func (a AuthzPdp) Identity() string            { return a.Hrid }
+func (a AuthzPolicy) Identity() string         { return a.Hrid }
+func (a AuthzSchema) Identity() string         { return a.Hrid }
 func (d Dictionary) Identity() string          { return d.Hrid }
 func (d Documentation) Identity() string       { return d.Hrid }
 func (g Group) Identity() string               { return g.Hrid }

@@ -150,6 +150,30 @@ func aimMcpProxyBody(hrid string) jsonObject {
 	}
 }
 
+func authzSchemaBody(hrid string) jsonObject {
+	return jsonObject{"hrid": hrid, "name": "Schema", "schema": "entity User;\n", "target": "default"}
+}
+
+func authzPdpBody(hrid string) jsonObject {
+	return jsonObject{"hrid": hrid, "name": "PDP", "targetPdpId": "orders", "tag": "eu", "endpoint": jsonObject{"path": "/authz/orders-eu"}}
+}
+
+func authzEntityBody(hrid string) jsonObject {
+	return jsonObject{
+		"hrid": hrid, "entityId": hrid, "kind": "PRINCIPAL", "entityType": "User",
+		"attributes": jsonObject{"department": "travel"},
+		"parents":    []any{jsonObject{"entityType": "Group", "entityId": "travel"}},
+		"targets":    []any{"orders@eu"},
+	}
+}
+
+func authzPolicyBody(hrid string) jsonObject {
+	return jsonObject{
+		"hrid": hrid, "entityId": "policy." + hrid, "name": "Policy", "policyType": "CUSTOM",
+		"policyText": "permit(principal, action, resource);", "targets": []any{"orders@eu"},
+	}
+}
+
 func subscriptionBody(hrid string) jsonObject {
 	return jsonObject{"hrid": hrid, "applicationHrid": applicationHrid, "planHrid": planHrid}
 }

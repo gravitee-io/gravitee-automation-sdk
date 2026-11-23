@@ -16,6 +16,9 @@ APIM_OAS_FILE := apim-sdk/openapi/sources/apim.yaml
 AIM_OAS_REF ?= 5.1.8
 AIM_OAS_FILE := apim-sdk/openapi/sources/aim.yaml
 
+AUTHZ_OAS_REF ?= 3.23.4
+AUTHZ_OAS_FILE := apim-sdk/openapi/sources/authz.yaml
+
 ##@ 🧹 Lint
 
 .PHONY: lint
@@ -55,6 +58,7 @@ lint-licenses: ## Check license headers
 		-ignore "**/*.gen.go" \
 		-ignore "**/*.gen.yaml" \
 		-ignore "apim-sdk/openapi/sources/aim.yaml" \
+		-ignore "apim-sdk/openapi/sources/authz.yaml" \
 		-ignore "**/node_modules/**" \
 		-ignore ".github/**" \
 		-ignore ".idea/**" \
@@ -69,6 +73,7 @@ lint-fix: ## Auto-fix linting issues and add license headers
 		-ignore "**/*.gen.go" \
 		-ignore "**/*.gen.yaml" \
 		-ignore "apim-sdk/openapi/sources/aim.yaml" \
+		-ignore "apim-sdk/openapi/sources/authz.yaml" \
 		-ignore "**/node_modules/**" \
 		-ignore ".github/**" \
 		-ignore ".idea/**" \
@@ -88,6 +93,14 @@ sync-aim-oas: ## Download the AIM Automation OAS fragment from the private gravi
 .PHONY: verify-aim-oas
 verify-aim-oas: sync-aim-oas ## Fail if the committed AIM OAS differs from gravitee-gamma-module-aim at $(AIM_OAS_REF)
 	@git diff --exit-code -- $(AIM_OAS_FILE) || (echo "$(AIM_OAS_FILE) differs from gravitee-gamma-module-aim at $(AIM_OAS_REF)" && exit 1)
+
+.PHONY: sync-authz-oas
+sync-authz-oas: ## Download the AuthZ Automation OAS fragment from the private gravitee-gamma-module-authz (needs a gh login)
+	gh api -H "Accept: application/vnd.github.raw" "repos/gravitee-io/gravitee-gamma-module-authz/contents/src/main/resources/openapi/openapi-automation.yaml?ref=$(AUTHZ_OAS_REF)" > $(AUTHZ_OAS_FILE)
+
+.PHONY: verify-authz-oas
+verify-authz-oas: sync-authz-oas ## Fail if the committed AuthZ OAS differs from gravitee-gamma-module-authz at $(AUTHZ_OAS_REF)
+	@git diff --exit-code -- $(AUTHZ_OAS_FILE) || (echo "$(AUTHZ_OAS_FILE) differs from gravitee-gamma-module-authz at $(AUTHZ_OAS_REF)" && exit 1)
 
 .PHONY: check-oas
 check-oas: ## Fail if committed AM or APIM OAS differs from upstream $(AM_OAS_BRANCH) / $(APIM_OAS_BRANCH) (needs a gh login)

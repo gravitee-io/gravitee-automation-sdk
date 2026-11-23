@@ -14,8 +14,8 @@
 
 # Every OAS is read through the GitHub API with a token, so a source repository turning private (as
 # gravitee-access-management did) keeps working. The token lives in Keeper, which only CircleCI can reach, so every
-# OAS check runs here. On pull requests, GitHub Actions triggers them (trigger=check_oas or verify_aim_oas,
-# hack/scripts/verify-oas.mjs), as terraform-provider-apim does.
+# OAS check runs here. On pull requests, GitHub Actions triggers them (trigger=check_oas, verify_aim_oas or
+# verify_authz_oas, hack/scripts/verify-oas.mjs), as terraform-provider-apim does.
 #
 # Daily OAS check: a CircleCI scheduled trigger (project settings, main, trigger=check_oas)
 # runs make check-oas and posts to Slack when it fails on main. The message reports drift, the usual cause:
@@ -34,6 +34,7 @@ parameters:
     enum:
       - check_oas
       - verify_aim_oas
+      - verify_authz_oas
       - none
 
 jobs:
@@ -96,6 +97,20 @@ jobs:
           name: Verify the AI Management OAS fragment matches its tag
           command: make verify-aim-oas
 
+  verify-authz-oas:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - checkout
+      - keeper/env-export:
+          secret-url: keeper://TIlcGPFq4rN5GvgnZb9hng/field/password
+          var-name: GITHUB_TOKEN
+      - gh/setup
+      - run:
+          name: Verify the Authorization OAS fragment matches its tag
+          command: make verify-authz-oas
+
 workflows:
   check-oas:
     when:
@@ -115,4 +130,14 @@ workflows:
     jobs:
       - verify-aim-oas:
           name: Verify AI Management OAS matches upstream
+          context: cicd-orchestrator
+
+  verify-authz-oas:
+    when:
+      equal:
+        - << pipeline.parameters.trigger >>
+        - verify_authz_oas
+    jobs:
+      - verify-authz-oas:
+          name: Verify Authorization OAS matches upstream
           context: cicd-orchestrator

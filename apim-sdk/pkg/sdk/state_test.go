@@ -70,6 +70,37 @@ func TestSpec_DropsTheMcpAuthPolicyRefs(t *testing.T) {
 	assert.Equal(t, AimMcpProxy{Hrid: "studio", Mode: AimMcpProxyModeSTUDIO}, proxy.Spec())
 }
 
+// The fields the AuthZ module derives stay on the State: GKO compares Spec() with what it sends.
+func TestSpec_DropsTheAuthzPlatformFields(t *testing.T) {
+	pdp := AuthzPdpState{
+		Hrid:          "orders-eu",
+		Name:          "Orders (EU)",
+		TargetPdpId:   "orders",
+		Tag:           new("eu"),
+		RoutingScope:  new("orders@eu"),
+		WellKnownPath: new("/.well-known/authzen-configuration/authz/orders-eu"),
+		Id:            new("8f1c"),
+	}
+	assert.Equal(t, AuthzPdp{Hrid: "orders-eu", Name: "Orders (EU)", TargetPdpId: "orders", Tag: new("eu")}, pdp.Spec())
+
+	policy := AuthzPolicyState{
+		Hrid:         "hotel-read",
+		EntityId:     "policy.hotel-read",
+		PolicyType:   AuthzPolicyStatePolicyTypeMCP,
+		PolicyStatus: new(AuthzPolicyStatePolicyStatusDISABLED),
+		Targets:      []string{"orders@eu"},
+	}
+	assert.Equal(t, AuthzPolicy{
+		Hrid:       "hotel-read",
+		EntityId:   "policy.hotel-read",
+		PolicyType: AuthzPolicySpecPolicyTypeMCP,
+		Targets:    []string{"orders@eu"},
+	}, policy.Spec())
+
+	entity := AuthzEntityState{Hrid: "agents", EntityId: "agents", Kind: AuthzEntityStateKindPRINCIPAL, EntityType: "Group"}
+	assert.Equal(t, AuthzEntitySpecKindPRINCIPAL, entity.Spec().Kind)
+}
+
 // AIM 5.1.2+ refuses a PUT carrying a studio tool's entityId, which GKO still reads off the State.
 func TestSpec_DropsTheStudioToolEntityIdsOffACopy(t *testing.T) {
 	studioState := func() AimMcpProxyState {

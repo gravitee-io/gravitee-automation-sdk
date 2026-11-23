@@ -32,6 +32,11 @@ const CHECKS = {
     name: "AI Management",
     done: "apim-sdk/openapi/sources/aim.yaml matches gravitee-gamma-module-aim at AIM_OAS_REF",
   },
+  authz: {
+    trigger: "verify_authz_oas",
+    name: "Authorization",
+    done: "apim-sdk/openapi/sources/authz.yaml matches gravitee-gamma-module-authz at AUTHZ_OAS_REF",
+  },
 };
 
 const VERBOSE = argv.verbose;
