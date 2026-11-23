@@ -880,36 +880,18 @@ func (e ApplicationStateStatus) Valid() bool {
 	}
 }
 
-// Defines values for AuthzEntitySpecKind.
+// Defines values for AuthzEntityKind.
 const (
-	AuthzEntitySpecKindPRINCIPAL AuthzEntitySpecKind = "PRINCIPAL"
-	AuthzEntitySpecKindRESOURCE  AuthzEntitySpecKind = "RESOURCE"
+	AuthzEntityKindPRINCIPAL AuthzEntityKind = "PRINCIPAL"
+	AuthzEntityKindRESOURCE  AuthzEntityKind = "RESOURCE"
 )
 
-// Valid indicates whether the value is a known member of the AuthzEntitySpecKind enum.
-func (e AuthzEntitySpecKind) Valid() bool {
+// Valid indicates whether the value is a known member of the AuthzEntityKind enum.
+func (e AuthzEntityKind) Valid() bool {
 	switch e {
-	case AuthzEntitySpecKindPRINCIPAL:
+	case AuthzEntityKindPRINCIPAL:
 		return true
-	case AuthzEntitySpecKindRESOURCE:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for AuthzEntityStateKind.
-const (
-	AuthzEntityStateKindPRINCIPAL AuthzEntityStateKind = "PRINCIPAL"
-	AuthzEntityStateKindRESOURCE  AuthzEntityStateKind = "RESOURCE"
-)
-
-// Valid indicates whether the value is a known member of the AuthzEntityStateKind enum.
-func (e AuthzEntityStateKind) Valid() bool {
-	switch e {
-	case AuthzEntityStateKindPRINCIPAL:
-		return true
-	case AuthzEntityStateKindRESOURCE:
+	case AuthzEntityKindRESOURCE:
 		return true
 	default:
 		return false
@@ -4368,8 +4350,8 @@ func (v AuthzEntityParent) WithDefaults() AuthzEntityParent {
 // `attributes`, `parents`, `targets` and `active` converge on re-apply and apply exactly as declared.
 type AuthzEntitySpec = AuthzEntity
 
-// AuthzEntitySpecKind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
-type AuthzEntitySpecKind string
+// AuthzEntityKind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
+type AuthzEntityKind string
 
 // AuthzEntity Specification of an authorization entity. `entityId`, `kind` and `entityType` are fixed at creation;
 // `attributes`, `parents`, `targets` and `active` converge on re-apply and apply exactly as declared.
@@ -4405,7 +4387,7 @@ type AuthzEntity struct {
 	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
 
 	// Kind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
-	Kind AuthzEntitySpecKind `json:"kind"`
+	Kind AuthzEntityKind `json:"kind"`
 
 	// Parents The entities this one is a member of; replaced whole on every apply
 	Parents []AuthzEntityParent `drift:"set:omitted-is-empty" json:"parents,omitempty"`
@@ -4476,7 +4458,7 @@ type AuthzEntityState struct {
 	Id *string `drift:"ignore" json:"id,omitempty"`
 
 	// Kind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
-	Kind AuthzEntityStateKind `json:"kind"`
+	Kind AuthzEntityKind `json:"kind"`
 
 	// OrganizationId The organization ID
 	OrganizationId *string `drift:"ignore" json:"organizationId,omitempty"`
@@ -4522,7 +4504,7 @@ func (s AuthzEntityState) Spec() AuthzEntity {
 		EntityId:   s.EntityId,
 		EntityType: s.EntityType,
 		Hrid:       s.Hrid,
-		Kind:       (AuthzEntitySpecKind)(s.Kind),
+		Kind:       s.Kind,
 		Parents:    s.Parents,
 		Targets:    s.Targets,
 	}
@@ -4531,9 +4513,6 @@ func (s AuthzEntityState) Spec() AuthzEntity {
 	}
 	return spec
 }
-
-// AuthzEntityStateKind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
-type AuthzEntityStateKind string
 
 // AuthzErrors Findings about the applied spec
 type AuthzErrors struct {

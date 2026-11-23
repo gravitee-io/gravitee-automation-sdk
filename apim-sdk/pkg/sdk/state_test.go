@@ -97,8 +97,8 @@ func TestSpec_DropsTheAuthzPlatformFields(t *testing.T) {
 		Targets:    []string{"orders@eu"},
 	}, policy.Spec())
 
-	entity := AuthzEntityState{Hrid: "agents", EntityId: "agents", Kind: AuthzEntityStateKindPRINCIPAL, EntityType: "Group"}
-	assert.Equal(t, AuthzEntitySpecKindPRINCIPAL, entity.Spec().Kind)
+	entity := AuthzEntityState{Hrid: "agents", EntityId: "agents", Kind: AuthzEntityKindPRINCIPAL, EntityType: "Group"}
+	assert.Equal(t, AuthzEntityKindPRINCIPAL, entity.Spec().Kind)
 }
 
 // AIM 5.1.2+ refuses a PUT carrying a studio tool's entityId, which GKO still reads off the State.
