@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.2.1...apim-sdk/v0.2.2) (2026-11-23)
+
+
+### Bug Fixes
+
+* **apim-sdk:** tell expired and not yet active client certificates ([5af00e2](https://github.com/gravitee-io/gravitee-automation-sdk/commit/5af00e2b084af5f87f87212502904f00c057b861))
+
 ## [0.2.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.2.0...apim-sdk/v0.2.1) (2026-11-19)
 
 
