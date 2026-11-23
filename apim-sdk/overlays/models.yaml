@@ -125,6 +125,12 @@ actions:
   - target: $.components.schemas.ApiV4Spec.properties.consoleNotification.properties.events.items
     update:
       x-go-type-name: ApiV4ConsoleNotificationEvent
+  # Same for AuthzPolicy. Without its own names, its API value would collide with PlanType's, and oapi-codegen would
+  # rename sdk.API and sdk.CATALOG to sdk.PlanTypeAPI and sdk.PlanTypeCATALOG.
+  - target: $.components.schemas.AuthzPolicySpec.properties.policyType
+    update:
+      x-go-type-name: AuthzPolicyType
+      x-enum-varnames: [AuthzPolicyTypeMCP, AuthzPolicyTypeAGENT, AuthzPolicyTypeMODEL, AuthzPolicyTypeAPI, AuthzPolicyTypeCUSTOM]
 
   # Dates stay RFC 3339 strings, as GKO compares them (rfc3339 drift tag); format is kept for OAS validation.
   - target: $.components.schemas.*.properties[?(@.format == "date-time")]

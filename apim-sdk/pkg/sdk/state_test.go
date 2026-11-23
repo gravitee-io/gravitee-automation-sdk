@@ -86,14 +86,14 @@ func TestSpec_DropsTheAuthzPlatformFields(t *testing.T) {
 	policy := AuthzPolicyState{
 		Hrid:         "hotel-read",
 		EntityId:     "policy.hotel-read",
-		PolicyType:   AuthzPolicyStatePolicyTypeMCP,
+		PolicyType:   AuthzPolicyTypeMCP,
 		PolicyStatus: new(AuthzPolicyStatePolicyStatusDISABLED),
 		Targets:      []string{"orders@eu"},
 	}
 	assert.Equal(t, AuthzPolicy{
 		Hrid:       "hotel-read",
 		EntityId:   "policy.hotel-read",
-		PolicyType: AuthzPolicySpecPolicyTypeMCP,
+		PolicyType: AuthzPolicyTypeMCP,
 		Targets:    []string{"orders@eu"},
 	}, policy.Spec())
 

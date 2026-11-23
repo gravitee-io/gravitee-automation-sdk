@@ -937,27 +937,27 @@ func (e AuthzPolicyDeploymentPolicyStatus) Valid() bool {
 	}
 }
 
-// Defines values for AuthzPolicySpecPolicyType.
+// Defines values for AuthzPolicyType.
 const (
-	AuthzPolicySpecPolicyTypeAGENT  AuthzPolicySpecPolicyType = "AGENT"
-	AuthzPolicySpecPolicyTypeAPI    AuthzPolicySpecPolicyType = "API"
-	AuthzPolicySpecPolicyTypeCUSTOM AuthzPolicySpecPolicyType = "CUSTOM"
-	AuthzPolicySpecPolicyTypeMCP    AuthzPolicySpecPolicyType = "MCP"
-	AuthzPolicySpecPolicyTypeMODEL  AuthzPolicySpecPolicyType = "MODEL"
+	AuthzPolicyTypeAGENT  AuthzPolicyType = "AGENT"
+	AuthzPolicyTypeAPI    AuthzPolicyType = "API"
+	AuthzPolicyTypeCUSTOM AuthzPolicyType = "CUSTOM"
+	AuthzPolicyTypeMCP    AuthzPolicyType = "MCP"
+	AuthzPolicyTypeMODEL  AuthzPolicyType = "MODEL"
 )
 
-// Valid indicates whether the value is a known member of the AuthzPolicySpecPolicyType enum.
-func (e AuthzPolicySpecPolicyType) Valid() bool {
+// Valid indicates whether the value is a known member of the AuthzPolicyType enum.
+func (e AuthzPolicyType) Valid() bool {
 	switch e {
-	case AuthzPolicySpecPolicyTypeAGENT:
+	case AuthzPolicyTypeAGENT:
 		return true
-	case AuthzPolicySpecPolicyTypeAPI:
+	case AuthzPolicyTypeAPI:
 		return true
-	case AuthzPolicySpecPolicyTypeCUSTOM:
+	case AuthzPolicyTypeCUSTOM:
 		return true
-	case AuthzPolicySpecPolicyTypeMCP:
+	case AuthzPolicyTypeMCP:
 		return true
-	case AuthzPolicySpecPolicyTypeMODEL:
+	case AuthzPolicyTypeMODEL:
 		return true
 	default:
 		return false
@@ -979,33 +979,6 @@ func (e AuthzPolicyStatePolicyStatus) Valid() bool {
 	case AuthzPolicyStatePolicyStatusDISABLED:
 		return true
 	case AuthzPolicyStatePolicyStatusDRAFT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for AuthzPolicyStatePolicyType.
-const (
-	AuthzPolicyStatePolicyTypeAGENT  AuthzPolicyStatePolicyType = "AGENT"
-	AuthzPolicyStatePolicyTypeAPI    AuthzPolicyStatePolicyType = "API"
-	AuthzPolicyStatePolicyTypeCUSTOM AuthzPolicyStatePolicyType = "CUSTOM"
-	AuthzPolicyStatePolicyTypeMCP    AuthzPolicyStatePolicyType = "MCP"
-	AuthzPolicyStatePolicyTypeMODEL  AuthzPolicyStatePolicyType = "MODEL"
-)
-
-// Valid indicates whether the value is a known member of the AuthzPolicyStatePolicyType enum.
-func (e AuthzPolicyStatePolicyType) Valid() bool {
-	switch e {
-	case AuthzPolicyStatePolicyTypeAGENT:
-		return true
-	case AuthzPolicyStatePolicyTypeAPI:
-		return true
-	case AuthzPolicyStatePolicyTypeCUSTOM:
-		return true
-	case AuthzPolicyStatePolicyTypeMCP:
-		return true
-	case AuthzPolicyStatePolicyTypeMODEL:
 		return true
 	default:
 		return false
@@ -1668,16 +1641,16 @@ func (e PlanStatus) Valid() bool {
 
 // Defines values for PlanType.
 const (
-	PlanTypeAPI     PlanType = "API"
-	PlanTypeCATALOG PlanType = "CATALOG"
+	API     PlanType = "API"
+	CATALOG PlanType = "CATALOG"
 )
 
 // Valid indicates whether the value is a known member of the PlanType enum.
 func (e PlanType) Valid() bool {
 	switch e {
-	case PlanTypeAPI:
+	case API:
 		return true
-	case PlanTypeCATALOG:
+	case CATALOG:
 		return true
 	default:
 		return false
@@ -4779,8 +4752,8 @@ type AuthzPolicyDeploymentPolicyStatus string
 // at creation; `name`, `policyText` and `targets` converge on re-apply and apply exactly as declared.
 type AuthzPolicySpec = AuthzPolicy
 
-// AuthzPolicySpecPolicyType What the policy governs, as the Console groups policies. Fixed at creation.
-type AuthzPolicySpecPolicyType string
+// AuthzPolicyType What the policy governs, as the Console groups policies. Fixed at creation.
+type AuthzPolicyType string
 
 // AuthzPolicy Specification of an authorization policy, deployed on every apply. `entityId` and `policyType` are fixed
 // at creation; `name`, `policyText` and `targets` converge on re-apply and apply exactly as declared.
@@ -4810,7 +4783,7 @@ type AuthzPolicy struct {
 	PolicyText string `json:"policyText"`
 
 	// PolicyType What the policy governs, as the Console groups policies. Fixed at creation.
-	PolicyType AuthzPolicySpecPolicyType `json:"policyType"`
+	PolicyType AuthzPolicyType `json:"policyType"`
 
 	// Targets The PDP gateways the policy is deployed to, each as the gateway reports its routing scope, or
 	// `default`, or `*` for every gateway. An empty list falls back to the default engine on every
@@ -4869,7 +4842,7 @@ type AuthzPolicyState struct {
 	PolicyText string `json:"policyText"`
 
 	// PolicyType What the policy governs, as the Console groups policies. Fixed at creation.
-	PolicyType AuthzPolicyStatePolicyType `json:"policyType"`
+	PolicyType AuthzPolicyType `json:"policyType"`
 
 	// Targets The PDP gateways the policy is deployed to, each as the gateway reports its routing scope, or
 	// `default`, or `*` for every gateway. An empty list falls back to the default engine on every
@@ -4898,7 +4871,7 @@ func (s AuthzPolicyState) Spec() AuthzPolicy {
 		Hrid:       s.Hrid,
 		Name:       s.Name,
 		PolicyText: s.PolicyText,
-		PolicyType: (AuthzPolicySpecPolicyType)(s.PolicyType),
+		PolicyType: s.PolicyType,
 		Targets:    s.Targets,
 	}
 	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
@@ -4910,9 +4883,6 @@ func (s AuthzPolicyState) Spec() AuthzPolicy {
 // AuthzPolicyStatePolicyStatus `DEPLOYED` after every apply. `DISABLED` once the policy is disabled in the Console, until the next
 // apply deploys it again.
 type AuthzPolicyStatePolicyStatus string
-
-// AuthzPolicyStatePolicyType What the policy governs, as the Console groups policies. Fixed at creation.
-type AuthzPolicyStatePolicyType string
 
 // AuthzResourceStatus Envelope the Automation API stamps on every state; read-only.
 type AuthzResourceStatus struct {
