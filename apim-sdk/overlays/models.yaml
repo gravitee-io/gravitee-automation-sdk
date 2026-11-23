@@ -125,8 +125,16 @@ actions:
   - target: $.components.schemas.ApiV4Spec.properties.consoleNotification.properties.events.items
     update:
       x-go-type-name: ApiV4ConsoleNotificationEvent
+  # Same for AuthzEntity's kind, which AuthzEntityState.Spec() then assigns as is. Prefixed like AuthzPolicyType, so
+  # that a later enum holding PRINCIPAL or RESOURCE renames nothing. x-enum-varnames maps by position:
+  # TestAuthzEnumValues pins each name to its value.
+  - target: $.components.schemas.AuthzEntitySpec.properties.kind
+    update:
+      x-go-type-name: AuthzEntityKind
+      x-enum-varnames: [AuthzEntityKindPRINCIPAL, AuthzEntityKindRESOURCE]
   # Same for AuthzPolicy. Without its own names, its API value would collide with PlanType's, and oapi-codegen would
-  # rename sdk.API and sdk.CATALOG to sdk.PlanTypeAPI and sdk.PlanTypeCATALOG.
+  # rename sdk.API and sdk.CATALOG to sdk.PlanTypeAPI and sdk.PlanTypeCATALOG. x-enum-varnames maps by position:
+  # TestAuthzEnumValues pins each name to its value.
   - target: $.components.schemas.AuthzPolicySpec.properties.policyType
     update:
       x-go-type-name: AuthzPolicyType
