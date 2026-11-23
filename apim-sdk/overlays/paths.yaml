@@ -63,6 +63,14 @@ actions:
       "/aim/catalog/mcp-servers/{hrid}": {}
       "/aim/mcp-proxies": {}
       "/aim/mcp-proxies/{hrid}": {}
+      "/authz/schemas": {}
+      "/authz/schemas/{hrid}": {}
+      "/authz/pdps": {}
+      "/authz/pdps/{hrid}": {}
+      "/authz/entities": {}
+      "/authz/entities/{hrid}": {}
+      "/authz/policies": {}
+      "/authz/policies/{hrid}": {}
 
   - target: $.paths["/apis"]
     copy: $.paths["/organizations/{orgId}/environments/{envId}/apis"]
@@ -124,6 +132,22 @@ actions:
     copy: $.paths["/organizations/{orgId}/environments/{envId}/aim/mcp-proxies"]
   - target: $.paths["/aim/mcp-proxies/{hrid}"]
     copy: $.paths["/organizations/{orgId}/environments/{envId}/aim/mcp-proxies/{hrid}"]
+  - target: $.paths["/authz/schemas"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/schemas"]
+  - target: $.paths["/authz/schemas/{hrid}"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/schemas/{hrid}"]
+  - target: $.paths["/authz/pdps"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/pdps"]
+  - target: $.paths["/authz/pdps/{hrid}"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/pdps/{hrid}"]
+  - target: $.paths["/authz/entities"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/entities"]
+  - target: $.paths["/authz/entities/{hrid}"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/entities/{hrid}"]
+  - target: $.paths["/authz/policies"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/policies"]
+  - target: $.paths["/authz/policies/{hrid}"]
+    copy: $.paths["/organizations/{orgId}/environments/{envId}/authz/policies/{hrid}"]
 
   - target: $.paths["/organizations/{orgId}/environments/{envId}/apis"]
     remove: true
@@ -185,6 +209,22 @@ actions:
     remove: true
   - target: $.paths["/organizations/{orgId}/environments/{envId}/aim/mcp-proxies/{hrid}"]
     remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/schemas"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/schemas/{hrid}"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/pdps"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/pdps/{hrid}"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/entities"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/entities/{hrid}"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/policies"]
+    remove: true
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/policies/{hrid}"]
+    remove: true
 
   # org/env are on the server URL now: drop their parameters, inline or referenced, at path and operation level
   - target: $.paths.*.parameters[?(@['$ref']=='#/components/parameters/orgIdParam')]
@@ -202,4 +242,9 @@ actions:
   - target: $.paths.*.parameters[?(@['$ref']=='#/components/parameters/AimEnvIdParam')]
     remove: true
   - target: $.paths.*.*.parameters[?(@['$ref']=='#/components/parameters/AimEnvIdParam')]
+    remove: true
+  # The AuthZ fragment declares org/env at path level only.
+  - target: $.paths.*.parameters[?(@['$ref']=='#/components/parameters/AuthzOrgIdParam')]
+    remove: true
+  - target: $.paths.*.parameters[?(@['$ref']=='#/components/parameters/AuthzEnvIdParam')]
     remove: true

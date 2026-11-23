@@ -26,6 +26,10 @@ func (s PortalState) Identity() string              { return s.Hrid }
 func (s PortalThemeState) Identity() string         { return s.Hrid }
 func (s AimCatalogMcpServerState) Identity() string { return s.Hrid }
 func (s AimMcpProxyState) Identity() string         { return s.Hrid }
+func (s AuthzSchemaState) Identity() string         { return s.Hrid }
+func (s AuthzPdpState) Identity() string            { return s.Hrid }
+func (s AuthzEntityState) Identity() string         { return s.Hrid }
+func (s AuthzPolicyState) Identity() string         { return s.Hrid }
 func (s SubscriptionState) Identity() string        { return s.Hrid }
 func (s DocumentationState) Identity() string       { return s.Hrid }
 func (s PortalLinkState) Identity() string          { return s.Hrid }

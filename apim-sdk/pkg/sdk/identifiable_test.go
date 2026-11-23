@@ -32,6 +32,10 @@ var (
 	_ store.Identifiable = AimMcpProxy{}
 	_ store.Identifiable = ApiV4{}
 	_ store.Identifiable = Application{}
+	_ store.Identifiable = AuthzEntity{}
+	_ store.Identifiable = AuthzPdp{}
+	_ store.Identifiable = AuthzPolicy{}
+	_ store.Identifiable = AuthzSchema{}
 	_ store.Identifiable = Dictionary{}
 	_ store.Identifiable = Documentation{}
 	_ store.Identifiable = Group{}
@@ -57,6 +61,7 @@ func TestIdentity(t *testing.T) {
 		{"unnamed certificate", ClientCertificate{Content: "\n  PEM\n"}, "PEM"},
 		{"group", Group{Hrid: "developers"}, "developers"},
 		{"api", ApiV4{Hrid: "petstore"}, "petstore"},
+		{"authz policy", AuthzPolicy{Hrid: "hotel-read"}, "hotel-read"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

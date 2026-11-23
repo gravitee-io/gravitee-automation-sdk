@@ -15,4 +15,4 @@
 // Package openapi holds the APIM Automation OpenAPI sources and the merged document the SDK is generated from.
 package openapi
 
-//go:generate go run ../../common/cmd/mergespec sources/apim.yaml sources/aim.yaml openapi.yaml
+//go:generate go run ../../common/cmd/mergespec sources/apim.yaml sources/aim.yaml sources/authz.yaml openapi.yaml

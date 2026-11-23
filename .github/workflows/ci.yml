@@ -110,9 +110,27 @@ jobs:
           npm ci
           npx zx verify-oas.mjs --check aim --branch "$BRANCH"
 
+  authz-oas:
+    needs: changes
+    # head_ref is empty on workflow_dispatch.
+    if: github.event_name == 'pull_request' && needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the check in CircleCI, where the token that reads the authz repository lives
+        working-directory: hack/scripts
+        env:
+          CIRCLECI_TOKEN: ${{ secrets.CIRCLECI_TOKEN }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          npm ci
+          npx zx verify-oas.mjs --check authz --branch "$BRANCH"
+
   ci-ok:
     if: always()
-    needs: [changes, oas, generate, lint, test, aim-oas]
+    needs: [changes, oas, generate, lint, test, aim-oas, authz-oas]
     runs-on: ubuntu-latest
     steps:
       - run: |

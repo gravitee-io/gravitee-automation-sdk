@@ -129,6 +129,10 @@ func aimHridNotFound(hrid string) AimHttpError {
 	return AimHttpError{HttpStatus: new(int32(http.StatusNotFound)), Message: new(hridNotFoundMessage(hrid))}
 }
 
+func authzHridNotFound(hrid string) AuthzAutomationHttpError {
+	return AuthzAutomationHttpError{HttpStatus: new(int32(http.StatusNotFound)), Message: new(hridNotFoundMessage(hrid))}
+}
+
 // Child is a sub-resource, keyed under its parent's hrid.
 type Child[T store.Identifiable] struct {
 	ParentIdentity string

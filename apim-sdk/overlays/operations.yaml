@@ -68,3 +68,15 @@ actions:
   - target: $.paths["/organizations/{orgId}/environments/{envId}/aim/mcp-proxies"].put
     update:
       operationId: upsertAimMcpProxy
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/schemas"].put
+    update:
+      operationId: upsertAuthzSchema
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/pdps"].put
+    update:
+      operationId: upsertAuthzPdp
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/entities"].put
+    update:
+      operationId: upsertAuthzEntity
+  - target: $.paths["/organizations/{orgId}/environments/{envId}/authz/policies"].put
+    update:
+      operationId: upsertAuthzPolicy

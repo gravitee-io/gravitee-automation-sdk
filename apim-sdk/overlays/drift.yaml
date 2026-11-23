@@ -117,7 +117,7 @@ actions:
         drift: unstructured:ignore-remote-default
 
   # Read-only next to a $ref: kin-openapi drops the readOnly before the generic rule can see it.
-  - target: $.components.schemas['BaseStatus','AimResourceStatus'].properties.errors
+  - target: $.components.schemas['BaseStatus','AimResourceStatus','AuthzResourceStatus'].properties.errors
     update:
       x-oapi-codegen-extra-tags:
         drift: ignore
@@ -328,6 +328,38 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
+
+  # AuthZ schema, PDP, entity and policy (GKO AuthzSchemaDTO, AuthzPdpDTO, AuthzEntityDTO, AuthzPolicyDTO).
+  - target: $.components.schemas['AuthzSchemaSpec','AuthzPdpSpec','AuthzEntitySpec','AuthzPolicySpec'].properties.hrid
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: ignore
+  - target: $.components.schemas.AuthzPdpSpec.properties.endpoint
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  # GKO's DTO held these as bool: absent and false compare equal.
+  - target: $.components.schemas.AuthzPdpSpec.properties.strict
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AuthzEntitySpec.properties.active
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: empty-is-nil
+  - target: $.components.schemas.AuthzEntitySpec.properties.attributes
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: unstructured
+  # The state sorts these lists and answers [] for none.
+  - target: $.components.schemas.AuthzEntitySpec.properties.parents
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: set:omitted-is-empty
+  - target: $.components.schemas['AuthzEntitySpec','AuthzPolicySpec'].properties.targets
+    update:
+      x-oapi-codegen-extra-tags:
+        drift: set:omitted-is-empty
 
   # Read-only properties are set by APIM, never part of the desired state: drift detection skips them.
   - target: $.components.schemas.*.properties[?(@.readOnly == true)]

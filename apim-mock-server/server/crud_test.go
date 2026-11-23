@@ -37,6 +37,10 @@ var topLevelKinds = []struct {
 	{"portal theme", "/portal-themes", portalThemeBody},
 	{"AIM catalog MCP server", "/aim/catalog/mcp-servers", aimCatalogMcpServerBody},
 	{"AIM MCP proxy", "/aim/mcp-proxies", aimMcpProxyBody},
+	{"AuthZ schema", "/authz/schemas", authzSchemaBody},
+	{"AuthZ PDP gateway", "/authz/pdps", authzPdpBody},
+	{"AuthZ entity", "/authz/entities", authzEntityBody},
+	{"AuthZ policy", "/authz/policies", authzPolicyBody},
 }
 
 func TestPutGet(t *testing.T) {
@@ -212,6 +216,54 @@ func sdkKinds(t *testing.T) []struct {
 				return c.DeleteAimMcpProxyWithResponse(ctx, hrid)
 			},
 		},
+		{
+			"AuthZ schema",
+			func(ctx context.Context, c *sdk.APIMClient) (response.StatusCoder, error) {
+				return c.UpsertAuthzSchemaWithResponse(ctx, nil, as[sdk.AuthzSchema](t, authzSchemaBody("test")))
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.GetAuthzSchemaWithResponse(ctx, hrid)
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.DeleteAuthzSchemaWithResponse(ctx, hrid)
+			},
+		},
+		{
+			"AuthZ PDP gateway",
+			func(ctx context.Context, c *sdk.APIMClient) (response.StatusCoder, error) {
+				return c.UpsertAuthzPdpWithResponse(ctx, nil, as[sdk.AuthzPdp](t, authzPdpBody("test")))
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.GetAuthzPdpWithResponse(ctx, hrid)
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.DeleteAuthzPdpWithResponse(ctx, hrid, nil)
+			},
+		},
+		{
+			"AuthZ entity",
+			func(ctx context.Context, c *sdk.APIMClient) (response.StatusCoder, error) {
+				return c.UpsertAuthzEntityWithResponse(ctx, nil, as[sdk.AuthzEntity](t, authzEntityBody("test")))
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.GetAuthzEntityWithResponse(ctx, hrid)
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.DeleteAuthzEntityWithResponse(ctx, hrid, nil)
+			},
+		},
+		{
+			"AuthZ policy",
+			func(ctx context.Context, c *sdk.APIMClient) (response.StatusCoder, error) {
+				return c.UpsertAuthzPolicyWithResponse(ctx, nil, as[sdk.AuthzPolicy](t, authzPolicyBody("test")))
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.GetAuthzPolicyWithResponse(ctx, hrid)
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.DeleteAuthzPolicyWithResponse(ctx, hrid, nil)
+			},
+		},
 	}
 }
 
@@ -339,4 +391,66 @@ func TestUpsertAimMcpProxySDK_PassthroughUpstreamAuthRoundTrips(t *testing.T) {
 	get, err := client.GetAimMcpProxyWithResponse(t.Context(), "studio")
 	assertSDKOK(t, get, err)
 	assert.NotNil(t, get.JSON200.Studio.UpstreamAuth[0].Auth.Passthrough)
+}
+
+// A dry-run delete of a PDP gateway, an entity or a policy answers the state and deletes nothing.
+func TestDeleteAuthzDryRunSDK_KeepsTheResource(t *testing.T) {
+	dryRun := new(true)
+	kinds := []struct {
+		name   string
+		upsert sdkCall
+		delete sdkHridCall
+		get    sdkHridCall
+	}{
+		{
+			"AuthZ PDP gateway",
+			func(ctx context.Context, c *sdk.APIMClient) (response.StatusCoder, error) {
+				return c.UpsertAuthzPdpWithResponse(ctx, nil, as[sdk.AuthzPdp](t, authzPdpBody("test")))
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.DeleteAuthzPdpWithResponse(ctx, hrid, &sdk.DeleteAuthzPdpParams{DryRun: dryRun})
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.GetAuthzPdpWithResponse(ctx, hrid)
+			},
+		},
+		{
+			"AuthZ entity",
+			func(ctx context.Context, c *sdk.APIMClient) (response.StatusCoder, error) {
+				return c.UpsertAuthzEntityWithResponse(ctx, nil, as[sdk.AuthzEntity](t, authzEntityBody("test")))
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.DeleteAuthzEntityWithResponse(ctx, hrid, &sdk.DeleteAuthzEntityParams{DryRun: dryRun})
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.GetAuthzEntityWithResponse(ctx, hrid)
+			},
+		},
+		{
+			"AuthZ policy",
+			func(ctx context.Context, c *sdk.APIMClient) (response.StatusCoder, error) {
+				return c.UpsertAuthzPolicyWithResponse(ctx, nil, as[sdk.AuthzPolicy](t, authzPolicyBody("test")))
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.DeleteAuthzPolicyWithResponse(ctx, hrid, &sdk.DeleteAuthzPolicyParams{DryRun: dryRun})
+			},
+			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
+				return c.GetAuthzPolicyWithResponse(ctx, hrid)
+			},
+		},
+	}
+	for _, kind := range kinds {
+		t.Run(kind.name, func(t *testing.T) {
+			_, srv := createAPIMServer(t)
+			client := newAPIMClient(t, srv)
+			put, err := kind.upsert(t.Context(), client)
+			state := assertSDKOK(t, put, err)
+
+			del, err := kind.delete(t.Context(), client, "test")
+			assert.Equal(t, state, assertSDKOK(t, del, err))
+
+			get, err := kind.get(t.Context(), client, "test")
+			assert.Equal(t, state, assertSDKOK(t, get, err))
+		})
+	}
 }

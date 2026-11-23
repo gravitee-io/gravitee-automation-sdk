@@ -880,6 +880,138 @@ func (e ApplicationStateStatus) Valid() bool {
 	}
 }
 
+// Defines values for AuthzEntitySpecKind.
+const (
+	AuthzEntitySpecKindPRINCIPAL AuthzEntitySpecKind = "PRINCIPAL"
+	AuthzEntitySpecKindRESOURCE  AuthzEntitySpecKind = "RESOURCE"
+)
+
+// Valid indicates whether the value is a known member of the AuthzEntitySpecKind enum.
+func (e AuthzEntitySpecKind) Valid() bool {
+	switch e {
+	case AuthzEntitySpecKindPRINCIPAL:
+		return true
+	case AuthzEntitySpecKindRESOURCE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AuthzEntityStateKind.
+const (
+	AuthzEntityStateKindPRINCIPAL AuthzEntityStateKind = "PRINCIPAL"
+	AuthzEntityStateKindRESOURCE  AuthzEntityStateKind = "RESOURCE"
+)
+
+// Valid indicates whether the value is a known member of the AuthzEntityStateKind enum.
+func (e AuthzEntityStateKind) Valid() bool {
+	switch e {
+	case AuthzEntityStateKindPRINCIPAL:
+		return true
+	case AuthzEntityStateKindRESOURCE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AuthzPolicyDeploymentPolicyStatus.
+const (
+	AuthzPolicyDeploymentPolicyStatusDEPLOYED AuthzPolicyDeploymentPolicyStatus = "DEPLOYED"
+	AuthzPolicyDeploymentPolicyStatusDISABLED AuthzPolicyDeploymentPolicyStatus = "DISABLED"
+	AuthzPolicyDeploymentPolicyStatusDRAFT    AuthzPolicyDeploymentPolicyStatus = "DRAFT"
+)
+
+// Valid indicates whether the value is a known member of the AuthzPolicyDeploymentPolicyStatus enum.
+func (e AuthzPolicyDeploymentPolicyStatus) Valid() bool {
+	switch e {
+	case AuthzPolicyDeploymentPolicyStatusDEPLOYED:
+		return true
+	case AuthzPolicyDeploymentPolicyStatusDISABLED:
+		return true
+	case AuthzPolicyDeploymentPolicyStatusDRAFT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AuthzPolicySpecPolicyType.
+const (
+	AuthzPolicySpecPolicyTypeAGENT  AuthzPolicySpecPolicyType = "AGENT"
+	AuthzPolicySpecPolicyTypeAPI    AuthzPolicySpecPolicyType = "API"
+	AuthzPolicySpecPolicyTypeCUSTOM AuthzPolicySpecPolicyType = "CUSTOM"
+	AuthzPolicySpecPolicyTypeMCP    AuthzPolicySpecPolicyType = "MCP"
+	AuthzPolicySpecPolicyTypeMODEL  AuthzPolicySpecPolicyType = "MODEL"
+)
+
+// Valid indicates whether the value is a known member of the AuthzPolicySpecPolicyType enum.
+func (e AuthzPolicySpecPolicyType) Valid() bool {
+	switch e {
+	case AuthzPolicySpecPolicyTypeAGENT:
+		return true
+	case AuthzPolicySpecPolicyTypeAPI:
+		return true
+	case AuthzPolicySpecPolicyTypeCUSTOM:
+		return true
+	case AuthzPolicySpecPolicyTypeMCP:
+		return true
+	case AuthzPolicySpecPolicyTypeMODEL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AuthzPolicyStatePolicyStatus.
+const (
+	AuthzPolicyStatePolicyStatusDEPLOYED AuthzPolicyStatePolicyStatus = "DEPLOYED"
+	AuthzPolicyStatePolicyStatusDISABLED AuthzPolicyStatePolicyStatus = "DISABLED"
+	AuthzPolicyStatePolicyStatusDRAFT    AuthzPolicyStatePolicyStatus = "DRAFT"
+)
+
+// Valid indicates whether the value is a known member of the AuthzPolicyStatePolicyStatus enum.
+func (e AuthzPolicyStatePolicyStatus) Valid() bool {
+	switch e {
+	case AuthzPolicyStatePolicyStatusDEPLOYED:
+		return true
+	case AuthzPolicyStatePolicyStatusDISABLED:
+		return true
+	case AuthzPolicyStatePolicyStatusDRAFT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AuthzPolicyStatePolicyType.
+const (
+	AuthzPolicyStatePolicyTypeAGENT  AuthzPolicyStatePolicyType = "AGENT"
+	AuthzPolicyStatePolicyTypeAPI    AuthzPolicyStatePolicyType = "API"
+	AuthzPolicyStatePolicyTypeCUSTOM AuthzPolicyStatePolicyType = "CUSTOM"
+	AuthzPolicyStatePolicyTypeMCP    AuthzPolicyStatePolicyType = "MCP"
+	AuthzPolicyStatePolicyTypeMODEL  AuthzPolicyStatePolicyType = "MODEL"
+)
+
+// Valid indicates whether the value is a known member of the AuthzPolicyStatePolicyType enum.
+func (e AuthzPolicyStatePolicyType) Valid() bool {
+	switch e {
+	case AuthzPolicyStatePolicyTypeAGENT:
+		return true
+	case AuthzPolicyStatePolicyTypeAPI:
+		return true
+	case AuthzPolicyStatePolicyTypeCUSTOM:
+		return true
+	case AuthzPolicyStatePolicyTypeMCP:
+		return true
+	case AuthzPolicyStatePolicyTypeMODEL:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for BaseSelectorType.
 const (
 	BaseSelectorTypeCHANNEL   BaseSelectorType = "CHANNEL"
@@ -1536,16 +1668,16 @@ func (e PlanStatus) Valid() bool {
 
 // Defines values for PlanType.
 const (
-	API     PlanType = "API"
-	CATALOG PlanType = "CATALOG"
+	PlanTypeAPI     PlanType = "API"
+	PlanTypeCATALOG PlanType = "CATALOG"
 )
 
 // Valid indicates whether the value is a known member of the PlanType enum.
 func (e PlanType) Valid() bool {
 	switch e {
-	case API:
+	case PlanTypeAPI:
 		return true
-	case CATALOG:
+	case PlanTypeCATALOG:
 		return true
 	default:
 		return false
@@ -4214,6 +4346,718 @@ func (v ApplicationTLSSettings) WithDefaults() ApplicationTLSSettings {
 	}
 	return v
 }
+
+// AuthzAutomationHttpError An error returned by the Automation API when a request could not be served.
+type AuthzAutomationHttpError struct {
+	// HttpStatus HTTP status code
+	//
+	// Examples: 404
+	HttpStatus *int32 `json:"httpStatus,omitempty"`
+
+	// Message Human readable message
+	//
+	// Examples: Resource [travel-schema] does not exist
+	Message *string `json:"message,omitempty"`
+
+	// Parameters Values interpolated into the message, keyed by placeholder name
+	Parameters map[string]string `json:"parameters,omitempty"`
+
+	// TechnicalCode Stable technical code of the error
+	//
+	// Examples: hrid.notFound
+	TechnicalCode *string `json:"technicalCode,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzAutomationHttpError with unset fields set to their OpenAPI defaults.
+func (v AuthzAutomationHttpError) WithDefaults() AuthzAutomationHttpError {
+	return v
+}
+
+// AuthzEntityParent A parent of an entity, as the engine spells it. Declared once, and never cyclic.
+type AuthzEntityParent struct {
+	// EntityId Id of the parent, under the same rule as an entity's `entityId`
+	//
+	// Examples: travel
+	EntityId string `json:"entityId"`
+
+	// EntityType Canonical type of the parent
+	//
+	// Examples: Group
+	EntityType string `json:"entityType"`
+}
+
+// WithDefaults returns a copy of AuthzEntityParent with unset fields set to their OpenAPI defaults.
+func (v AuthzEntityParent) WithDefaults() AuthzEntityParent {
+	return v
+}
+
+// AuthzEntitySpec Specification of an authorization entity. `entityId`, `kind` and `entityType` are fixed at creation;
+// `attributes`, `parents`, `targets` and `active` converge on re-apply and apply exactly as declared.
+type AuthzEntitySpec = AuthzEntity
+
+// AuthzEntitySpecKind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
+type AuthzEntitySpecKind string
+
+// AuthzEntity Specification of an authorization entity. `entityId`, `kind` and `entityType` are fixed at creation;
+// `attributes`, `parents`, `targets` and `active` converge on re-apply and apply exactly as declared.
+type AuthzEntity struct {
+	// Active Whether the entity is published to the PDP gateways it targets
+	Active *bool `drift:"empty-is-nil" json:"active,omitempty"`
+
+	// Attributes The attributes of the entity, replaced whole on every apply. A key that starts with `_` is
+	// reserved to the module and refused.
+	//
+	//
+	// Examples: {"department":"travel"}
+	Attributes *unstructured.Unstructured `drift:"unstructured" json:"attributes,omitempty"`
+
+	// EntityId Id of the entity in policies, without its type: `postman-studio.read_wiki_structure`, not
+	// `MCPTool::"postman-studio.read_wiki_structure"`. Fixed at creation; held by one entity of the
+	// environment.
+	//
+	//
+	// Examples: agents
+	EntityId string `json:"entityId"`
+
+	// EntityType Type of the entity, spelled the way the engine spells it: `Group`, not `group`; `MCPTool`, not
+	// `mcptool`. Fixed at creation. A built-in type fixes the `kind`.
+	//
+	//
+	// Examples: Group
+	EntityType string `json:"entityType"`
+
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Kind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
+	Kind AuthzEntitySpecKind `json:"kind"`
+
+	// Parents The entities this one is a member of; replaced whole on every apply
+	Parents []AuthzEntityParent `drift:"set:omitted-is-empty" json:"parents,omitempty"`
+
+	// Targets The PDP gateways the entity is published to, each as the gateway reports its routing scope, or
+	// `default`, or `*` for every gateway. An empty list falls back to the default engine on every gateway. Not allowed on an `Action`
+	// entity.
+	//
+	//
+	// Examples: ["orders@eu"]
+	Targets []string `drift:"set:omitted-is-empty" json:"targets,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzEntity with unset fields set to their OpenAPI defaults.
+func (v AuthzEntity) WithDefaults() AuthzEntity {
+	if v.Active == nil {
+		v.Active = new(bool(true))
+	}
+	if v.Parents != nil {
+		items := make([]AuthzEntityParent, len(v.Parents))
+		for i, item := range v.Parents {
+			items[i] = item.WithDefaults()
+		}
+		v.Parents = items
+	}
+	return v
+}
+
+// AuthzEntityState State of an authorization entity that has been created or updated, in the shape of its spec.
+type AuthzEntityState struct {
+	// Active Whether the entity is published to the PDP gateways it targets
+	Active *bool `drift:"empty-is-nil" json:"active,omitempty"`
+
+	// Attributes The attributes of the entity, replaced whole on every apply. A key that starts with `_` is
+	// reserved to the module and refused.
+	//
+	//
+	// Examples: {"department":"travel"}
+	Attributes *unstructured.Unstructured `drift:"unstructured" json:"attributes,omitempty"`
+
+	// EntityId Id of the entity in policies, without its type: `postman-studio.read_wiki_structure`, not
+	// `MCPTool::"postman-studio.read_wiki_structure"`. Fixed at creation; held by one entity of the
+	// environment.
+	//
+	//
+	// Examples: agents
+	EntityId string `json:"entityId"`
+
+	// EntityType Type of the entity, spelled the way the engine spells it: `Group`, not `group`; `MCPTool`, not
+	// `mcptool`. Fixed at creation. A built-in type fixes the `kind`.
+	//
+	//
+	// Examples: Group
+	EntityType string `json:"entityType"`
+
+	// EnvironmentId The environment ID
+	EnvironmentId *string `drift:"ignore" json:"environmentId,omitempty"`
+
+	// Errors Findings about the applied spec
+	Errors *AuthzErrors `drift:"ignore" json:"errors,omitempty"`
+
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Id Resource UUID
+	Id *string `drift:"ignore" json:"id,omitempty"`
+
+	// Kind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
+	Kind AuthzEntityStateKind `json:"kind"`
+
+	// OrganizationId The organization ID
+	OrganizationId *string `drift:"ignore" json:"organizationId,omitempty"`
+
+	// Parents The entities this one is a member of; replaced whole on every apply
+	Parents []AuthzEntityParent `drift:"set:omitted-is-empty" json:"parents,omitempty"`
+
+	// Targets The PDP gateways the entity is published to, each as the gateway reports its routing scope, or
+	// `default`, or `*` for every gateway. An empty list falls back to the default engine on every gateway. Not allowed on an `Action`
+	// entity.
+	//
+	//
+	// Examples: ["orders@eu"]
+	Targets []string `drift:"set:omitted-is-empty" json:"targets,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzEntityState with unset fields set to their OpenAPI defaults.
+func (v AuthzEntityState) WithDefaults() AuthzEntityState {
+	if v.Active == nil {
+		v.Active = new(bool(true))
+	}
+	if v.Errors != nil {
+		withDefaults := v.Errors.WithDefaults()
+		v.Errors = &withDefaults
+	}
+	if v.Parents != nil {
+		items := make([]AuthzEntityParent, len(v.Parents))
+		for i, item := range v.Parents {
+			items[i] = item.WithDefaults()
+		}
+		v.Parents = items
+	}
+	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of AuthzEntity sends. Shallow copy, then a
+// clearReadOnly method on *AuthzEntity, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
+func (s AuthzEntityState) Spec() AuthzEntity {
+	spec := AuthzEntity{
+		Active:     s.Active,
+		Attributes: s.Attributes,
+		EntityId:   s.EntityId,
+		EntityType: s.EntityType,
+		Hrid:       s.Hrid,
+		Kind:       (AuthzEntitySpecKind)(s.Kind),
+		Parents:    s.Parents,
+		Targets:    s.Targets,
+	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
+}
+
+// AuthzEntityStateKind Whether the entity acts (`PRINCIPAL`) or is acted upon (`RESOURCE`). Fixed at creation.
+type AuthzEntityStateKind string
+
+// AuthzErrors Findings about the applied spec
+type AuthzErrors struct {
+	// Severe Findings that prevented the apply; nothing was persisted
+	Severe []string `json:"severe,omitempty"`
+
+	// Warning Findings that did not prevent the apply
+	Warning []string `json:"warning,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzErrors with unset fields set to their OpenAPI defaults.
+func (v AuthzErrors) WithDefaults() AuthzErrors {
+	return v
+}
+
+// AuthzHrid A unique human readable id identifying this resource
+//
+// Examples: travel-schema
+type AuthzHrid = string
+
+// AuthzPdpEndpoint The AuthZEN endpoint of the PDP: an API that listens on `path` and on the matching AuthZEN discovery path.
+type AuthzPdpEndpoint struct {
+	// Path Context path of the endpoint, unique among the APIs of the environment, and outside
+	// `/.well-known/authzen-configuration`. Written the way APIM stores it, without the trailing slash,
+	// so the state reads it back as declared: `/authz/orders-eu`, not `authz//orders-eu/`. A changed
+	// path replaces the endpoint.
+	//
+	//
+	// Examples: /authz/orders-eu
+	Path string `json:"path"`
+}
+
+// WithDefaults returns a copy of AuthzPdpEndpoint with unset fields set to their OpenAPI defaults.
+func (v AuthzPdpEndpoint) WithDefaults() AuthzPdpEndpoint {
+	return v
+}
+
+// AuthzPdpGatewayStatus What the platform derives from a PDP gateway; read-only.
+type AuthzPdpGatewayStatus struct {
+	// RoutingScope `targetPdpId@tag`, or `targetPdpId` untagged: what the targets of other resources name
+	//
+	// Examples: orders@eu
+	RoutingScope *string `drift:"ignore" json:"routingScope,omitempty"`
+
+	// WellKnownPath The AuthZEN discovery path of the endpoint. Absent without an endpoint, or when another API already
+	// held that path when the endpoint was created.
+	//
+	//
+	// Examples: /.well-known/authzen-configuration/authz/orders-eu
+	WellKnownPath *string `drift:"ignore" json:"wellKnownPath,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzPdpGatewayStatus with unset fields set to their OpenAPI defaults.
+func (v AuthzPdpGatewayStatus) WithDefaults() AuthzPdpGatewayStatus {
+	return v
+}
+
+// AuthzPdpSpec Specification of a PDP gateway. `targetPdpId` and `tag` are fixed at creation; `name`, `strict` and
+// `endpoint` converge on re-apply.
+type AuthzPdpSpec = AuthzPdp
+
+// AuthzPdp Specification of a PDP gateway. `targetPdpId` and `tag` are fixed at creation; `name`, `strict` and
+// `endpoint` converge on re-apply.
+type AuthzPdp struct {
+	// Endpoint The AuthZEN endpoint of the PDP: an API that listens on `path` and on the matching AuthZEN discovery path.
+	Endpoint *AuthzPdpEndpoint `drift:"empty-is-nil" json:"endpoint,omitempty"`
+
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Name Display name of the PDP gateway; converges on re-apply
+	//
+	// Examples: Orders PDP (EU)
+	Name string `json:"name"`
+
+	// Strict Whether the engine checks policies and entities against its schema. Shared by every PDP of the
+	// targetPdpId: on create it has to agree with the registered ones, and a change on an existing PDP
+	// changes them all, with a warning naming each.
+	Strict *bool `drift:"empty-is-nil" json:"strict,omitempty"`
+
+	// Tag An APIM sharding tag key, which selects the gateway nodes that run the PDP.
+	//
+	// Examples: eu
+	Tag *AuthzShardingTag `json:"tag,omitempty"`
+
+	// TargetPdpId The PDP engine the gateway runs. Every PDP gateway of one targetPdpId shares the engine, and its `strict`
+	// value.
+	//
+	//
+	// Examples: orders
+	TargetPdpId AuthzTargetPdpId `json:"targetPdpId"`
+}
+
+// WithDefaults returns a copy of AuthzPdp with unset fields set to their OpenAPI defaults.
+func (v AuthzPdp) WithDefaults() AuthzPdp {
+	if v.Endpoint != nil {
+		withDefaults := v.Endpoint.WithDefaults()
+		v.Endpoint = &withDefaults
+	}
+	if v.Strict == nil {
+		v.Strict = new(bool(false))
+	}
+	return v
+}
+
+// AuthzPdpState State of a PDP gateway that has been created or updated, in the shape of its spec.
+type AuthzPdpState struct {
+	// Endpoint The AuthZEN endpoint of the PDP: an API that listens on `path` and on the matching AuthZEN discovery path.
+	Endpoint *AuthzPdpEndpoint `drift:"empty-is-nil" json:"endpoint,omitempty"`
+
+	// EnvironmentId The environment ID
+	EnvironmentId *string `drift:"ignore" json:"environmentId,omitempty"`
+
+	// Errors Findings about the applied spec
+	Errors *AuthzErrors `drift:"ignore" json:"errors,omitempty"`
+
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Id Resource UUID
+	Id *string `drift:"ignore" json:"id,omitempty"`
+
+	// Name Display name of the PDP gateway; converges on re-apply
+	//
+	// Examples: Orders PDP (EU)
+	Name string `json:"name"`
+
+	// OrganizationId The organization ID
+	OrganizationId *string `drift:"ignore" json:"organizationId,omitempty"`
+
+	// RoutingScope `targetPdpId@tag`, or `targetPdpId` untagged: what the targets of other resources name
+	//
+	// Examples: orders@eu
+	RoutingScope *string `drift:"ignore" json:"routingScope,omitempty"`
+
+	// Strict Whether the engine checks policies and entities against its schema. Shared by every PDP of the
+	// targetPdpId: on create it has to agree with the registered ones, and a change on an existing PDP
+	// changes them all, with a warning naming each.
+	Strict *bool `drift:"empty-is-nil" json:"strict,omitempty"`
+
+	// Tag An APIM sharding tag key, which selects the gateway nodes that run the PDP.
+	//
+	// Examples: eu
+	Tag *AuthzShardingTag `json:"tag,omitempty"`
+
+	// TargetPdpId The PDP engine the gateway runs. Every PDP gateway of one targetPdpId shares the engine, and its `strict`
+	// value.
+	//
+	//
+	// Examples: orders
+	TargetPdpId AuthzTargetPdpId `json:"targetPdpId"`
+
+	// WellKnownPath The AuthZEN discovery path of the endpoint. Absent without an endpoint, or when another API already
+	// held that path when the endpoint was created.
+	//
+	//
+	// Examples: /.well-known/authzen-configuration/authz/orders-eu
+	WellKnownPath *string `drift:"ignore" json:"wellKnownPath,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzPdpState with unset fields set to their OpenAPI defaults.
+func (v AuthzPdpState) WithDefaults() AuthzPdpState {
+	if v.Endpoint != nil {
+		withDefaults := v.Endpoint.WithDefaults()
+		v.Endpoint = &withDefaults
+	}
+	if v.Errors != nil {
+		withDefaults := v.Errors.WithDefaults()
+		v.Errors = &withDefaults
+	}
+	if v.Strict == nil {
+		v.Strict = new(bool(false))
+	}
+	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of AuthzPdp sends. Shallow copy, then a
+// clearReadOnly method on *AuthzPdp, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
+func (s AuthzPdpState) Spec() AuthzPdp {
+	spec := AuthzPdp{
+		Endpoint:    s.Endpoint,
+		Hrid:        s.Hrid,
+		Name:        s.Name,
+		Strict:      s.Strict,
+		Tag:         s.Tag,
+		TargetPdpId: s.TargetPdpId,
+	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
+}
+
+// AuthzPolicyDeployment Whether the PDP gateways enforce the policy; read-only.
+type AuthzPolicyDeployment struct {
+	// PolicyStatus `DEPLOYED` after every apply. `DISABLED` once the policy is disabled in the Console, until the next
+	// apply deploys it again.
+	PolicyStatus *AuthzPolicyDeploymentPolicyStatus `drift:"ignore" json:"policyStatus,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzPolicyDeployment with unset fields set to their OpenAPI defaults.
+func (v AuthzPolicyDeployment) WithDefaults() AuthzPolicyDeployment {
+	return v
+}
+
+// AuthzPolicyDeploymentPolicyStatus `DEPLOYED` after every apply. `DISABLED` once the policy is disabled in the Console, until the next
+// apply deploys it again.
+type AuthzPolicyDeploymentPolicyStatus string
+
+// AuthzPolicySpec Specification of an authorization policy, deployed on every apply. `entityId` and `policyType` are fixed
+// at creation; `name`, `policyText` and `targets` converge on re-apply and apply exactly as declared.
+type AuthzPolicySpec = AuthzPolicy
+
+// AuthzPolicySpecPolicyType What the policy governs, as the Console groups policies. Fixed at creation.
+type AuthzPolicySpecPolicyType string
+
+// AuthzPolicy Specification of an authorization policy, deployed on every apply. `entityId` and `policyType` are fixed
+// at creation; `name`, `policyText` and `targets` converge on re-apply and apply exactly as declared.
+type AuthzPolicy struct {
+	// EntityId Id of the policy in the engine and in the Console: `policy.` then one or more segments separated
+	// by `.`. Held by one policy of the environment, and fixed at creation.
+	//
+	//
+	// Examples: policy.hotel-booking-read
+	EntityId string `json:"entityId"`
+
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Name Display name of the policy; converges on re-apply
+	//
+	// Examples: Hotel booking — read access
+	Name string `json:"name"`
+
+	// PolicyText The GAPL text, one or more `permit` and `forbid` statements, replaced whole on every apply. A
+	// template, with `?principal` or `?resource` in its scope, is refused.
+	//
+	//
+	// Examples: permit(principal in Group::"agents", action == Action::"read", resource == Resource::"searchHotels");
+	PolicyText string `json:"policyText"`
+
+	// PolicyType What the policy governs, as the Console groups policies. Fixed at creation.
+	PolicyType AuthzPolicySpecPolicyType `json:"policyType"`
+
+	// Targets The PDP gateways the policy is deployed to, each as the gateway reports its routing scope, or
+	// `default`, or `*` for every gateway. An empty list falls back to the default engine on every
+	// gateway. An MCP proxy asks the default engine only.
+	//
+	//
+	// Examples: ["orders@eu"]
+	Targets []string `drift:"set:omitted-is-empty" json:"targets,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzPolicy with unset fields set to their OpenAPI defaults.
+func (v AuthzPolicy) WithDefaults() AuthzPolicy {
+	return v
+}
+
+// AuthzPolicyState State of an authorization policy that has been created or updated, in the shape of its spec.
+type AuthzPolicyState struct {
+	// EntityId Id of the policy in the engine and in the Console: `policy.` then one or more segments separated
+	// by `.`. Held by one policy of the environment, and fixed at creation.
+	//
+	//
+	// Examples: policy.hotel-booking-read
+	EntityId string `json:"entityId"`
+
+	// EnvironmentId The environment ID
+	EnvironmentId *string `drift:"ignore" json:"environmentId,omitempty"`
+
+	// Errors Findings about the applied spec
+	Errors *AuthzErrors `drift:"ignore" json:"errors,omitempty"`
+
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Id Resource UUID
+	Id *string `drift:"ignore" json:"id,omitempty"`
+
+	// Name Display name of the policy; converges on re-apply
+	//
+	// Examples: Hotel booking — read access
+	Name string `json:"name"`
+
+	// OrganizationId The organization ID
+	OrganizationId *string `drift:"ignore" json:"organizationId,omitempty"`
+
+	// PolicyStatus `DEPLOYED` after every apply. `DISABLED` once the policy is disabled in the Console, until the next
+	// apply deploys it again.
+	PolicyStatus *AuthzPolicyStatePolicyStatus `drift:"ignore" json:"policyStatus,omitempty"`
+
+	// PolicyText The GAPL text, one or more `permit` and `forbid` statements, replaced whole on every apply. A
+	// template, with `?principal` or `?resource` in its scope, is refused.
+	//
+	//
+	// Examples: permit(principal in Group::"agents", action == Action::"read", resource == Resource::"searchHotels");
+	PolicyText string `json:"policyText"`
+
+	// PolicyType What the policy governs, as the Console groups policies. Fixed at creation.
+	PolicyType AuthzPolicyStatePolicyType `json:"policyType"`
+
+	// Targets The PDP gateways the policy is deployed to, each as the gateway reports its routing scope, or
+	// `default`, or `*` for every gateway. An empty list falls back to the default engine on every
+	// gateway. An MCP proxy asks the default engine only.
+	//
+	//
+	// Examples: ["orders@eu"]
+	Targets []string `drift:"set:omitted-is-empty" json:"targets,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzPolicyState with unset fields set to their OpenAPI defaults.
+func (v AuthzPolicyState) WithDefaults() AuthzPolicyState {
+	if v.Errors != nil {
+		withDefaults := v.Errors.WithDefaults()
+		v.Errors = &withDefaults
+	}
+	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of AuthzPolicy sends. Shallow copy, then a
+// clearReadOnly method on *AuthzPolicy, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
+func (s AuthzPolicyState) Spec() AuthzPolicy {
+	spec := AuthzPolicy{
+		EntityId:   s.EntityId,
+		Hrid:       s.Hrid,
+		Name:       s.Name,
+		PolicyText: s.PolicyText,
+		PolicyType: (AuthzPolicySpecPolicyType)(s.PolicyType),
+		Targets:    s.Targets,
+	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
+}
+
+// AuthzPolicyStatePolicyStatus `DEPLOYED` after every apply. `DISABLED` once the policy is disabled in the Console, until the next
+// apply deploys it again.
+type AuthzPolicyStatePolicyStatus string
+
+// AuthzPolicyStatePolicyType What the policy governs, as the Console groups policies. Fixed at creation.
+type AuthzPolicyStatePolicyType string
+
+// AuthzResourceStatus Envelope the Automation API stamps on every state; read-only.
+type AuthzResourceStatus struct {
+	// EnvironmentId The environment ID
+	EnvironmentId *string `drift:"ignore" json:"environmentId,omitempty"`
+
+	// Errors Findings about the applied spec
+	Errors *AuthzErrors `drift:"ignore" json:"errors,omitempty"`
+
+	// Id Resource UUID
+	Id *string `drift:"ignore" json:"id,omitempty"`
+
+	// OrganizationId The organization ID
+	OrganizationId *string `drift:"ignore" json:"organizationId,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzResourceStatus with unset fields set to their OpenAPI defaults.
+func (v AuthzResourceStatus) WithDefaults() AuthzResourceStatus {
+	if v.Errors != nil {
+		withDefaults := v.Errors.WithDefaults()
+		v.Errors = &withDefaults
+	}
+	return v
+}
+
+// AuthzRoutingScope The routing scope of a PDP gateway: `targetPdpId@tag` for a tagged gateway, `targetPdpId` for an untagged
+// one, or `default`. Written exactly as the gateway reports it; a PDP id or a bare `targetPdpId` naming a
+// tagged gateway is rejected, never resolved.
+//
+// Examples: orders@eu
+type AuthzRoutingScope = string
+
+// AuthzSchemaSpec Specification of a GAPL schema document. `name` and `schema` converge on re-apply, and so does `target`:
+// a document moved to another gateway is withdrawn from the one it leaves.
+type AuthzSchemaSpec = AuthzSchema
+
+// AuthzSchema Specification of a GAPL schema document. `name` and `schema` converge on re-apply, and so does `target`:
+// a document moved to another gateway is withdrawn from the one it leaves.
+type AuthzSchema struct {
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Name Display name of the document; converges on re-apply
+	//
+	// Examples: Travel schema
+	Name string `json:"name"`
+
+	// Schema The GAPL schema text, replaced whole on every apply
+	//
+	// Examples: entity User in Group;
+	// entity Hotel;
+	// action read appliesTo { principal: User, resource: Hotel };
+	Schema string `json:"schema"`
+
+	// Target The routing scope of a PDP gateway: `targetPdpId@tag` for a tagged gateway, `targetPdpId` for an untagged
+	// one, or `default`. Written exactly as the gateway reports it; a PDP id or a bare `targetPdpId` naming a
+	// tagged gateway is rejected, never resolved.
+	//
+	//
+	// Examples: orders@eu
+	Target *AuthzRoutingScope `json:"target,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzSchema with unset fields set to their OpenAPI defaults.
+func (v AuthzSchema) WithDefaults() AuthzSchema {
+	return v
+}
+
+// AuthzSchemaState State of an authorization schema that has been created or updated, in the shape of its spec.
+type AuthzSchemaState struct {
+	// EnvironmentId The environment ID
+	EnvironmentId *string `drift:"ignore" json:"environmentId,omitempty"`
+
+	// Errors Findings about the applied spec
+	Errors *AuthzErrors `drift:"ignore" json:"errors,omitempty"`
+
+	// Hrid A unique human readable id identifying this resource
+	//
+	// Examples: travel-schema
+	Hrid AuthzHrid `drift:"ignore" json:"hrid"`
+
+	// Id Resource UUID
+	Id *string `drift:"ignore" json:"id,omitempty"`
+
+	// Name Display name of the document; converges on re-apply
+	//
+	// Examples: Travel schema
+	Name string `json:"name"`
+
+	// OrganizationId The organization ID
+	OrganizationId *string `drift:"ignore" json:"organizationId,omitempty"`
+
+	// Schema The GAPL schema text, replaced whole on every apply
+	//
+	// Examples: entity User in Group;
+	// entity Hotel;
+	// action read appliesTo { principal: User, resource: Hotel };
+	Schema string `json:"schema"`
+
+	// Target The routing scope of a PDP gateway: `targetPdpId@tag` for a tagged gateway, `targetPdpId` for an untagged
+	// one, or `default`. Written exactly as the gateway reports it; a PDP id or a bare `targetPdpId` naming a
+	// tagged gateway is rejected, never resolved.
+	//
+	//
+	// Examples: orders@eu
+	Target *AuthzRoutingScope `json:"target,omitempty"`
+}
+
+// WithDefaults returns a copy of AuthzSchemaState with unset fields set to their OpenAPI defaults.
+func (v AuthzSchemaState) WithDefaults() AuthzSchemaState {
+	if v.Errors != nil {
+		withDefaults := v.Errors.WithDefaults()
+		v.Errors = &withDefaults
+	}
+	return v
+}
+
+// Spec returns the desired state held in s: the fields a PUT of AuthzSchema sends. Shallow copy, then a
+// clearReadOnly method on *AuthzSchema, where the package has one, drops the nested read-only fields the
+// platform refuses on PUT.
+func (s AuthzSchemaState) Spec() AuthzSchema {
+	spec := AuthzSchema{
+		Hrid:   s.Hrid,
+		Name:   s.Name,
+		Schema: s.Schema,
+		Target: s.Target,
+	}
+	if c, ok := any(&spec).(interface{ clearReadOnly() }); ok {
+		c.clearReadOnly()
+	}
+	return spec
+}
+
+// AuthzShardingTag An APIM sharding tag key, which selects the gateway nodes that run the PDP.
+//
+// Examples: eu
+type AuthzShardingTag = string
+
+// AuthzTargetPdpId The PDP engine the gateway runs. Every PDP gateway of one targetPdpId shares the engine, and its `strict`
+// value.
+//
+// Examples: orders
+type AuthzTargetPdpId = string
 
 // BaseListener Base listener
 type BaseListener struct {
@@ -7477,6 +8321,12 @@ type AimDryRunQueryParam = bool
 // AimHridParam defines model for AimHridParam.
 type AimHridParam = string
 
+// AuthzDryRunQueryParam defines model for AuthzDryRunQueryParam.
+type AuthzDryRunQueryParam = bool
+
+// AuthzHridParam defines model for AuthzHridParam.
+type AuthzHridParam = string
+
 // ApiHridParam Examples: my_demo_api
 type ApiHridParam = string
 
@@ -7518,6 +8368,18 @@ type AimUnauthenticated = AimHttpError
 
 // AimUnauthorized An error returned by the Automation API when a request could not be served.
 type AimUnauthorized = AimHttpError
+
+// AuthzError An error returned by the Automation API when a request could not be served.
+type AuthzError = AuthzAutomationHttpError
+
+// AuthzNotFound An error returned by the Automation API when a request could not be served.
+type AuthzNotFound = AuthzAutomationHttpError
+
+// AuthzUnauthenticated An error returned by the Automation API when a request could not be served.
+type AuthzUnauthenticated = AuthzAutomationHttpError
+
+// AuthzUnauthorized An error returned by the Automation API when a request could not be served.
+type AuthzUnauthorized = AuthzAutomationHttpError
 
 // BadRequest Error
 type BadRequest = HttpError
@@ -7662,6 +8524,55 @@ type UpsertApplicationParams struct {
 	IgnoreGroups *IgnoreGroupsQueryParam `form:"ignoreGroups,omitempty" json:"ignoreGroups,omitempty"`
 }
 
+// UpsertAuthzEntityParams defines parameters for UpsertAuthzEntity.
+type UpsertAuthzEntityParams struct {
+	// DryRun Preview the result of the apply without persisting anything. The same validation runs as for a real apply
+	// and the findings are reported in the returned state.
+	DryRun *AuthzDryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
+// DeleteAuthzEntityParams defines parameters for DeleteAuthzEntity.
+type DeleteAuthzEntityParams struct {
+	// DryRun Preview the result of the apply without persisting anything. The same validation runs as for a real apply
+	// and the findings are reported in the returned state.
+	DryRun *AuthzDryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
+// UpsertAuthzPdpParams defines parameters for UpsertAuthzPdp.
+type UpsertAuthzPdpParams struct {
+	// DryRun Preview the result of the apply without persisting anything. The same validation runs as for a real apply
+	// and the findings are reported in the returned state.
+	DryRun *AuthzDryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
+// DeleteAuthzPdpParams defines parameters for DeleteAuthzPdp.
+type DeleteAuthzPdpParams struct {
+	// DryRun Preview the result of the apply without persisting anything. The same validation runs as for a real apply
+	// and the findings are reported in the returned state.
+	DryRun *AuthzDryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
+// UpsertAuthzPolicyParams defines parameters for UpsertAuthzPolicy.
+type UpsertAuthzPolicyParams struct {
+	// DryRun Preview the result of the apply without persisting anything. The same validation runs as for a real apply
+	// and the findings are reported in the returned state.
+	DryRun *AuthzDryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
+// DeleteAuthzPolicyParams defines parameters for DeleteAuthzPolicy.
+type DeleteAuthzPolicyParams struct {
+	// DryRun Preview the result of the apply without persisting anything. The same validation runs as for a real apply
+	// and the findings are reported in the returned state.
+	DryRun *AuthzDryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
+// UpsertAuthzSchemaParams defines parameters for UpsertAuthzSchema.
+type UpsertAuthzSchemaParams struct {
+	// DryRun Preview the result of the apply without persisting anything. The same validation runs as for a real apply
+	// and the findings are reported in the returned state.
+	DryRun *AuthzDryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+}
+
 // UpsertDictionaryParams defines parameters for UpsertDictionary.
 type UpsertDictionaryParams struct {
 	// DryRun For modifying requests, validates the request without persisting it. A dry run runs every check the same
@@ -7789,6 +8700,18 @@ type UpsertApiSubscriptionJSONRequestBody = SubscriptionSpec
 
 // UpsertApplicationJSONRequestBody defines body for UpsertApplication for application/json ContentType.
 type UpsertApplicationJSONRequestBody = ApplicationSpec
+
+// UpsertAuthzEntityJSONRequestBody defines body for UpsertAuthzEntity for application/json ContentType.
+type UpsertAuthzEntityJSONRequestBody = AuthzEntitySpec
+
+// UpsertAuthzPdpJSONRequestBody defines body for UpsertAuthzPdp for application/json ContentType.
+type UpsertAuthzPdpJSONRequestBody = AuthzPdpSpec
+
+// UpsertAuthzPolicyJSONRequestBody defines body for UpsertAuthzPolicy for application/json ContentType.
+type UpsertAuthzPolicyJSONRequestBody = AuthzPolicySpec
+
+// UpsertAuthzSchemaJSONRequestBody defines body for UpsertAuthzSchema for application/json ContentType.
+type UpsertAuthzSchemaJSONRequestBody = AuthzSchemaSpec
 
 // UpsertDictionaryJSONRequestBody defines body for UpsertDictionary for application/json ContentType.
 type UpsertDictionaryJSONRequestBody = DictionarySpec
