@@ -393,7 +393,8 @@ func TestUpsertAimMcpProxySDK_PassthroughUpstreamAuthRoundTrips(t *testing.T) {
 	assert.NotNil(t, get.JSON200.Studio.UpstreamAuth[0].Auth.Passthrough)
 }
 
-// A dry-run delete of a PDP gateway, an entity or a policy answers the state and deletes nothing.
+// A dry-run delete of a PDP gateway, an entity or a policy answers the state and deletes nothing, and
+// answers 404 for a hrid that does not exist.
 func TestDeleteAuthzDryRunSDK_KeepsTheResource(t *testing.T) {
 	dryRun := new(true)
 	kinds := []struct {
@@ -451,6 +452,9 @@ func TestDeleteAuthzDryRunSDK_KeepsTheResource(t *testing.T) {
 
 			get, err := kind.get(t.Context(), client, "test")
 			assert.Equal(t, state, assertSDKOK(t, get, err))
+
+			missing, err := kind.delete(t.Context(), client, "missing")
+			assertSDK404(t, missing, err)
 		})
 	}
 }
