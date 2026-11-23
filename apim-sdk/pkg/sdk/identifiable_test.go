@@ -61,6 +61,9 @@ func TestIdentity(t *testing.T) {
 		{"unnamed certificate", ClientCertificate{Content: "\n  PEM\n"}, "PEM"},
 		{"group", Group{Hrid: "developers"}, "developers"},
 		{"api", ApiV4{Hrid: "petstore"}, "petstore"},
+		{"authz schema", AuthzSchema{Hrid: "travel-schema"}, "travel-schema"},
+		{"authz pdp", AuthzPdp{Hrid: "orders-eu"}, "orders-eu"},
+		{"authz entity", AuthzEntity{Hrid: "agents-group"}, "agents-group"},
 		{"authz policy", AuthzPolicy{Hrid: "hotel-read"}, "hotel-read"},
 	}
 	for _, tt := range tests {
