@@ -111,6 +111,8 @@ Operations with query parameters (`dryRun`, the legacy UUID params) take a param
   sets non-pointer scalars (a `false` stays `false`) and never recurses into anonymous structs.
 - Resources (by hrid) and list items with an identity (`Member`, `GroupMember`, `Metadata`, `ApiKey`,
   `ClientCertificate`) implement `store.Identifiable` (`pkg/sdk/identifiable.go`), with GKO's keys.
+- `ClientCertificate.Expired()` / `Scheduled()` (`pkg/sdk/certificate.go`) tell whether `endsAt` is past or `startsAt`
+  still ahead; a missing or unparseable date is neither. GKO's drift ignores such certificates, which APIM leaves out.
 - Dates are RFC 3339 strings (`*string`), not `time.Time`.
 - Free-form configurations (plugin, endpoint, page source, subscription entrypoint) are `unstructured.Unstructured`.
 - Polymorphic types (`Listener`, `Selector`, and the AIM `AimCatalogMcpServerAuth`, `AimMcpProxyUpstreamAuth`,
