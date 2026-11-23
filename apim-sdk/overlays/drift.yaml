@@ -353,10 +353,11 @@ actions:
     update:
       x-oapi-codegen-extra-tags:
         drift: empty-is-nil
+  # The API's default is true: an absent active means an active entity.
   - target: $.components.schemas.AuthzEntitySpec.properties.active
     update:
       x-oapi-codegen-extra-tags:
-        drift: empty-is-nil
+        drift: empty-is-true
   - target: $.components.schemas.AuthzEntitySpec.properties.attributes
     update:
       x-oapi-codegen-extra-tags:

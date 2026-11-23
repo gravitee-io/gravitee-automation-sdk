@@ -4375,7 +4375,7 @@ type AuthzEntitySpecKind string
 // `attributes`, `parents`, `targets` and `active` converge on re-apply and apply exactly as declared.
 type AuthzEntity struct {
 	// Active Whether the entity is published to the PDP gateways it targets
-	Active *bool `drift:"empty-is-nil" json:"active,omitempty"`
+	Active *bool `drift:"empty-is-true" json:"active,omitempty"`
 
 	// Attributes The attributes of the entity, replaced whole on every apply. A key that starts with `_` is
 	// reserved to the module and refused.
@@ -4437,7 +4437,7 @@ func (v AuthzEntity) WithDefaults() AuthzEntity {
 // AuthzEntityState State of an authorization entity that has been created or updated, in the shape of its spec.
 type AuthzEntityState struct {
 	// Active Whether the entity is published to the PDP gateways it targets
-	Active *bool `drift:"empty-is-nil" json:"active,omitempty"`
+	Active *bool `drift:"empty-is-true" json:"active,omitempty"`
 
 	// Attributes The attributes of the entity, replaced whole on every apply. A key that starts with `_` is
 	// reserved to the module and refused.

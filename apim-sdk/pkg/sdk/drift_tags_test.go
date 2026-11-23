@@ -65,7 +65,7 @@ func TestDriftTags_Authz(t *testing.T) {
 		{AuthzPdp{}, "Strict", "empty-is-nil"},
 		{AuthzPdp{}, "Tag", "empty-is-nil"},
 		{AuthzEntity{}, "Hrid", "ignore"},
-		{AuthzEntity{}, "Active", "empty-is-nil"},
+		{AuthzEntity{}, "Active", "empty-is-true"},
 		{AuthzEntity{}, "Attributes", "unstructured"},
 		{AuthzEntity{}, "Parents", "set:omitted-is-empty"},
 		{AuthzEntity{}, "Targets", "set:omitted-is-empty"},
