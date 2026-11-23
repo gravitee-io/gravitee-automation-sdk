@@ -4619,7 +4619,7 @@ type AuthzPdp struct {
 	// Tag An APIM sharding tag key, which selects the gateway nodes that run the PDP.
 	//
 	// Examples: eu
-	Tag *AuthzShardingTag `json:"tag,omitempty"`
+	Tag *AuthzShardingTag `drift:"empty-is-nil" json:"tag,omitempty"`
 
 	// TargetPdpId The PDP engine the gateway runs. Every PDP gateway of one targetPdpId shares the engine, and its `strict`
 	// value.
@@ -4681,7 +4681,7 @@ type AuthzPdpState struct {
 	// Tag An APIM sharding tag key, which selects the gateway nodes that run the PDP.
 	//
 	// Examples: eu
-	Tag *AuthzShardingTag `json:"tag,omitempty"`
+	Tag *AuthzShardingTag `drift:"empty-is-nil" json:"tag,omitempty"`
 
 	// TargetPdpId The PDP engine the gateway runs. Every PDP gateway of one targetPdpId shares the engine, and its `strict`
 	// value.

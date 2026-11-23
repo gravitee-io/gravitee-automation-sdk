@@ -55,13 +55,14 @@ func TestDriftTags_McpProxyFalseIsUnset(t *testing.T) {
 }
 
 // The tags of GKO's AuthZ DTOs: the state sorts targets and parents and answers [] for none, and GKO's DTO held
-// strict and active as bool, where absent and false compare equal.
+// strict and active as bool, where absent and false compare equal, and tag as a string, where absent and "" do.
 func TestDriftTags_Authz(t *testing.T) {
 	assertDriftTags(t, []driftTag{
 		{AuthzSchema{}, "Hrid", "ignore"},
 		{AuthzPdp{}, "Hrid", "ignore"},
 		{AuthzPdp{}, "Endpoint", "empty-is-nil"},
 		{AuthzPdp{}, "Strict", "empty-is-nil"},
+		{AuthzPdp{}, "Tag", "empty-is-nil"},
 		{AuthzEntity{}, "Hrid", "ignore"},
 		{AuthzEntity{}, "Active", "empty-is-nil"},
 		{AuthzEntity{}, "Attributes", "unstructured"},
