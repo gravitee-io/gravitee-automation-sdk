@@ -59,6 +59,7 @@ func TestDriftTags_McpProxyFalseIsUnset(t *testing.T) {
 func TestDriftTags_Authz(t *testing.T) {
 	assertDriftTags(t, []driftTag{
 		{AuthzSchema{}, "Hrid", "ignore"},
+		{AuthzSchema{}, "Target", "empty-is-nil"},
 		{AuthzPdp{}, "Hrid", "ignore"},
 		{AuthzPdp{}, "Endpoint", "empty-is-nil"},
 		{AuthzPdp{}, "Strict", "empty-is-nil"},

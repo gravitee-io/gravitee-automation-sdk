@@ -4945,7 +4945,7 @@ type AuthzSchema struct {
 	//
 	//
 	// Examples: orders@eu
-	Target *AuthzRoutingScope `json:"target,omitempty"`
+	Target *AuthzRoutingScope `drift:"empty-is-nil" json:"target,omitempty"`
 }
 
 // WithDefaults returns a copy of AuthzSchema with unset fields set to their OpenAPI defaults.
@@ -4990,7 +4990,7 @@ type AuthzSchemaState struct {
 	//
 	//
 	// Examples: orders@eu
-	Target *AuthzRoutingScope `json:"target,omitempty"`
+	Target *AuthzRoutingScope `drift:"empty-is-nil" json:"target,omitempty"`
 }
 
 // WithDefaults returns a copy of AuthzSchemaState with unset fields set to their OpenAPI defaults.
