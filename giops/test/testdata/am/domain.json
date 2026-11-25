@@ -1,0 +1,7 @@
+{
+  "key": "giops-json-domain",
+  "name": "JSON domain",
+  "path": "/giops-json",
+  "dataPlaneId": "default",
+  "enabled": true
+}

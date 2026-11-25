@@ -1,6 +1,7 @@
 # Gravitee Automation SDKs
 
-Go clients and mock servers for the Gravitee Access Management (AM) and API Management (APIM) Automation APIs.
+Go clients, mock servers and a command line client, `giops`, for the Gravitee Access Management (AM) and
+API Management (APIM) Automation APIs.
 
 Aim: talk to AM the same way GKO does (idempotent PUT, org/env scoped), and test that against a local mock.
 
@@ -12,6 +13,7 @@ am-sdk/            AM Automation client (generated + thin facade)
 am-mock-server/    in-memory HTTP mock of the same API
 apim-sdk/          APIM Automation client (generated, core APIM + AIM + AuthZ)
 apim-mock-server/  in-memory HTTP mock of the APIM Automation API
+giops/             command line client over both SDKs (experimental)
 ```
 
 ## AM SDK
@@ -222,6 +224,21 @@ It behaves like APIM:
   nothing. The mock derives none of the read-only fields AuthZ fills in (`routingScope`, `wellKnownPath`,
   `policyStatus`), cascades no entity delete, and refuses no delete with a `409` or `413`.
 
+## giops CLI
+
+`giops` gets, applies and deletes AM and APIM resources described in YAML or JSON files, the way
+`kubectl` does for Kubernetes: `apply` runs a dry run and asks before saving. It is a proof of concept.
+
+```bash
+go run ./giops am apply domains -f giops/examples/am/domain.yaml -c config.yaml
+go run ./giops am get domains -c config.yaml
+go run ./giops apim get groups example-developers -o yaml -c config.yaml
+```
+
+`giops/examples/config/config.yaml` documents every configuration key and environment variable. See
+[giops/README.md](giops/README.md) for the commands, the resources and their options. Releases attach the
+binaries to the `giops/vX.Y.Z` tags.
+
 ## Prerequisites
 
 - Go 1.26+
@@ -229,7 +246,7 @@ It behaves like APIM:
 ## Build & Test
 
 ```bash
-go test ./am-sdk/... ./apim-sdk/... ./am-mock-server/... ./apim-mock-server/... ./common/...
+go test ./am-sdk/... ./apim-sdk/... ./am-mock-server/... ./apim-mock-server/... ./common/... ./giops/...
 go test ./am-mock-server/server/...
 make sync-oas          # AM_OAS_BRANCH / APIM_OAS_BRANCH to override; needs a gh login with access to gravitee-access-management
 make sync-aim-oas      # AIM_OAS_REF to override; needs a gh login with access to gravitee-gamma-module-aim
