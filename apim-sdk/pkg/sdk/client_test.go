@@ -200,3 +200,66 @@ func bearerContext(serverURL string) APIContext {
 		Auth:    apicontext.Auth{BearerToken: new("123")},
 	}}
 }
+
+func TestProbe(t *testing.T) {
+	groupPath := "/automation/organizations/DEFAULT/environments/DEFAULT/groups/" + probeHrid
+	probeNotFound := `{"httpStatus":404,"message":"HRID [` + probeHrid + `] cannot be found."}`
+
+	tests := []struct {
+		name          string
+		openAPIStatus int
+		groupStatus   int
+		groupBody     string
+		wantStatus    int // 0: Probe succeeds
+	}{
+		{name: "probe group not found", openAPIStatus: 200, groupStatus: 404, groupBody: probeNotFound},
+		{name: "probe group found", openAPIStatus: 200, groupStatus: 200, groupBody: `{"hrid":"` + probeHrid + `"}`},
+		{name: "not an APIM Automation API", openAPIStatus: 404, wantStatus: 404},
+		{name: "OpenAPI document refused by a gateway", openAPIStatus: 403, wantStatus: 403},
+		{name: "bad credentials", openAPIStatus: 200, groupStatus: 401, groupBody: `{"httpStatus":401}`, wantStatus: 401},
+		{name: "no access to the environment", openAPIStatus: 200, groupStatus: 403, groupBody: `{"httpStatus":403}`, wantStatus: 403},
+		{name: "unknown environment", openAPIStatus: 200, groupStatus: 404, groupBody: `{"httpStatus":404,"message":"Environment [DEFAULT] cannot be found."}`, wantStatus: 404},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.URL.Path {
+				case "/automation/open-api.yaml":
+					assert.Equal(t, "Bearer 123", r.Header.Get("Authorization"), "a gateway in front of APIM may need the credentials")
+					w.WriteHeader(tt.openAPIStatus)
+				case groupPath:
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(tt.groupStatus)
+					_, _ = w.Write([]byte(tt.groupBody))
+				default:
+					t.Errorf("unexpected request to %s", r.URL.Path)
+				}
+			}))
+			defer s.Close()
+			client, err := NewAPIMClient(bearerContext(s.URL))
+			require.NoError(t, err)
+
+			err = client.Probe(context.Background())
+
+			if tt.wantStatus == 0 {
+				assert.NoError(t, err)
+				return
+			}
+			var httpErr errors.HttpError
+			require.ErrorAs(t, err, &httpErr)
+			assert.Equal(t, tt.wantStatus, httpErr.Status)
+		})
+	}
+}
+
+func TestProbe_ServerUnreachable(t *testing.T) {
+	s := httptest.NewServer(http.NotFoundHandler())
+	s.Close()
+	client, err := NewAPIMClient(bearerContext(s.URL))
+	require.NoError(t, err)
+
+	err = client.Probe(context.Background())
+
+	assert.ErrorAs(t, err, new(errors.ClientError))
+}

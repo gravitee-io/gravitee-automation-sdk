@@ -29,6 +29,12 @@
       "component": "apim-mock-server",
       "bump-minor-pre-major": true,
       "initial-version": "0.1.0"
+    },
+    "giops": {
+      "release-type": "go",
+      "component": "giops",
+      "bump-minor-pre-major": true,
+      "initial-version": "0.1.0"
     }
   }
 }
