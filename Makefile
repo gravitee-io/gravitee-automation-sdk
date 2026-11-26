@@ -96,7 +96,7 @@ verify-aim-oas: sync-aim-oas ## Fail if the committed AIM OAS differs from gravi
 
 .PHONY: sync-authz-oas
 sync-authz-oas: ## Download the AuthZ Automation OAS fragment from the private gravitee-gamma-module-authz (needs a gh login)
-	gh api -H "Accept: application/vnd.github.raw" "repos/gravitee-io/gravitee-gamma-module-authz/contents/src/main/resources/openapi/openapi-automation.yaml?ref=$(AUTHZ_OAS_REF)" > $(AUTHZ_OAS_FILE)
+	$(GH_RAW) "repos/gravitee-io/gravitee-gamma-module-authz/contents/src/main/resources/openapi/openapi-automation.yaml?ref=$(AUTHZ_OAS_REF)" > $(AUTHZ_OAS_FILE)
 
 .PHONY: verify-authz-oas
 verify-authz-oas: sync-authz-oas ## Fail if the committed AuthZ OAS differs from gravitee-gamma-module-authz at $(AUTHZ_OAS_REF)
