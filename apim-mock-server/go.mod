@@ -6,8 +6,8 @@ require (
 	github.com/getkin/kin-openapi v0.149.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
-	github.com/gravitee-io/gravitee-automation-sdk/apim-sdk v0.2.1
-	github.com/gravitee-io/gravitee-automation-sdk/common v1.4.0
+	github.com/gravitee-io/gravitee-automation-sdk/apim-sdk v0.2.2
+	github.com/gravitee-io/gravitee-automation-sdk/common v1.4.1
 	github.com/oapi-codegen/nethttp-middleware v1.1.2
 	github.com/oapi-codegen/runtime v1.7.0
 	github.com/spf13/cobra v1.10.2
