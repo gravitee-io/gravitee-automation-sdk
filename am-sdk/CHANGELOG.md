@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.7.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.6.2...am-sdk/v2.7.0) (2026-11-26)
+
+
+### Features
+
+* **am-sdk:** generate from AM master 4.15.0 ([265ee38](https://github.com/gravitee-io/gravitee-automation-sdk/commit/265ee382cd55ceaa34dd3b5665349eaa0aa44eac))
+
+
+### Bug Fixes
+
+* **deps:** bump common to v1.4.1, apim-sdk to v0.2.2 ([e42fa0e](https://github.com/gravitee-io/gravitee-automation-sdk/commit/e42fa0e6238560b3f11644b0e8673c3873cde849))
+
 ## [2.6.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/am-sdk/v2.6.1...am-sdk/v2.6.2) (2026-11-16)
 
 
