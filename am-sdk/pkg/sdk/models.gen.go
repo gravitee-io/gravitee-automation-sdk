@@ -636,6 +636,9 @@ type ApplicationOAuthSettings struct {
 	// ApplicationType OIDC application type, computed from the application type: native for native applications, web for web, browser and service applications. Read-only.
 	ApplicationType *string `drift:"ignore" json:"applicationType,omitempty"`
 
+	// AuthorizationDetailTypes Authorization detail types the application can request. Each type must exist in the domain and appear once, otherwise the request is rejected with 400.
+	AuthorizationDetailTypes []AutomationAuthorizationDetailType `json:"authorizationDetailTypes,omitempty"`
+
 	// AuthorizationEncryptedResponseAlg JWE alg algorithm encrypting the authorization responses (JARM).
 	AuthorizationEncryptedResponseAlg *string `json:"authorizationEncryptedResponseAlg,omitempty"`
 
@@ -838,6 +841,13 @@ type ApplicationOAuthSettings struct {
 func (v ApplicationOAuthSettings) WithDefaults() ApplicationOAuthSettings {
 	if v.AccessTokenValiditySeconds == nil {
 		v.AccessTokenValiditySeconds = new(int32(7200))
+	}
+	if v.AuthorizationDetailTypes != nil {
+		items := make([]AutomationAuthorizationDetailType, len(v.AuthorizationDetailTypes))
+		for i, item := range v.AuthorizationDetailTypes {
+			items[i] = item.WithDefaults()
+		}
+		v.AuthorizationDetailTypes = items
 	}
 	if v.CrossAppAccessSettings != nil {
 		withDefaults := v.CrossAppAccessSettings.WithDefaults()
@@ -1110,6 +1120,27 @@ func (v AssessmentSettings) WithDefaults() AssessmentSettings {
 	if v.Enabled == nil {
 		v.Enabled = new(bool(false))
 	}
+	return v
+}
+
+// AutomationAuthorizationDetailType An authorization detail type of the domain that the application can request.
+type AutomationAuthorizationDetailType = AuthorizationDetailType
+
+// AuthorizationDetailType An authorization detail type of the domain that the application can request.
+type AuthorizationDetailType struct {
+	// ExpiresIn Duration, in seconds, of the user consent to this type. When absent, the type's own expiresIn applies, then the gateway default.
+	//
+	// Example: 86400
+	ExpiresIn *int32 `json:"expiresIn,omitempty"`
+
+	// Type Type of an authorization detail type of the domain, matched exactly, case included. The type must exist, otherwise the request is rejected with 400.
+	//
+	// Example: payment_initiation
+	Type string `json:"type"`
+}
+
+// WithDefaults returns a copy of AuthorizationDetailType with unset fields set to their OpenAPI defaults.
+func (v AuthorizationDetailType) WithDefaults() AuthorizationDetailType {
 	return v
 }
 
@@ -2874,6 +2905,9 @@ type TokenExchangeSettings struct {
 	// AllowImpersonation Whether impersonation is allowed, where the issued token represents the subject directly. At least one of allowImpersonation or allowDelegation must be enabled.
 	AllowImpersonation *bool `json:"allowImpersonation,omitempty"`
 
+	// AllowRefreshTokensFromOtherClients Whether a refresh token issued to another client of the domain is accepted as the subject or actor token. When disabled, a refresh token is only accepted from the client it was issued to. When enabled, the DPoP binding of a refresh token issued to another client is not enforced, since that client cannot hold the key, and any client of the domain with the token-exchange grant can redeem a refresh token it obtains.
+	AllowRefreshTokensFromOtherClients *bool `json:"allowRefreshTokensFromOtherClients,omitempty"`
+
 	// AllowedActorTokenTypes Token types accepted as the actor token when delegating.
 	//
 	// Example: ["urn:ietf:params:oauth:token-type:access_token","urn:ietf:params:oauth:token-type:id_token"]
@@ -2913,6 +2947,9 @@ func (v TokenExchangeSettings) WithDefaults() TokenExchangeSettings {
 	}
 	if v.AllowImpersonation == nil {
 		v.AllowImpersonation = new(bool(true))
+	}
+	if v.AllowRefreshTokensFromOtherClients == nil {
+		v.AllowRefreshTokensFromOtherClients = new(bool(false))
 	}
 	if v.Enabled == nil {
 		v.Enabled = new(bool(false))

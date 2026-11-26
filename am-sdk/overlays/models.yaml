@@ -44,6 +44,9 @@ actions:
   - target: $.components.schemas.AutomationAssessmentSettings
     update:
       x-go-type-name: AssessmentSettings
+  - target: $.components.schemas.AutomationAuthorizationDetailType
+    update:
+      x-go-type-name: AuthorizationDetailType
   - target: $.components.schemas.AutomationCIBASettings
     update:
       x-go-type-name: CIBASettings
