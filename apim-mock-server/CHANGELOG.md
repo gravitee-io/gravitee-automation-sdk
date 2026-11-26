@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.3.0...apim-mock-server/v0.3.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **deps:** bump apim-sdk to v0.3.0 ([5f62e49](https://github.com/gravitee-io/gravitee-automation-sdk/commit/5f62e49d102aa65a72c247ebc87af4c6979585ea))
+
 ## [0.3.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.2.1...apim-mock-server/v0.3.0) (2026-11-26)
 
 
