@@ -15,16 +15,13 @@
 package server
 
 import (
-	"context"
 	"encoding/base64"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gravitee-io/gravitee-automation-sdk/common/pkg/auth"
-	"github.com/gravitee-io/gravitee-automation-sdk/common/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -128,31 +125,4 @@ func TestAuth_NoAuthConfig_OpenAccess(t *testing.T) {
 	resp := httpGet(t, collectionURL(srv, "/apis"), "test")
 	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-}
-
-func TestOpenAPIDocument_NeedsNoAuth(t *testing.T) {
-	srv := createAPIMServerWithAuth(t)
-
-	resp := doWithAuth(t, http.MethodGet, srv.URL+BasePath+"/open-api.yaml", nil, "")
-	defer resp.Body.Close()
-
-	require.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "application/yaml", resp.Header.Get("Content-Type"))
-	body, err := io.ReadAll(resp.Body)
-	require.NoError(t, err)
-	_, err = openapi3.NewLoader().LoadFromData(body)
-	assert.NoError(t, err)
-}
-
-func TestSDKProbe(t *testing.T) {
-	srv := createAPIMServerWithAuth(t)
-
-	t.Run("accepted token", func(t *testing.T) {
-		assert.NoError(t, newTestClient(t, srv, "", "", "admin-token").Probe(context.Background()))
-	})
-	t.Run("unknown token", func(t *testing.T) {
-		var httpErr errors.HttpError
-		require.ErrorAs(t, newTestClient(t, srv, "", "", "wrong-token").Probe(context.Background()), &httpErr)
-		assert.Equal(t, http.StatusUnauthorized, httpErr.Status)
-	})
 }

@@ -25,11 +25,6 @@ type StatusCoder interface {
 	StatusCode() int
 }
 
-type BodyResponse interface {
-	StatusCoder
-	GetBody() []byte
-}
-
 // IsNetworkError reports whether err is non-nil. The status coder is ignored.
 func IsNetworkError(_ StatusCoder, err error) bool {
 	return err != nil

@@ -14,7 +14,7 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     strategy:
       matrix:
-        module: [am-mock-server, apim-mock-server, giops]
+        module: [am-mock-server, apim-mock-server]
     steps:
       - uses: actions/checkout@v4
         with:
