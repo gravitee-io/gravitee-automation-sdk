@@ -156,8 +156,9 @@ Not an API reference — generated methods and models live in `apim-sdk/pkg/sdk`
 The spec has two sources, merged by `common/cmd/mergespec` into `apim-sdk/openapi/openapi.yaml`: core APIM
 (`gravitee-api-management` `master`, `make sync-oas`, checked by `make check-oas`) and the AIM fragment (private
 `gravitee-gamma-module-aim`, pinned by `AIM_OAS_REF` in the `Makefile`). `make sync-aim-oas` and
-`make verify-aim-oas` need a `gh` login with access to the AIM repo; CI runs the AIM check in CircleCI, which holds the
-token in Keeper (as terraform-provider-apim does).
+`make verify-aim-oas` need a `gh` login with access to the AIM repo. Every target reads its source through the GitHub
+API, so `make sync-oas` and `make check-oas` need one too (`gravitee-access-management` is private). CI runs every
+check in CircleCI, which holds the token in Keeper (as terraform-provider-apim does).
 
 Nothing bumps the AIM fragment automatically, and `make verify-aim-oas` only checks the committed file against its
 tag. To move it:
@@ -221,7 +222,7 @@ It behaves like APIM:
 ```bash
 go test ./am-sdk/... ./apim-sdk/... ./am-mock-server/... ./apim-mock-server/... ./common/...
 go test ./am-mock-server/server/...
-make sync-oas          # AM_OAS_BRANCH / APIM_OAS_BRANCH to override
+make sync-oas          # AM_OAS_BRANCH / APIM_OAS_BRANCH to override; needs a gh login with access to gravitee-access-management
 make sync-aim-oas      # AIM_OAS_REF to override; needs a gh login with access to gravitee-gamma-module-aim
 make generate
 ```
