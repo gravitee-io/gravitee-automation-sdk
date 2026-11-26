@@ -18,11 +18,27 @@ import { runPipeline, waitForPipeline } from "./lib/circleci.mjs";
 
 import { LOG, toggleVerbosity } from "./lib/index.mjs";
 
-// Runs the verify-aim-oas CircleCI workflow on a branch and exits with its
-// result. CircleCI holds the GitHub token that reads the private aim repository.
+// Runs an OAS check in CircleCI on a branch and exits with its result. CircleCI holds the GitHub token that reads the
+// source repositories, some of them private.
+
+const CHECKS = {
+  upstream: {
+    trigger: "check_oas",
+    name: "AM and APIM",
+    done: "am-sdk/openapi/openapi.yaml and apim-sdk/openapi/sources/apim.yaml match AM_OAS_BRANCH and APIM_OAS_BRANCH",
+  },
+  aim: {
+    trigger: "verify_aim_oas",
+    name: "AI Management",
+    done: "apim-sdk/openapi/sources/aim.yaml matches gravitee-gamma-module-aim at AIM_OAS_REF",
+  },
+};
 
 const VERBOSE = argv.verbose;
 const BRANCH = argv["branch"];
+const CHECK_ID = argv["check"] ?? "";
+// Own keys only: "constructor" or "toString" would otherwise pass the check below.
+const CHECK = Object.hasOwn(CHECKS, CHECK_ID) ? CHECKS[CHECK_ID] : undefined;
 
 toggleVerbosity(VERBOSE);
 
@@ -31,7 +47,12 @@ if (!BRANCH) {
   process.exit(1);
 }
 
-const pipeline = await runPipeline({ trigger: "verify_aim_oas" }, BRANCH);
+if (!CHECK) {
+  LOG.red(`--check is required, one of: ${Object.keys(CHECKS).join(", ")}`);
+  process.exit(1);
+}
+
+const pipeline = await runPipeline({ trigger: CHECK.trigger }, BRANCH);
 
 LOG.blue(`Pipeline is running at ${pipeline.url}`);
 
@@ -43,8 +64,8 @@ for (const w of workflows) {
 }
 
 if (failed.length > 0) {
-  LOG.red(`The AI Management OAS fragment check failed, see ${pipeline.url}`);
+  LOG.red(`The ${CHECK.name} OAS check failed, see ${pipeline.url}`);
   process.exit(1);
 }
 
-LOG.green("apim-sdk/openapi/sources/aim.yaml matches gravitee-gamma-module-aim at AIM_OAS_REF");
+LOG.green(CHECK.done);

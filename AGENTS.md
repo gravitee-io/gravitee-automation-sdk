@@ -24,15 +24,19 @@ If you are an AI agent operating in this repository:
 # Install lint/dev tools (staticcheck, revive, addlicense, goimports)
 make tools
 
+# Every OAS is read through the GitHub API, so every sync and check target needs a gh login (or GH_TOKEN) with access
+# to the source repos, some of them private (gravitee-access-management, gravitee-gamma-module-aim)
+
 # Sync AM and APIM Automation OAS (AM_OAS_BRANCH / APIM_OAS_BRANCH, default master)
 make sync-oas
 
-# Sync the AIM fragment from the private gravitee-gamma-module-aim (AIM_OAS_REF); needs a gh login with access
+# Sync the AIM fragment from the private gravitee-gamma-module-aim (AIM_OAS_REF)
 make sync-aim-oas
 
-# Fail if the committed AIM fragment differs from AIM_OAS_REF. CI runs it in CircleCI (.circleci/config.yml),
-# triggered by the aim-oas GitHub Actions job through hack/scripts/verify-aim-oas.mjs, because only CircleCI
-# holds (in Keeper) the token that reads the private repo
+# Fail if the committed AM or APIM OAS differs from its branch, or the AIM fragment from AIM_OAS_REF. CI runs them in
+# CircleCI (.circleci/config.yml), triggered by the oas and aim-oas GitHub Actions jobs through
+# hack/scripts/verify-oas.mjs, because only CircleCI holds (in Keeper) the token that reads the private repos
+make check-oas
 make verify-aim-oas
 
 # Regenerate all code (overlays + oapi-codegen)

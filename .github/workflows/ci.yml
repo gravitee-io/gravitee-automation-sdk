@@ -32,13 +32,24 @@ jobs:
             | grep -vE '(\.md$|^\.release-please-manifest\.json$)' \
             && echo code=true >> "$GITHUB_OUTPUT" || echo code=false >> "$GITHUB_OUTPUT"
 
+  # Every OAS source is read with a token that only CircleCI holds (see .circleci/config.yml).
   oas:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    # head_ref is empty on workflow_dispatch.
+    if: github.event_name == 'pull_request' && needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - run: make check-oas
+      - name: Run the check in CircleCI, where the token that reads the AM and APIM repositories lives
+        working-directory: hack/scripts
+        env:
+          CIRCLECI_TOKEN: ${{ secrets.CIRCLECI_TOKEN }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          npm ci
+          npx zx verify-oas.mjs --check upstream --branch "$BRANCH"
 
   generate:
     needs: changes
@@ -81,7 +92,6 @@ jobs:
           go-version-file: go.work
       - run: make test
 
-  # The AIM source is private: CircleCI holds the token that reads it (see .circleci/config.yml).
   aim-oas:
     needs: changes
     # head_ref is empty on workflow_dispatch.
@@ -95,9 +105,10 @@ jobs:
         working-directory: hack/scripts
         env:
           CIRCLECI_TOKEN: ${{ secrets.CIRCLECI_TOKEN }}
+          BRANCH: ${{ github.head_ref }}
         run: |
           npm ci
-          npx zx verify-aim-oas.mjs --branch "${{ github.head_ref }}"
+          npx zx verify-oas.mjs --check aim --branch "$BRANCH"
 
   ci-ok:
     if: always()

@@ -2,12 +2,15 @@ MODULES := am-sdk apim-sdk common am-mock-server apim-mock-server
 
 HAS_GO = [ -n "$$(find $$mod -name '*.go' -print -quit)" ]
 
+# Every OAS is read through the GitHub API with the gh token, so a source repository turning private keeps working.
+GH_RAW := gh api -H "Accept: application/vnd.github.raw"
+
 AM_OAS_BRANCH ?= master
-AM_OAS_URL := https://raw.githubusercontent.com/gravitee-io/gravitee-access-management/refs/heads/$(AM_OAS_BRANCH)/docs/automation/openapi.yaml
+AM_OAS_URL := repos/gravitee-io/gravitee-access-management/contents/docs/automation/openapi.yaml?ref=$(AM_OAS_BRANCH)
 AM_OAS_FILE := am-sdk/openapi/openapi.yaml
 
 APIM_OAS_BRANCH ?= master
-APIM_OAS_URL := https://raw.githubusercontent.com/gravitee-io/gravitee-api-management/refs/heads/$(APIM_OAS_BRANCH)/gravitee-apim-rest-api/gravitee-apim-rest-api-automation/gravitee-apim-rest-api-automation-rest/src/main/resources/open-api.yaml
+APIM_OAS_URL := repos/gravitee-io/gravitee-api-management/contents/gravitee-apim-rest-api/gravitee-apim-rest-api-automation/gravitee-apim-rest-api-automation-rest/src/main/resources/open-api.yaml?ref=$(APIM_OAS_BRANCH)
 APIM_OAS_FILE := apim-sdk/openapi/sources/apim.yaml
 
 AIM_OAS_REF ?= 5.1.8
@@ -74,23 +77,23 @@ lint-fix: ## Auto-fix linting issues and add license headers
 ##@ 🔄 Generate
 
 .PHONY: sync-oas
-sync-oas: ## Download AM and APIM Automation OAS from gravitee-access-management and gravitee-api-management
-	curl -fsSL "$(AM_OAS_URL)" -o $(AM_OAS_FILE)
-	curl -fsSL "$(APIM_OAS_URL)" -o $(APIM_OAS_FILE)
+sync-oas: ## Download AM and APIM Automation OAS from gravitee-access-management and gravitee-api-management (needs a gh login)
+	$(GH_RAW) "$(AM_OAS_URL)" > $(AM_OAS_FILE)
+	$(GH_RAW) "$(APIM_OAS_URL)" > $(APIM_OAS_FILE)
 
 .PHONY: sync-aim-oas
 sync-aim-oas: ## Download the AIM Automation OAS fragment from the private gravitee-gamma-module-aim (needs a gh login)
-	gh api -H "Accept: application/vnd.github.raw" "repos/gravitee-io/gravitee-gamma-module-aim/contents/src/main/resources/openapi/openapi-automation.yaml?ref=$(AIM_OAS_REF)" > $(AIM_OAS_FILE)
+	$(GH_RAW) "repos/gravitee-io/gravitee-gamma-module-aim/contents/src/main/resources/openapi/openapi-automation.yaml?ref=$(AIM_OAS_REF)" > $(AIM_OAS_FILE)
 
 .PHONY: verify-aim-oas
 verify-aim-oas: sync-aim-oas ## Fail if the committed AIM OAS differs from gravitee-gamma-module-aim at $(AIM_OAS_REF)
 	@git diff --exit-code -- $(AIM_OAS_FILE) || (echo "$(AIM_OAS_FILE) differs from gravitee-gamma-module-aim at $(AIM_OAS_REF)" && exit 1)
 
 .PHONY: check-oas
-check-oas: ## Fail if committed AM or APIM OAS differs from upstream $(AM_OAS_BRANCH) / $(APIM_OAS_BRANCH)
-	curl -fsSL "$(AM_OAS_URL)" -o /tmp/am-openapi.yaml
+check-oas: ## Fail if committed AM or APIM OAS differs from upstream $(AM_OAS_BRANCH) / $(APIM_OAS_BRANCH) (needs a gh login)
+	$(GH_RAW) "$(AM_OAS_URL)" > /tmp/am-openapi.yaml
 	@diff -u $(AM_OAS_FILE) /tmp/am-openapi.yaml || { echo "OAS out of date. Run 'make sync-oas' and commit."; exit 1; }
-	curl -fsSL "$(APIM_OAS_URL)" -o /tmp/apim-openapi.yaml
+	$(GH_RAW) "$(APIM_OAS_URL)" > /tmp/apim-openapi.yaml
 	@diff -u $(APIM_OAS_FILE) /tmp/apim-openapi.yaml || { echo "OAS out of date. Run 'make sync-oas' and commit."; exit 1; }
 
 .PHONY: generate

@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Daily OAS check: a CircleCI scheduled trigger (project settings, main, trigger=check_oas)
-# runs make check-oas and posts to Slack when it fails. The message reports drift, the usual cause:
-# a download error only shows in the job log, linked from the message.
+# Every OAS is read through the GitHub API with a token, so a source repository turning private (as
+# gravitee-access-management did) keeps working. The token lives in Keeper, which only CircleCI can reach, so every
+# OAS check runs here. On pull requests, GitHub Actions triggers them (trigger=check_oas or verify_aim_oas,
+# hack/scripts/verify-oas.mjs), as terraform-provider-apim does.
 #
-# AI Management OAS check: the GitHub token that reads the private gravitee-gamma-module-aim
-# repository lives in Keeper, which only CircleCI can reach. GitHub Actions triggers it
-# (trigger=verify_aim_oas, hack/scripts/verify-aim-oas.mjs), as terraform-provider-apim does.
+# Daily OAS check: a CircleCI scheduled trigger (project settings, main, trigger=check_oas)
+# runs make check-oas and posts to Slack when it fails on main. The message reports drift, the usual cause:
+# a download error only shows in the job log, linked from the message.
 version: 2.1
 
 orbs:
@@ -46,13 +47,18 @@ jobs:
       - keeper/env-export:
           secret-url: keeper://ZOz4db245GNaETVwmPBk8w/field/password
           var-name: SLACK_ACCESS_TOKEN
+      - keeper/env-export:
+          secret-url: keeper://TIlcGPFq4rN5GvgnZb9hng/field/password
+          var-name: GITHUB_TOKEN
+      - gh/setup
       - run:
           name: Compare the committed OAS with upstream
           command: make check-oas
       - slack/notify:
           channel: C0CD7HY4PUJ
           event: fail
-          branch_pattern: ".+"
+          # Pull request runs report in GitHub, only the daily run on main posts here.
+          branch_pattern: "main"
           custom: |
             {
               "blocks": [
