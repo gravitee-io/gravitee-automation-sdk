@@ -76,8 +76,27 @@ func TestExampleAPIMResources(t *testing.T) {
 	requireMock(t, "the examples are not giops-* resources the live tests clean up")
 	giops := newAPIMCLI(t)
 
-	giops.mustRun("apim", "apply", "groups", "-f", example(t, "apim/group.yaml"), "--yes")
+	for _, apply := range [][]string{
+		{"groups", "apim/group.yaml"},
+		{"apis", "apim/api.yaml"},
+		{"documentations", "apim/api-documentation.yaml"},
+		{"links", "apim/api-link.yaml"},
+		{"applications", "apim/application.yaml"},
+		{"subscriptions", "apim/subscription.yaml"},
+		{"dictionaries", "apim/dictionary.yaml"},
+		{"shared-policy-groups", "apim/shared-policy-group.yaml"},
+	} {
+		giops.mustRun("apim", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
 
 	group := giops.getJSON("apim", "groups", "example-developers")
 	assert.Equal(t, "Example developers", group["name"])
+	onApi := []string{"--api", "example-api"}
+	assert.Equal(t, "Example API", giops.getJSON("apim", "apis", "example-api")["name"])
+	assert.Equal(t, "Getting started", giops.getJSON("apim", "documentations", "example-api-doc", onApi...)["name"])
+	assert.Equal(t, "Status page", giops.getJSON("apim", "links", "example-api-link", onApi...)["name"])
+	assert.Equal(t, "Example app", giops.getJSON("apim", "applications", "example-app")["name"])
+	assert.Equal(t, "example-plan", giops.getJSON("apim", "subscriptions", "example-subscription", onApi...)["planHrid"])
+	assert.Equal(t, "Example dictionary", giops.getJSON("apim", "dictionaries", "example-dictionary")["name"])
+	assert.Equal(t, "Example headers", giops.getJSON("apim", "shared-policy-groups", "example-spg")["name"])
 }

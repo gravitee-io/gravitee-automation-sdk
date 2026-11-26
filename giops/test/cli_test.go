@@ -74,6 +74,15 @@ var liveResources = map[string][][]string{
 		{"dataplanes", "giops-dataplane"},
 	},
 	"apim": {
+		{"subscriptions", "giops-subscription", "--api", "giops-api"},
+		{"subscriptions", "giops-subscription", "--api", "giops-other-api"},
+		{"documentations", "giops-doc", "--api", "giops-api"},
+		{"links", "giops-link", "--api", "giops-api"},
+		{"apis", "giops-api"},
+		{"apis", "giops-other-api"},
+		{"applications", "giops-app"},
+		{"dictionaries", "giops-dictionary"},
+		{"shared-policy-groups", "giops-spg"},
 		{"groups", "giops-group"},
 	},
 }
@@ -145,10 +154,15 @@ func startAM(t *testing.T, rejectDryRun bool) cli {
 }
 
 func newAPIMCLI(t *testing.T) cli {
+	return newGammaCLI(t, "apim")
+}
+
+// newGammaCLI points a module that uses the APIM client (apim, portal, aim, authz) at the APIM server.
+func newGammaCLI(t *testing.T, module string) cli {
 	if liveConfig != "" {
-		return newLiveCLI(t, "apim")
+		return newLiveCLI(t, module)
 	}
-	return newCLI(t, "apim", apimmock.New(apimmock.NewMockAPIM(false)), apimmock.BasePath, mockAPI())
+	return newCLI(t, module, apimmock.New(apimmock.NewMockAPIM(false)), apimmock.BasePath, mockAPI())
 }
 
 func mockAPI() apicontext.APIContext {

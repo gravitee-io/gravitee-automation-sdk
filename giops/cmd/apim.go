@@ -54,6 +54,120 @@ func registerAPIMResourceConfigs(gammaModule core.Module, main *cobra.Command) {
 		},
 	})
 
+	registry.RegisterResource(resources.Command{
+		Module: gammaModule,
+		Kind:   *resources.NewKind[apimsdk.ApiV4]("apis"),
+		Getter: resources.Getter{
+			Get:     apim.GetApi,
+			Columns: apim.ApiColumns,
+		},
+		Applier: resources.Applier{
+			Put:               apim.PutApi,
+			DryRun:            apim.DryRunApi,
+			AdditionalOptions: resources.NewSpecificOptions(apim.ApiOptions()),
+		},
+		Deleter: resources.Deleter{
+			Delete: apim.DeleteApi,
+		},
+	})
+
+	registry.RegisterResource(resources.Command{
+		Module: gammaModule,
+		Kind:   *resources.NewKind[apim.ApiDocumentation]("documentations").WithParent(apim.ApiDocumentationApi, "api"),
+		Getter: resources.Getter{
+			Get:     apim.GetApiDocumentation,
+			Columns: apim.ApiDocumentationColumns,
+		},
+		Applier: resources.Applier{
+			Put:    apim.PutApiDocumentation,
+			DryRun: apim.DryRunApiDocumentation,
+		},
+		Deleter: resources.Deleter{
+			Delete: apim.DeleteApiDocumentation,
+		},
+	})
+
+	registry.RegisterResource(resources.Command{
+		Module: gammaModule,
+		Kind:   *resources.NewKind[apim.ApiLink]("links").WithParent(apim.ApiLinkApi, "api"),
+		Getter: resources.Getter{
+			Get:     apim.GetApiLink,
+			Columns: apim.ApiLinkColumns,
+		},
+		Applier: resources.Applier{
+			Put:    apim.PutApiLink,
+			DryRun: apim.DryRunApiLink,
+		},
+		Deleter: resources.Deleter{
+			Delete: apim.DeleteApiLink,
+		},
+	})
+
+	registry.RegisterResource(resources.Command{
+		Module: gammaModule,
+		Kind:   *resources.NewKind[apimsdk.Application]("applications"),
+		Getter: resources.Getter{
+			Get:     apim.GetApplication,
+			Columns: apim.ApplicationColumns,
+		},
+		Applier: resources.Applier{
+			Put:               apim.PutApplication,
+			DryRun:            apim.DryRunApplication,
+			AdditionalOptions: resources.NewSpecificOptions(apim.ApplicationOptions()),
+		},
+		Deleter: resources.Deleter{
+			Delete: apim.DeleteApplication,
+		},
+	})
+
+	registry.RegisterResource(resources.Command{
+		Module: gammaModule,
+		Kind:   *resources.NewKind[apim.Subscription]("subscriptions").WithParent(apim.SubscriptionApi, "api"),
+		Getter: resources.Getter{
+			Get:     apim.GetSubscription,
+			Columns: apim.SubscriptionColumns,
+		},
+		Applier: resources.Applier{
+			Put: apim.PutSubscription,
+		},
+		Deleter: resources.Deleter{
+			Delete: apim.DeleteSubscription,
+		},
+	})
+
+	registry.RegisterResource(resources.Command{
+		Module: gammaModule,
+		Kind:   *resources.NewKind[apimsdk.Dictionary]("dictionaries"),
+		Getter: resources.Getter{
+			Get:     apim.GetDictionary,
+			Columns: apim.DictionaryColumns,
+		},
+		Applier: resources.Applier{
+			Put:    apim.PutDictionary,
+			DryRun: apim.DryRunDictionary,
+		},
+		Deleter: resources.Deleter{
+			Delete: apim.DeleteDictionary,
+		},
+	})
+
+	registry.RegisterResource(resources.Command{
+		Module: gammaModule,
+		Kind:   *resources.NewKind[apimsdk.SharedPolicyGroup]("shared-policy-groups"),
+		Getter: resources.Getter{
+			Get:     apim.GetSharedPolicyGroup,
+			Columns: apim.SharedPolicyGroupColumns,
+		},
+		Applier: resources.Applier{
+			Put:    apim.PutSharedPolicyGroup,
+			DryRun: apim.DryRunSharedPolicyGroup,
+		},
+		Deleter: resources.Deleter{
+			Delete:       apim.DeleteSharedPolicyGroup,
+			DryRunDelete: apim.DryRunDeleteSharedPolicyGroup,
+		},
+	})
+
 	// Hook
 	registry.HookCommands(main)
 }

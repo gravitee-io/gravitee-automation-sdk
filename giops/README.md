@@ -125,7 +125,8 @@ than `y` or `yes` applies nothing.
 `giops <module> delete <resource> <id>` deletes the resource.
 
 Like apply, delete asks before deleting; any answer other than `y` or `yes` deletes nothing. When the API
-has a delete dry run for the resource, giops runs it first and prints its result; errors stop there.
+has a delete dry run for the resource, giops runs it first and prints its result; errors stop there. These
+resources have one: APIM `shared-policy-groups`.
 
 | Flag | Meaning |
 |------|---------|
@@ -149,6 +150,13 @@ the APIM Automation API has no list endpoint, so APIM `get` needs an id.
 | `am` | `secrets` | `key` | `application`, `domain` | yes | [examples/am/secret.yaml](examples/am/secret.yaml) |
 | `am` | `dataplanes` | `id` | — | yes | [examples/am/dataplane.yaml](examples/am/dataplane.yaml) |
 | `apim` | `groups` | `hrid` | — | no | [examples/apim/group.yaml](examples/apim/group.yaml) |
+| `apim` | `apis` | `hrid` | — | no | [examples/apim/api.yaml](examples/apim/api.yaml) |
+| `apim` | `documentations` | `hrid` | `api` | no | [examples/apim/api-documentation.yaml](examples/apim/api-documentation.yaml) |
+| `apim` | `links` | `hrid` | `api` | no | [examples/apim/api-link.yaml](examples/apim/api-link.yaml) |
+| `apim` | `applications` | `hrid` | — | no | [examples/apim/application.yaml](examples/apim/application.yaml) |
+| `apim` | `subscriptions` | `hrid` | `api` | no | [examples/apim/subscription.yaml](examples/apim/subscription.yaml) |
+| `apim` | `dictionaries` | `hrid` | — | no | [examples/apim/dictionary.yaml](examples/apim/dictionary.yaml) |
+| `apim` | `shared-policy-groups` | `hrid` | — | no | [examples/apim/shared-policy-group.yaml](examples/apim/shared-policy-group.yaml) |
 
 ```bash
 giops am apply domains -f examples/am/domain.yaml
@@ -162,15 +170,25 @@ giops am delete domains example-domain
 ### Parents
 
 A child resource lives in its parents: an AM identity provider, reporter, certificate or application in a
-security domain; an AM client secret in an application of a domain. Name each parent's id with a field in
-the file (`domain`, `application`), or with the flag of the same name on `get`, `apply` and `delete`. The
-flag wins over the file.
+security domain; an AM client secret in an application of a domain; an APIM API documentation, link or
+subscription in an API. Name each parent's id with a field in the file (`domain`, `application`, `api`), or
+with the flag of the same name on `get`, `apply` and `delete`. The flag wins over the file.
 
 ```bash
 giops am apply identityproviders -f examples/am/identity-provider.yaml
 giops am get identityproviders --domain example-domain
 giops am apply secrets -f examples/am/secret.yaml --application other-app   # into other-app, not the file's
 giops am get secrets example-secret --domain example-domain --application example-app
+giops apim delete subscriptions example-subscription --api example-api
+```
+
+### APIM apis and applications: `--ignore-groups`
+
+`apply apis -g` / `--ignore-groups`, and the same on `applications`, saves the resource without its
+`groups`: the groups already in APIM are left as they are. It applies to the dry run too.
+
+```bash
+giops apim apply apis -f examples/apim/api.yaml --ignore-groups
 ```
 
 ### APIM groups: `--ignore-members`
@@ -182,7 +200,7 @@ are left as they are. It applies to the dry run too.
 giops apim apply groups -f examples/apim/group.yaml --ignore-members
 ```
 
-### AM data planes: no apply dry run
+### APIM subscriptions and AM data planes: no apply dry run
 
 Their API has no dry run. `apply` prints "Dry run is not configured", then asks before applying;
 `--dry-run` stops there and saves nothing, `--yes` applies at once.
