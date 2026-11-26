@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.3.1...apim-mock-server/v0.4.0) (2026-11-26)
+
+
+### Features
+
+* **giops:** CLI for the AM and APIM Automation APIs (proof of concept) ([f79f3e0](https://github.com/gravitee-io/gravitee-automation-sdk/commit/f79f3e0c34a27a237c10084f38c3bb2e18330488))
+
+
+### Reverts
+
+* feat(giops): CLI for the AM and APIM Automation APIs (proof of concept) ([892abdf](https://github.com/gravitee-io/gravitee-automation-sdk/commit/892abdf6df68605dd4d01267f0edcf298aa8a6ac))
+
 ## [0.3.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.3.0...apim-mock-server/v0.3.1) (2026-11-26)
 
 
