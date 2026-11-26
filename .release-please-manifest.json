@@ -1,7 +1,7 @@
 {
   "am-sdk": "2.6.2",
   "apim-sdk": "0.2.2",
-  "common": "1.4.0",
+  "common": "1.4.1",
   "am-mock-server": "1.7.1",
   "apim-mock-server": "0.2.1"
 }
