@@ -37,29 +37,10 @@ func New(mock *MockAPIM) http.Handler {
 }
 
 // NewWithPath mounts the API at basePath. nil Registry leaves the API open. nil mock serves Unimplemented.
-// Like APIM, basePath/open-api.yaml serves the OpenAPI document without auth.
 func NewWithPath(mock *MockAPIM, basePath string, reg *auth.Registry) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
-	r.Get(basePath+"/open-api.yaml", openAPIDocument)
-	r.Group(func(api chi.Router) {
-		mountAPI(api, mock, basePath, reg)
-	})
-	return r
-}
 
-// openAPIDocument writes the embedded spec. It is JSON, which YAML readers accept.
-func openAPIDocument(w http.ResponseWriter, _ *http.Request) {
-	spec, err := rawSpec()
-	if err != nil {
-		auth.WriteError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	w.Header().Set("Content-Type", "application/yaml")
-	_, _ = w.Write(spec)
-}
-
-func mountAPI(r chi.Router, mock *MockAPIM, basePath string, reg *auth.Registry) {
 	// First in the list is innermost: requests are validated after auth and parent checks.
 	middlewares := []MiddlewareFunc{requestValidator(basePath)}
 	if reg != nil {
@@ -76,7 +57,7 @@ func mountAPI(r chi.Router, mock *MockAPIM, basePath string, reg *auth.Registry)
 		si = NewStrictHandler(mock, nil)
 	}
 
-	HandlerWithOptions(si, ChiServerOptions{
+	return HandlerWithOptions(si, ChiServerOptions{
 		BaseURL:     basePath,
 		BaseRouter:  r,
 		Middlewares: middlewares,

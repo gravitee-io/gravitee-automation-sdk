@@ -63,13 +63,6 @@ go test ./am-mock-server/server/... -run TestGetDomain404SDK
 # Run the mock servers
 go run ./am-mock-server --port 8080
 go run ./apim-mock-server --port 8080
-
-# Run the giops CLI (reads ./config.yaml, or the file given with -c; see giops/examples/config/config.yaml)
-go run ./giops am get domains -c config.yaml
-go run ./giops am apply domains -f giops/examples/am/domain.yaml
-
-# Run the giops end-to-end tests against live AM/APIM servers instead of the mocks
-GIOPS_LIVE_CONFIG=/path/to/config.yaml go test ./giops/test/...
 ```
 
 ---
@@ -78,7 +71,7 @@ GIOPS_LIVE_CONFIG=/path/to/config.yaml go test ./giops/test/...
 
 ### What Is This?
 
-Go SDK clients, mock servers and a CLI (`giops`) for the Gravitee Access Management (AM) and API Management (APIM) Automation APIs. The SDK is generated from an OpenAPI spec using `oapi-codegen`, with OpenAPI Overlay files applied to reshape the spec before generation.
+Go SDK clients and mock servers for the Gravitee Access Management (AM) and API Management (APIM) Automation APIs. The SDK is generated from an OpenAPI spec using `oapi-codegen`, with OpenAPI Overlay files applied to reshape the spec before generation.
 
 ### Tech Stack
 
@@ -88,12 +81,12 @@ Go SDK clients, mock servers and a CLI (`giops`) for the Gravitee Access Managem
 | Build | Go workspace (`go.work`) |
 | Code generation | oapi-codegen + OpenAPI Overlay 1.1.0 |
 | HTTP (mock server) | chi v5 |
-| CLI (mock servers, giops) | cobra |
+| CLI (mock server) | cobra |
 | Tests | stdlib `testing` + testify |
 
 ### Modules
 
-A Go workspace with six modules:
+A Go workspace with five modules:
 
 | Module | Role |
 |--------|------|
@@ -102,7 +95,6 @@ A Go workspace with six modules:
 | `am-mock-server` | Standalone mock HTTP server implementing the same OpenAPI spec with strict-server codegen. Used for integration-testing the SDK |
 | `apim-sdk` | Generated SDK client for the APIM Automation API (core APIM + the AIM and AuthZ fragments) in `apim-sdk/pkg/sdk`, with hand-written `oneof.go` (polymorphic types), `identifiable.go` (resource and list item identities), `certificate.go` (client certificate `Expired`/`Scheduled`) and `apicontext.go` (`APIContext` with cloud-token resolution) |
 | `apim-mock-server` | Standalone mock HTTP server for the APIM Automation API (strict-server codegen from the merged APIM spec). Mirrors real APIM where the AM mock differs: 404 on missing hrids, deterministic ids, PUT returns the State, dry run in the handlers, parent and subscription reference checks, cascades |
-| `giops` | CLI over both SDKs (`giops am …`, `giops apim …`): `get`, `apply` and `delete` per resource, and module actions such as `check`. Experimental (proof of concept). Released like the mock servers: release-please tags `giops/vX.Y.Z`, goreleaser attaches the binaries (version set with `-X main.version`) |
 
 ---
 
@@ -138,9 +130,6 @@ In `apim-sdk/pkg/sdk`, `oneof.go` must have one `OneOf<Name>` struct per `x-go-t
 
 - **`store.Identifiable` interface** — Any type stored in `store.Store[T]` must implement `Identity() string`. The mock server's `identifiers.go` wires generated types to this interface.
 - **`response.Payload[T]`** — Generic extractor that pulls `JSON200` from oapi-codegen response structs via reflection. Used in tests and intended for SDK consumers.
-- **giops resources** — Each resource is a `resources.Command` registered in `giops/cmd/cmd.go`: a `Kind` (the type a file decodes into, optionally with a parent such as an identity provider's domain, given in the file or as a flag), and `Get`/`List`, `Put`/`DryRun` and `Delete` functions in `giops/pkg/modules/<module>/`. Flags are `core.Option` values; a resource adds its own apply flags through `AdditionalOptions`, which `Put` and `DryRun` receive.
-- **giops examples** — `giops/examples/config/config.yaml` documents every config key and env var; `giops/examples/am/` and `giops/examples/apim/` hold one complete file per resource. `giops/test/examples_test.go` loads the config and applies every resource example on the mocks: keep them valid.
-- **giops tests** — `giops/test/` runs the CLI in process against the mock servers, through a proxy that records requests. With `GIOPS_LIVE_CONFIG` set, they run against the servers that config names, skip the mock-only tests, and delete the `giops-*` resources they create before and after each test.
 - **Test helpers** — `am-mock-server/server/helpers_test.go` contains reusable assertion functions (`assertSDKOK`, `assertGet404`, etc.) used across all resource test files. Each resource's tests exercise both raw HTTP and SDK client paths.
 
 ---

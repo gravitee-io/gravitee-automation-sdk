@@ -15,9 +15,6 @@
 package sdk
 
 import (
-	"context"
-	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -28,10 +25,8 @@ import (
 // APIMClient is the generated APIM Automation API client, sharing one base URL, org/env, auth, and HTTP client.
 type APIMClient struct {
 	ClientWithResponsesInterface
-	baseURL    string
-	server     string
-	editor     RequestEditorFn
-	httpClient *http.Client
+	server string
+	editor RequestEditorFn
 }
 
 // NewAPIMClient builds an APIMClient from ac, resolved first (see APIContext.Resolve).
@@ -64,7 +59,7 @@ func NewAPIMClient(ac APIContext) (*APIMClient, error) {
 		return nil, err
 	}
 
-	return (&APIMClient{baseURL: baseUrl.String(), server: server, editor: editor}).WithHTTPClient(&http.Client{})
+	return (&APIMClient{server: server, editor: editor}).WithHTTPClient(&http.Client{})
 }
 
 // WithHTTPClient returns a new APIMClient with the same server URL and auth, sending requests through httpClient.
@@ -78,68 +73,5 @@ func (c *APIMClient) WithHTTPClient(httpClient *http.Client) (*APIMClient, error
 	if err != nil {
 		return nil, err
 	}
-	return &APIMClient{
-		ClientWithResponsesInterface: client,
-		baseURL:                      c.baseURL,
-		server:                       c.server,
-		editor:                       c.editor,
-		httpClient:                   httpClient,
-	}, nil
-}
-
-// probeHrid names a Group nobody should create: Probe only needs APIM to look it up.
-var probeHrid = "gravitee-automation-sdk-probe"
-
-// Probe checks that BaseURL serves the APIM Automation API, and that APIM accepts the credentials, org and env.
-// It reads the OpenAPI document (404 means no Automation API at BaseURL), then looks up a Group:
-// found, or "HRID not found", both mean access is granted. Any other answer is returned as an errors.HttpError.
-// Both requests carry the credentials: APIM serves the document without auth, but a gateway in front of it,
-// such as a Gravitee Cloud gate, may not.
-func (c *APIMClient) Probe(ctx context.Context) error {
-	if err := c.probeOpenAPI(ctx); err != nil {
-		return err
-	}
-	resp, err := c.GetGroupWithResponse(ctx, probeHrid, nil)
-	if err != nil {
-		return errors.NewClientError(err)
-	}
-	if resp.StatusCode() == http.StatusOK || isProbeHridNotFound(resp) {
-		return nil
-	}
-	return errors.HttpError{Status: resp.StatusCode(), Body: string(resp.Body)}
-}
-
-func (c *APIMClient) probeOpenAPI(ctx context.Context) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/open-api.yaml", nil)
-	if err != nil {
-		return errors.NewClientError(err)
-	}
-	if err := c.editor(ctx, req); err != nil {
-		return errors.NewClientError(err)
-	}
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return errors.NewClientError(err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	switch resp.StatusCode {
-	case http.StatusOK:
-		return nil
-	case http.StatusNotFound:
-		return errors.HttpError{
-			Status: resp.StatusCode,
-			Body:   fmt.Sprintf("no APIM Automation API at %s: GET open-api.yaml returned 404", c.baseURL),
-		}
-	default:
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxProbeBody))
-		return errors.HttpError{Status: resp.StatusCode, Body: string(body)}
-	}
-}
-
-// maxProbeBody bounds the error body Probe keeps: the OpenAPI document URL may answer with a large page.
-const maxProbeBody = 4096
-
-// isProbeHridNotFound tells a missing probe Group apart from other 404s, such as an unknown environment.
-func isProbeHridNotFound(resp *GetGroupResponse) bool {
-	return resp.JSON404 != nil && resp.JSON404.Message != nil && strings.Contains(*resp.JSON404.Message, probeHrid)
+	return &APIMClient{ClientWithResponsesInterface: client, server: c.server, editor: c.editor}, nil
 }
