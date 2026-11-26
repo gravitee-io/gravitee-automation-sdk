@@ -74,8 +74,8 @@ func TestAPIMGetGroupAsTable(t *testing.T) {
 
 	out := giops.mustRun("apim", "get", "groups", "giops-group")
 
-	assert.Regexp(t, `HRID\s+NAME`, out)
-	assert.Regexp(t, `giops-group\s+Giops group`, out)
+	assert.Regexp(t, `HRID\s+MEMBERCOUNT`, out)
+	assert.Regexp(t, `giops-group`, out)
 }
 
 func TestAPIMGetUnknownGroup(t *testing.T) {

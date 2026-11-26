@@ -88,8 +88,8 @@ func TestAMGetIdentityProviderWithDomainFlag(t *testing.T) {
 
 	out := giops.mustRun("am", "get", "identityproviders", "giops-idp", "--domain", "giops-domain")
 
-	assert.Regexp(t, `KEY\s+NAME\s+TYPE`, out)
-	assert.Regexp(t, `giops-idp\s+Giops users\s+inline-am-idp`, out)
+	assert.Regexp(t, `KEY\s+TYPE`, out)
+	assert.Regexp(t, `giops-idp\s+inline-am-idp`, out)
 }
 
 func TestAMGetUnknownIdentityProvider(t *testing.T) {
@@ -144,9 +144,9 @@ func TestAMListIdentityProvidersOfADomain(t *testing.T) {
 
 	out := giops.mustRun("am", "get", "identityproviders", "--domain", "giops-domain")
 
-	assert.Regexp(t, `KEY\s+NAME\s+TYPE`, out)
-	assert.Regexp(t, `giops-idp\s+Giops users\s+inline-am-idp`, out)
-	assert.Regexp(t, `other-idp\s+Other users\s+inline-am-idp`, out)
+	assert.Regexp(t, `KEY\s+TYPE`, out)
+	assert.Regexp(t, `giops-idp\s+inline-am-idp`, out)
+	assert.Regexp(t, `other-idp\s+inline-am-idp`, out)
 }
 
 func TestAMListIdentityProvidersAsJSON(t *testing.T) {

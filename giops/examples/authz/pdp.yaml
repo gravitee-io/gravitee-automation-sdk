@@ -1,0 +1,27 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# A PDP gateway: the gateway that runs a PDP engine and answers AuthZEN requests.
+#   giops authz apply pdps -f pdp.yaml
+#   giops authz get pdps example-pdp -o yaml
+#   giops authz delete pdps example-pdp   (checks with a dry run: refused while a policy or entity targets only it)
+
+hrid: example-pdp
+name: Orders PDP (EU)
+# The PDP engine it runs, and its sharding tag; together, the routing scope orders@eu. Fixed at creation.
+targetPdpId: orders
+tag: eu
+# The AuthZEN endpoint, on the gateway.
+endpoint:
+  path: /authz/orders-eu

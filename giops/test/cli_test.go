@@ -61,12 +61,48 @@ var liveConfig = os.Getenv("GIOPS_LIVE_CONFIG")
 // deleted before each test, for leftovers of a failed run, and after it.
 var liveResources = map[string][][]string{
 	"am": {
+		{"secrets", "giops-secret", "--domain", "giops-domain", "--application", "giops-app"},
+		{"secrets", "giops-secret", "--domain", "giops-domain", "--application", "giops-other-app"},
+		{"applications", "giops-app", "--domain", "giops-domain"},
+		{"applications", "giops-other-app", "--domain", "giops-domain"},
+		{"reporters", "giops-reporter", "--domain", "giops-domain"},
+		{"certificates", "giops-certificate", "--domain", "giops-domain"},
+		{"identityproviders", "giops-idp", "--domain", "giops-domain"},
 		{"domains", "giops-domain"},
 		{"domains", "giops-other-domain"},
 		{"domains", "giops-json-domain"},
+		{"dataplanes", "giops-dataplane"},
 	},
 	"apim": {
+		{"subscriptions", "giops-subscription", "--api", "giops-api"},
+		{"subscriptions", "giops-subscription", "--api", "giops-other-api"},
+		{"documentations", "giops-doc", "--api", "giops-api"},
+		{"links", "giops-link", "--api", "giops-api"},
+		{"apis", "giops-api"},
+		{"apis", "giops-other-api"},
+		{"applications", "giops-app"},
+		{"dictionaries", "giops-dictionary"},
+		{"shared-policy-groups", "giops-spg"},
 		{"groups", "giops-group"},
+	},
+	"portal": {
+		{"listings", "giops-listing", "--portal", "giops-portal"},
+		{"documentations", "giops-guide", "--portal", "giops-portal"},
+		{"documentations", "giops-guide", "--portal", "giops-other-portal"},
+		{"links", "giops-link", "--portal", "giops-portal"},
+		{"portals", "giops-portal"},
+		{"portals", "giops-other-portal"},
+		{"themes", "giops-theme"},
+	},
+	"aim": {
+		{"mcp-proxies", "giops-mcp-proxy"},
+		{"mcp-servers", "giops-mcp-server"},
+	},
+	"authz": {
+		{"policies", "giops-policy"},
+		{"entities", "giops-entity"},
+		{"schemas", "giops-schema"},
+		{"pdps", "giops-pdp"},
 	},
 }
 
@@ -137,10 +173,15 @@ func startAM(t *testing.T, rejectDryRun bool) cli {
 }
 
 func newAPIMCLI(t *testing.T) cli {
+	return newGammaCLI(t, "apim")
+}
+
+// newGammaCLI points a module that uses the APIM client (apim, portal, aim, authz) at the APIM server.
+func newGammaCLI(t *testing.T, module string) cli {
 	if liveConfig != "" {
-		return newLiveCLI(t, "apim")
+		return newLiveCLI(t, module)
 	}
-	return newCLI(t, "apim", apimmock.New(apimmock.NewMockAPIM(false)), apimmock.BasePath, mockAPI())
+	return newCLI(t, module, apimmock.New(apimmock.NewMockAPIM(false)), apimmock.BasePath, mockAPI())
 }
 
 func mockAPI() apicontext.APIContext {
@@ -235,19 +276,19 @@ func (c cli) mustRun(args ...string) string {
 	return r.out
 }
 
-// getJSON reads one resource with `get -o json` and decodes it.
-func (c cli) getJSON(module, subject, id string) map[string]any {
+// getJSON reads one resource with `get -o json` and decodes it. flags are added to the command, such as parents.
+func (c cli) getJSON(module, subject, id string, flags ...string) map[string]any {
 	c.t.Helper()
-	out := c.mustRun(module, "get", subject, id, "-o", "json")
+	out := c.mustRun(append([]string{module, "get", subject, id, "-o", "json"}, flags...)...)
 	var resource map[string]any
 	require.NoErrorf(c.t, json.Unmarshal([]byte(out), &resource), "not JSON:\n%s", out)
 	return resource
 }
 
-// requireAbsent fails the test if the resource can be read.
-func (c cli) requireAbsent(module, subject, id string) {
+// requireAbsent fails the test if the resource can be read. flags are added to the command, such as parents.
+func (c cli) requireAbsent(module, subject, id string, flags ...string) {
 	c.t.Helper()
-	r := c.run(module, "get", subject, id, "-o", "json")
+	r := c.run(append([]string{module, "get", subject, id, "-o", "json"}, flags...)...)
 	require.Errorf(c.t, r.err, "%s %s should not exist, got:\n%s", subject, id, r.out)
 }
 

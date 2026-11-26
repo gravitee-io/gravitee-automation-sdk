@@ -39,3 +39,19 @@ func ToErrorList(errors *sdk.Errors) error {
 
 	return err
 }
+
+// ToAimErrorList does what ToErrorList does for the findings of an AIM dry run.
+func ToAimErrorList(errors *sdk.AimErrors) error {
+	if errors == nil {
+		return nil
+	}
+	return ToErrorList(&sdk.Errors{Severe: errors.Severe, Warning: errors.Warning})
+}
+
+// ToAuthzErrorList does what ToErrorList does for the findings of an AuthZ dry run.
+func ToAuthzErrorList(errors *sdk.AuthzErrors) error {
+	if errors == nil {
+		return nil
+	}
+	return ToErrorList(&sdk.Errors{Severe: errors.Severe, Warning: errors.Warning})
+}

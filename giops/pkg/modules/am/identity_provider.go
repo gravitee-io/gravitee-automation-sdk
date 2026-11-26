@@ -38,7 +38,6 @@ func IdentityProviderDomain(object store.Identifiable) string {
 func IdentityProviderColumns() []*res.Column {
 	return []*res.Column{
 		res.NewColumnFromField("Key"),
-		res.NewColumnFromField("Name"),
 		res.NewColumnFromField("Type"),
 	}
 }

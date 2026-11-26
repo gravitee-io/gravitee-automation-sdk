@@ -1,0 +1,36 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# An MCP proxy on the gateway, in front of an upstream MCP server, behind an API key plan.
+#   giops aim apply mcp-proxies -f mcp-proxy.yaml
+#   giops aim get mcp-proxies example-mcp-proxy -o yaml
+#   giops aim delete mcp-proxies example-mcp-proxy
+
+hrid: example-mcp-proxy
+# Catalog identity, immutable: lowercase dot-separated segments, the first one mcp-proxy.
+entityId: mcp-proxy.example
+name: Example MCP proxy
+# Gateway path agents call.
+contextPath: /mcp/example
+mode: PROXY
+proxy:
+  serverUrl: https://api.githubcopilot.com/mcp/
+  upstreamAuth:
+    type: BEARER
+    token: secret://kubernetes/example-mcp:token
+plans:
+  - name: gold
+    security:
+      type: API_KEY
+      source: HEADER

@@ -37,7 +37,7 @@ func GetGroup(ctx context.Context, _ core.Module, _ res.Kind, id string) (any, e
 func GroupColumns() []*res.Column {
 	return []*res.Column{
 		res.NewColumnFromField("Hrid"),
-		res.NewColumnFromField("Name"),
+		res.NewColumnFromField("MemberCount"),
 	}
 }
 
@@ -55,12 +55,12 @@ func GroupOptions() []core.Option {
 }
 
 func PutGroup(ctx context.Context, _ core.Module, kind res.Kind, options *res.AdditionalOptions) error {
-	_, err := put(ctx, false, kind, options)
+	_, err := putGroup(ctx, false, kind, options)
 	return err
 }
 
 func DryRunGroup(ctx context.Context, _ core.Module, kind res.Kind, options *res.AdditionalOptions) error {
-	resp, err := put(ctx, true, kind, options)
+	resp, err := putGroup(ctx, true, kind, options)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func DeleteGroup(ctx context.Context, _ core.Module, _ res.Kind, id string) erro
 	return core.ExpectSuccess(response.StatusCode(), response.Body)
 }
 
-func put(ctx context.Context, dryRun bool, kind res.Kind, options *res.AdditionalOptions) (*apimsdk.UpsertGroupResponse, error) {
+func putGroup(ctx context.Context, dryRun bool, kind res.Kind, options *res.AdditionalOptions) (*apimsdk.UpsertGroupResponse, error) {
 	body := *kind.GetObject().(*apimsdk.Group)
 	params := &apimsdk.UpsertGroupParams{
 		DryRun:        &dryRun,

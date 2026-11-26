@@ -50,19 +50,106 @@ func TestExampleAMResources(t *testing.T) {
 
 	giops.mustRun("am", "apply", "domains", "-f", example(t, "am/domain.yaml"), "--yes")
 	giops.mustRun("am", "apply", "identityproviders", "-f", example(t, "am/identity-provider.yaml"), "--yes")
+	for _, apply := range [][]string{
+		{"reporters", "am/reporter.yaml"},
+		{"certificates", "am/certificate.yaml"},
+		{"applications", "am/application.yaml"},
+		{"secrets", "am/secret.yaml"},
+		{"dataplanes", "am/dataplane.yaml"},
+	} {
+		giops.mustRun("am", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
 
 	domain := giops.getJSON("am", "domains", "example-domain")
 	assert.Equal(t, "Example domain", domain["name"])
 	out := giops.mustRun("am", "get", "identityproviders", "--domain", "example-domain")
-	assert.Regexp(t, `example-users\s+Example users\s+inline-am-idp`, out)
+	assert.Regexp(t, `example-users\s+inline-am-idp`, out)
+	inDomain := []string{"--domain", "example-domain"}
+	assert.Equal(t, "Example audit file", giops.getJSON("am", "reporters", "example-reporter", inDomain...)["name"])
+	assert.Equal(t, "Example signing certificate", giops.getJSON("am", "certificates", "example-certificate", inDomain...)["name"])
+	assert.Equal(t, "Example service", giops.getJSON("am", "applications", "example-app", inDomain...)["name"])
+	assert.Equal(t, "example-secret", giops.getJSON("am", "secrets", "example-secret", "--domain", "example-domain", "--application", "example-app")["key"])
+	assert.Equal(t, "Example data plane", giops.getJSON("am", "dataplanes", "example-dataplane")["name"])
 }
 
 func TestExampleAPIMResources(t *testing.T) {
 	requireMock(t, "the examples are not giops-* resources the live tests clean up")
 	giops := newAPIMCLI(t)
 
-	giops.mustRun("apim", "apply", "groups", "-f", example(t, "apim/group.yaml"), "--yes")
+	for _, apply := range [][]string{
+		{"groups", "apim/group.yaml"},
+		{"apis", "apim/api.yaml"},
+		{"documentations", "apim/api-documentation.yaml"},
+		{"links", "apim/api-link.yaml"},
+		{"applications", "apim/application.yaml"},
+		{"subscriptions", "apim/subscription.yaml"},
+		{"dictionaries", "apim/dictionary.yaml"},
+		{"shared-policy-groups", "apim/shared-policy-group.yaml"},
+	} {
+		giops.mustRun("apim", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
 
 	group := giops.getJSON("apim", "groups", "example-developers")
 	assert.Equal(t, "Example developers", group["name"])
+	onApi := []string{"--api", "example-api"}
+	assert.Equal(t, "Example API", giops.getJSON("apim", "apis", "example-api")["name"])
+	assert.Equal(t, "Getting started", giops.getJSON("apim", "documentations", "example-api-doc", onApi...)["name"])
+	assert.Equal(t, "Status page", giops.getJSON("apim", "links", "example-api-link", onApi...)["name"])
+	assert.Equal(t, "Example app", giops.getJSON("apim", "applications", "example-app")["name"])
+	assert.Equal(t, "example-plan", giops.getJSON("apim", "subscriptions", "example-subscription", onApi...)["planHrid"])
+	assert.Equal(t, "Example dictionary", giops.getJSON("apim", "dictionaries", "example-dictionary")["name"])
+	assert.Equal(t, "Example headers", giops.getJSON("apim", "shared-policy-groups", "example-spg")["name"])
+}
+
+func TestExamplePortalResources(t *testing.T) {
+	requireMock(t, "the examples are not giops-* resources the live tests clean up")
+	giops := newGammaCLI(t, "portal")
+	giops.mustRun("apim", "apply", "apis", "-f", example(t, "apim/api.yaml"), "--yes")
+
+	for _, apply := range [][]string{
+		{"themes", "portal/theme.yaml"},
+		{"portals", "portal/portal.yaml"},
+		{"documentations", "portal/documentation.yaml"},
+		{"links", "portal/link.yaml"},
+		{"listings", "portal/listing.yaml"},
+	} {
+		giops.mustRun("portal", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
+
+	inPortal := []string{"--portal", "example-portal"}
+	assert.Equal(t, "Example theme", giops.getJSON("portal", "themes", "example-theme")["name"])
+	assert.Equal(t, "Example portal", giops.getJSON("portal", "portals", "example-portal")["name"])
+	assert.Equal(t, "Getting started", giops.getJSON("portal", "documentations", "example-guide", inPortal...)["name"])
+	assert.Equal(t, "Status page", giops.getJSON("portal", "links", "example-status", inPortal...)["name"])
+	assert.Equal(t, "example-listing", giops.getJSON("portal", "listings", "example-listing", inPortal...)["hrid"])
+}
+
+func TestExampleAIMResources(t *testing.T) {
+	requireMock(t, "the examples are not giops-* resources the live tests clean up")
+	giops := newGammaCLI(t, "aim")
+
+	giops.mustRun("aim", "apply", "mcp-servers", "-f", example(t, "aim/mcp-server.yaml"), "--yes")
+	giops.mustRun("aim", "apply", "mcp-proxies", "-f", example(t, "aim/mcp-proxy.yaml"), "--yes")
+
+	assert.Equal(t, "mcp-server.example", giops.getJSON("aim", "mcp-servers", "example-mcp-server")["entityId"])
+	assert.Equal(t, "Example MCP proxy", giops.getJSON("aim", "mcp-proxies", "example-mcp-proxy")["name"])
+}
+
+func TestExampleAuthzResources(t *testing.T) {
+	requireMock(t, "the examples are not giops-* resources the live tests clean up")
+	giops := newGammaCLI(t, "authz")
+
+	for _, apply := range [][]string{
+		{"pdps", "authz/pdp.yaml"},
+		{"schemas", "authz/schema.yaml"},
+		{"entities", "authz/entity.yaml"},
+		{"policies", "authz/policy.yaml"},
+	} {
+		giops.mustRun("authz", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
+
+	assert.Equal(t, "Orders PDP (EU)", giops.getJSON("authz", "pdps", "example-pdp")["name"])
+	assert.Equal(t, "Hotel schema", giops.getJSON("authz", "schemas", "example-schema")["name"])
+	assert.Equal(t, "agents", giops.getJSON("authz", "entities", "example-agents")["entityId"])
+	assert.Equal(t, "Hotel booking — read access", giops.getJSON("authz", "policies", "example-policy")["name"])
 }

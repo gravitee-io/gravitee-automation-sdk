@@ -18,8 +18,10 @@ go build -o giops ./giops
 
 ## Configuration
 
-giops connects to one or both products, called modules: `am` and `apim`. Each module has its own section
-in the configuration, `am` for AM and `gamma` for APIM. Declare at least one.
+giops connects to one or both products through five modules: `am` for AM, and `apim`, `portal`, `aim` and
+`authz` for APIM (its core, its developer portal, its AI Management and its authorization resources). The
+`am` module reads the `am` section of the configuration; the four APIM modules share the `gamma` section.
+Declare at least one section.
 
 ### File
 
@@ -98,7 +100,8 @@ reachable and accepts the credentials, organization and environment.
 
 ### get
 
-`giops <module> get <resource>` lists the resources; `giops <module> get <resource> <id>` reads one.
+`giops <module> get <resource>` lists the resources, where the API can list them (AM only);
+`giops <module> get <resource> <id>` reads one.
 
 | Flag | Meaning |
 |------|---------|
@@ -124,7 +127,9 @@ than `y` or `yes` applies nothing.
 `giops <module> delete <resource> <id>` deletes the resource.
 
 Like apply, delete asks before deleting; any answer other than `y` or `yes` deletes nothing. When the API
-has a delete dry run for the resource, giops runs it first and prints its result; errors stop there.
+has a delete dry run for the resource, giops runs it first and prints its result; errors stop there. These
+resources have one: APIM `shared-policy-groups`, and AuthZ `pdps`, `entities` and `policies` (a PDP gateway
+delete is refused while a policy or an entity targets only that gateway).
 
 | Flag | Meaning |
 |------|---------|
@@ -135,11 +140,37 @@ has a delete dry run for the resource, giops runs it first and prints its result
 
 ## Resources
 
-| Module | Resource | Id | Example |
-|--------|----------|----|---------|
-| `am` | `domains` | `key` | [examples/am/domain.yaml](examples/am/domain.yaml) |
-| `am` | `identityproviders` | `key` | [examples/am/identity-provider.yaml](examples/am/identity-provider.yaml) |
-| `apim` | `groups` | `hrid` | [examples/apim/group.yaml](examples/apim/group.yaml) |
+Parents are the resources a resource lives in; see [Parents](#parents). Only AM resources can be listed:
+the APIM Automation API has no list endpoint, so APIM `get` needs an id.
+
+| Module | Resource | Id | Parents | List | Example |
+|--------|----------|----|---------|------|---------|
+| `am` | `domains` | `key` | — | yes | [examples/am/domain.yaml](examples/am/domain.yaml) |
+| `am` | `identityproviders` | `key` | `domain` | yes | [examples/am/identity-provider.yaml](examples/am/identity-provider.yaml) |
+| `am` | `reporters` | `key` | `domain` | yes | [examples/am/reporter.yaml](examples/am/reporter.yaml) |
+| `am` | `certificates` | `key` | `domain` | yes | [examples/am/certificate.yaml](examples/am/certificate.yaml) |
+| `am` | `applications` | `key` | `domain` | yes | [examples/am/application.yaml](examples/am/application.yaml) |
+| `am` | `secrets` | `key` | `application`, `domain` | yes | [examples/am/secret.yaml](examples/am/secret.yaml) |
+| `am` | `dataplanes` | `id` | — | yes | [examples/am/dataplane.yaml](examples/am/dataplane.yaml) |
+| `apim` | `groups` | `hrid` | — | no | [examples/apim/group.yaml](examples/apim/group.yaml) |
+| `apim` | `apis` | `hrid` | — | no | [examples/apim/api.yaml](examples/apim/api.yaml) |
+| `apim` | `documentations` | `hrid` | `api` | no | [examples/apim/api-documentation.yaml](examples/apim/api-documentation.yaml) |
+| `apim` | `links` | `hrid` | `api` | no | [examples/apim/api-link.yaml](examples/apim/api-link.yaml) |
+| `apim` | `applications` | `hrid` | — | no | [examples/apim/application.yaml](examples/apim/application.yaml) |
+| `apim` | `subscriptions` | `hrid` | `api` | no | [examples/apim/subscription.yaml](examples/apim/subscription.yaml) |
+| `apim` | `dictionaries` | `hrid` | — | no | [examples/apim/dictionary.yaml](examples/apim/dictionary.yaml) |
+| `apim` | `shared-policy-groups` | `hrid` | — | no | [examples/apim/shared-policy-group.yaml](examples/apim/shared-policy-group.yaml) |
+| `portal` | `portals` | `hrid` | — | no | [examples/portal/portal.yaml](examples/portal/portal.yaml) |
+| `portal` | `themes` | `hrid` | — | no | [examples/portal/theme.yaml](examples/portal/theme.yaml) |
+| `portal` | `documentations` | `hrid` | `portal` | no | [examples/portal/documentation.yaml](examples/portal/documentation.yaml) |
+| `portal` | `links` | `hrid` | `portal` | no | [examples/portal/link.yaml](examples/portal/link.yaml) |
+| `portal` | `listings` | `hrid` | `portal` | no | [examples/portal/listing.yaml](examples/portal/listing.yaml) |
+| `aim` | `mcp-proxies` | `hrid` | — | no | [examples/aim/mcp-proxy.yaml](examples/aim/mcp-proxy.yaml) |
+| `aim` | `mcp-servers` | `hrid` | — | no | [examples/aim/mcp-server.yaml](examples/aim/mcp-server.yaml) |
+| `authz` | `pdps` | `hrid` | — | no | [examples/authz/pdp.yaml](examples/authz/pdp.yaml) |
+| `authz` | `schemas` | `hrid` | — | no | [examples/authz/schema.yaml](examples/authz/schema.yaml) |
+| `authz` | `entities` | `hrid` | — | no | [examples/authz/entity.yaml](examples/authz/entity.yaml) |
+| `authz` | `policies` | `hrid` | — | no | [examples/authz/policy.yaml](examples/authz/policy.yaml) |
 
 ```bash
 giops am apply domains -f examples/am/domain.yaml
@@ -150,15 +181,32 @@ giops am delete domains example-domain
 
 ## Resources with additional options
 
-### AM identity providers: `--domain`
+### Parents
 
-An identity provider belongs to a security domain. Name the domain's key with a `domain` field in the
-file, or with `--domain` on `get`, `apply` and `delete`. The flag wins over the file.
+A child resource lives in its parents: an AM identity provider, reporter, certificate or application in a
+security domain; an AM client secret in an application of a domain; an APIM API documentation, link or
+subscription in an API; a portal documentation, link or listing in a portal. Name each parent's id with a
+field in the file (`domain`, `application`, `api`, `portal`), or with the flag of the same name on `get`,
+`apply` and `delete`. The flag wins over the file.
 
 ```bash
 giops am apply identityproviders -f examples/am/identity-provider.yaml
 giops am get identityproviders --domain example-domain
-giops am delete identityproviders example-users --domain example-domain
+giops am apply secrets -f examples/am/secret.yaml --application other-app   # into other-app, not the file's
+giops am get secrets example-secret --domain example-domain --application example-app
+giops apim delete subscriptions example-subscription --api example-api
+```
+
+AuthZ entities also have `parents`, but those are links between entities in the authorization graph, sent
+in the body: entities are not giops children.
+
+### APIM apis and applications: `--ignore-groups`
+
+`apply apis -g` / `--ignore-groups`, and the same on `applications`, saves the resource without its
+`groups`: the groups already in APIM are left as they are. It applies to the dry run too.
+
+```bash
+giops apim apply apis -f examples/apim/api.yaml --ignore-groups
 ```
 
 ### APIM groups: `--ignore-members`
@@ -169,6 +217,17 @@ are left as they are. It applies to the dry run too.
 ```bash
 giops apim apply groups -f examples/apim/group.yaml --ignore-members
 ```
+
+### APIM subscriptions and AM data planes: no apply dry run
+
+Their API has no dry run. `apply` prints "Dry run is not configured", then asks before applying;
+`--dry-run` stops there and saves nothing, `--yes` applies at once.
+
+### AM client secrets: write-only value
+
+The API never returns a secret's `value`, and needs it on every apply: re-applying the stored value does
+nothing, another value is refused. So `get secrets -o yaml` cannot be applied back. A secret is immutable:
+to rotate it, apply a secret with a new key, then delete the old one.
 
 ### AM check: `--print-result`
 

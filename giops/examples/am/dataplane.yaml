@@ -1,0 +1,32 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# An AM data plane: the database that holds the runtime data of the domains bound to it.
+#   giops am apply dataplanes -f dataplane.yaml --yes   (data planes have no dry run)
+#   giops am get dataplanes
+#   giops am delete dataplanes example-dataplane
+
+# Identifies the data plane in its environment: a domain's dataPlaneId refers to it.
+id: example-dataplane
+name: Example data plane
+# Plugin type, immutable.
+type: mongodb
+# Gateway URL of the domains on this data plane.
+gatewayUrl: https://gateway.example.com
+# Connection settings, write-only: the API never returns them.
+configuration:
+  mongodb:
+    dbname: gravitee-am-example
+    host: mongo
+    port: 27017

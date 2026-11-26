@@ -135,8 +135,8 @@ func TestAMGetDomainAsTable(t *testing.T) {
 
 	out := giops.mustRun("am", "get", "domains", "giops-domain")
 
-	assert.Regexp(t, `KEY\s+NAME\s+PATH\s+ENABLED`, out)
-	assert.Regexp(t, `giops-domain\s+Giops domain\s+/giops\s+true`, out)
+	assert.Regexp(t, `KEY\s+PATH\s+ENABLED`, out)
+	assert.Regexp(t, `giops-domain\s+/giops\s+true`, out)
 }
 
 func TestAMGetDomainAsYAMLCanBeAppliedBack(t *testing.T) {
@@ -160,9 +160,9 @@ func TestAMListDomains(t *testing.T) {
 
 	out := giops.mustRun("am", "get", "domains")
 
-	assert.Regexp(t, `KEY\s+NAME`, out)
-	assert.Regexp(t, `giops-domain\s+Giops domain\s+/giops\s+true`, out)
-	assert.Regexp(t, `giops-other-domain\s+Other domain\s+/giops-other\s+false`, out)
+	assert.Regexp(t, `KEY\s+PATH\s+ENABLED`, out)
+	assert.Regexp(t, `giops-domain\s+/giops\s+true`, out)
+	assert.Regexp(t, `giops-other-domain\s+/giops-other\s+false`, out)
 }
 
 func TestAMListNoDomain(t *testing.T) {
