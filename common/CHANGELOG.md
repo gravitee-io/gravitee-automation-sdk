@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/common/v1.4.0...common/v1.4.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **apim-sdk:** drop studio tool entityIds from AimMcpProxyState.Spec() ([0cca0ed](https://github.com/gravitee-io/gravitee-automation-sdk/commit/0cca0ed2186187146485624cd834909775831bc2))
+
 ## [1.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/common/v1.3.0...common/v1.4.0) (2026-11-13)
 
 
