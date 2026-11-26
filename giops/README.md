@@ -18,9 +18,10 @@ go build -o giops ./giops
 
 ## Configuration
 
-giops connects to one or both products through four modules: `am` for AM, and `apim`, `portal` and `aim`
-for APIM (its core, its developer portal and its AI Management). The `am` module reads the `am` section of
-the configuration; the three APIM modules share the `gamma` section. Declare at least one section.
+giops connects to one or both products through five modules: `am` for AM, and `apim`, `portal`, `aim` and
+`authz` for APIM (its core, its developer portal, its AI Management and its authorization resources). The
+`am` module reads the `am` section of the configuration; the four APIM modules share the `gamma` section.
+Declare at least one section.
 
 ### File
 
@@ -127,7 +128,8 @@ than `y` or `yes` applies nothing.
 
 Like apply, delete asks before deleting; any answer other than `y` or `yes` deletes nothing. When the API
 has a delete dry run for the resource, giops runs it first and prints its result; errors stop there. These
-resources have one: APIM `shared-policy-groups`.
+resources have one: APIM `shared-policy-groups`, and AuthZ `pdps`, `entities` and `policies` (a PDP gateway
+delete is refused while a policy or an entity targets only that gateway).
 
 | Flag | Meaning |
 |------|---------|
@@ -165,6 +167,10 @@ the APIM Automation API has no list endpoint, so APIM `get` needs an id.
 | `portal` | `listings` | `hrid` | `portal` | no | [examples/portal/listing.yaml](examples/portal/listing.yaml) |
 | `aim` | `mcp-proxies` | `hrid` | — | no | [examples/aim/mcp-proxy.yaml](examples/aim/mcp-proxy.yaml) |
 | `aim` | `mcp-servers` | `hrid` | — | no | [examples/aim/mcp-server.yaml](examples/aim/mcp-server.yaml) |
+| `authz` | `pdps` | `hrid` | — | no | [examples/authz/pdp.yaml](examples/authz/pdp.yaml) |
+| `authz` | `schemas` | `hrid` | — | no | [examples/authz/schema.yaml](examples/authz/schema.yaml) |
+| `authz` | `entities` | `hrid` | — | no | [examples/authz/entity.yaml](examples/authz/entity.yaml) |
+| `authz` | `policies` | `hrid` | — | no | [examples/authz/policy.yaml](examples/authz/policy.yaml) |
 
 ```bash
 giops am apply domains -f examples/am/domain.yaml
@@ -190,6 +196,9 @@ giops am apply secrets -f examples/am/secret.yaml --application other-app   # in
 giops am get secrets example-secret --domain example-domain --application example-app
 giops apim delete subscriptions example-subscription --api example-api
 ```
+
+AuthZ entities also have `parents`, but those are links between entities in the authorization graph, sent
+in the body: entities are not giops children.
 
 ### APIM apis and applications: `--ignore-groups`
 

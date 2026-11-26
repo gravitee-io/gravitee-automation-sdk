@@ -98,6 +98,12 @@ var liveResources = map[string][][]string{
 		{"mcp-proxies", "giops-mcp-proxy"},
 		{"mcp-servers", "giops-mcp-server"},
 	},
+	"authz": {
+		{"policies", "giops-policy"},
+		{"entities", "giops-entity"},
+		{"schemas", "giops-schema"},
+		{"pdps", "giops-pdp"},
+	},
 }
 
 // requireMock skips the test on live servers.

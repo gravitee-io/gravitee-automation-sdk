@@ -134,3 +134,22 @@ func TestExampleAIMResources(t *testing.T) {
 	assert.Equal(t, "mcp-server.example", giops.getJSON("aim", "mcp-servers", "example-mcp-server")["entityId"])
 	assert.Equal(t, "Example MCP proxy", giops.getJSON("aim", "mcp-proxies", "example-mcp-proxy")["name"])
 }
+
+func TestExampleAuthzResources(t *testing.T) {
+	requireMock(t, "the examples are not giops-* resources the live tests clean up")
+	giops := newGammaCLI(t, "authz")
+
+	for _, apply := range [][]string{
+		{"pdps", "authz/pdp.yaml"},
+		{"schemas", "authz/schema.yaml"},
+		{"entities", "authz/entity.yaml"},
+		{"policies", "authz/policy.yaml"},
+	} {
+		giops.mustRun("authz", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
+
+	assert.Equal(t, "Orders PDP (EU)", giops.getJSON("authz", "pdps", "example-pdp")["name"])
+	assert.Equal(t, "Hotel schema", giops.getJSON("authz", "schemas", "example-schema")["name"])
+	assert.Equal(t, "agents", giops.getJSON("authz", "entities", "example-agents")["entityId"])
+	assert.Equal(t, "Hotel booking — read access", giops.getJSON("authz", "policies", "example-policy")["name"])
+}

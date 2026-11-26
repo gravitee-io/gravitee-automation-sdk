@@ -51,5 +51,9 @@ func MainCommand() *cobra.Command {
 	registerAIMResourceConfigs(aimModule, main)
 	registerAPIMActionConfigs(aimModule, main)
 
+	authzModule := core.Module{Name: "authz", ClientFactory: Gamma}
+	registerAuthzResourceConfigs(authzModule, main)
+	registerAPIMActionConfigs(authzModule, main)
+
 	return main
 }
