@@ -100,3 +100,26 @@ func TestExampleAPIMResources(t *testing.T) {
 	assert.Equal(t, "Example dictionary", giops.getJSON("apim", "dictionaries", "example-dictionary")["name"])
 	assert.Equal(t, "Example headers", giops.getJSON("apim", "shared-policy-groups", "example-spg")["name"])
 }
+
+func TestExamplePortalResources(t *testing.T) {
+	requireMock(t, "the examples are not giops-* resources the live tests clean up")
+	giops := newGammaCLI(t, "portal")
+	giops.mustRun("apim", "apply", "apis", "-f", example(t, "apim/api.yaml"), "--yes")
+
+	for _, apply := range [][]string{
+		{"themes", "portal/theme.yaml"},
+		{"portals", "portal/portal.yaml"},
+		{"documentations", "portal/documentation.yaml"},
+		{"links", "portal/link.yaml"},
+		{"listings", "portal/listing.yaml"},
+	} {
+		giops.mustRun("portal", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
+
+	inPortal := []string{"--portal", "example-portal"}
+	assert.Equal(t, "Example theme", giops.getJSON("portal", "themes", "example-theme")["name"])
+	assert.Equal(t, "Example portal", giops.getJSON("portal", "portals", "example-portal")["name"])
+	assert.Equal(t, "Getting started", giops.getJSON("portal", "documentations", "example-guide", inPortal...)["name"])
+	assert.Equal(t, "Status page", giops.getJSON("portal", "links", "example-status", inPortal...)["name"])
+	assert.Equal(t, "example-listing", giops.getJSON("portal", "listings", "example-listing", inPortal...)["hrid"])
+}

@@ -18,8 +18,9 @@ go build -o giops ./giops
 
 ## Configuration
 
-giops connects to one or both products, called modules: `am` and `apim`. Each module has its own section
-in the configuration, `am` for AM and `gamma` for APIM. Declare at least one.
+giops connects to one or both products through three modules: `am` for AM, and `apim` and `portal`
+for APIM (its core and its developer portal). The `am` module reads the `am` section of the configuration;
+the two APIM modules share the `gamma` section. Declare at least one section.
 
 ### File
 
@@ -157,6 +158,11 @@ the APIM Automation API has no list endpoint, so APIM `get` needs an id.
 | `apim` | `subscriptions` | `hrid` | `api` | no | [examples/apim/subscription.yaml](examples/apim/subscription.yaml) |
 | `apim` | `dictionaries` | `hrid` | — | no | [examples/apim/dictionary.yaml](examples/apim/dictionary.yaml) |
 | `apim` | `shared-policy-groups` | `hrid` | — | no | [examples/apim/shared-policy-group.yaml](examples/apim/shared-policy-group.yaml) |
+| `portal` | `portals` | `hrid` | — | no | [examples/portal/portal.yaml](examples/portal/portal.yaml) |
+| `portal` | `themes` | `hrid` | — | no | [examples/portal/theme.yaml](examples/portal/theme.yaml) |
+| `portal` | `documentations` | `hrid` | `portal` | no | [examples/portal/documentation.yaml](examples/portal/documentation.yaml) |
+| `portal` | `links` | `hrid` | `portal` | no | [examples/portal/link.yaml](examples/portal/link.yaml) |
+| `portal` | `listings` | `hrid` | `portal` | no | [examples/portal/listing.yaml](examples/portal/listing.yaml) |
 
 ```bash
 giops am apply domains -f examples/am/domain.yaml
@@ -171,8 +177,9 @@ giops am delete domains example-domain
 
 A child resource lives in its parents: an AM identity provider, reporter, certificate or application in a
 security domain; an AM client secret in an application of a domain; an APIM API documentation, link or
-subscription in an API. Name each parent's id with a field in the file (`domain`, `application`, `api`), or
-with the flag of the same name on `get`, `apply` and `delete`. The flag wins over the file.
+subscription in an API; a portal documentation, link or listing in a portal. Name each parent's id with a
+field in the file (`domain`, `application`, `api`, `portal`), or with the flag of the same name on `get`,
+`apply` and `delete`. The flag wins over the file.
 
 ```bash
 giops am apply identityproviders -f examples/am/identity-provider.yaml

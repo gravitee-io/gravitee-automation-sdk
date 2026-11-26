@@ -85,6 +85,15 @@ var liveResources = map[string][][]string{
 		{"shared-policy-groups", "giops-spg"},
 		{"groups", "giops-group"},
 	},
+	"portal": {
+		{"listings", "giops-listing", "--portal", "giops-portal"},
+		{"documentations", "giops-guide", "--portal", "giops-portal"},
+		{"documentations", "giops-guide", "--portal", "giops-other-portal"},
+		{"links", "giops-link", "--portal", "giops-portal"},
+		{"portals", "giops-portal"},
+		{"portals", "giops-other-portal"},
+		{"themes", "giops-theme"},
+	},
 }
 
 // requireMock skips the test on live servers.
