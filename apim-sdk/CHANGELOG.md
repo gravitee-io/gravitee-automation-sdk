@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.3.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.2.2...apim-sdk/v0.3.0) (2026-11-26)
+
+
+### Features
+
+* **am-sdk:** generate from AM master 4.15.0 ([265ee38](https://github.com/gravitee-io/gravitee-automation-sdk/commit/265ee382cd55ceaa34dd3b5665349eaa0aa44eac))
+* **apim-sdk:** generate from AIM 5.1.8 to carry the MCP auth policy refs ([2f82e60](https://github.com/gravitee-io/gravitee-automation-sdk/commit/2f82e607001ff2427c3d4211d121a7335361cba4))
+* **apim-sdk:** generate the AuthZ Automation API ([3165f7d](https://github.com/gravitee-io/gravitee-automation-sdk/commit/3165f7d957cb5af46ba9ac74517750ee7b0ec4aa))
+
+
+### Bug Fixes
+
+* **apim-sdk:** compare an AuthZ entity left without active as active ([f118024](https://github.com/gravitee-io/gravitee-automation-sdk/commit/f1180249252d554250a1102881896c22a22e2d19))
+* **apim-sdk:** compare an AuthZ PDP tag left out and an empty one as equal ([7919c00](https://github.com/gravitee-io/gravitee-automation-sdk/commit/7919c002ed782a64b0109c313e9b1d000499aca9))
+* **apim-sdk:** compare an AuthZ schema target left out and an empty one as equal ([821ae77](https://github.com/gravitee-io/gravitee-automation-sdk/commit/821ae77c7e3f28325950937250d10b17d89d84ae))
+* **apim-sdk:** drop studio tool entityIds from AimMcpProxyState.Spec() ([0cca0ed](https://github.com/gravitee-io/gravitee-automation-sdk/commit/0cca0ed2186187146485624cd834909775831bc2))
+* **apim-sdk:** keep the PlanType constant names next to the AuthZ policy type ([6384483](https://github.com/gravitee-io/gravitee-automation-sdk/commit/6384483ed86eb5052cc2fe9b707462942dbdabfc))
+* **apim-sdk:** read an unset MCP proxy enableFGA and matchRequired as false ([65125aa](https://github.com/gravitee-io/gravitee-automation-sdk/commit/65125aaea68150c98d58367022ce4d395a0c442c))
+* **ci:** read the AuthZ OAS through the GitHub API helper (APIM-16606) ([2f1a0af](https://github.com/gravitee-io/gravitee-automation-sdk/commit/2f1a0af60d26efeeee3dd3483b99b73e7b40ed7e))
+* **deps:** bump common to v1.4.1, apim-sdk to v0.2.2 ([e42fa0e](https://github.com/gravitee-io/gravitee-automation-sdk/commit/e42fa0e6238560b3f11644b0e8673c3873cde849))
+
 ## [0.2.2](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.2.1...apim-sdk/v0.2.2) (2026-11-23)
 
 
