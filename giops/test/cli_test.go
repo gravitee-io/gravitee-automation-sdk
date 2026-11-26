@@ -61,9 +61,17 @@ var liveConfig = os.Getenv("GIOPS_LIVE_CONFIG")
 // deleted before each test, for leftovers of a failed run, and after it.
 var liveResources = map[string][][]string{
 	"am": {
+		{"secrets", "giops-secret", "--domain", "giops-domain", "--application", "giops-app"},
+		{"secrets", "giops-secret", "--domain", "giops-domain", "--application", "giops-other-app"},
+		{"applications", "giops-app", "--domain", "giops-domain"},
+		{"applications", "giops-other-app", "--domain", "giops-domain"},
+		{"reporters", "giops-reporter", "--domain", "giops-domain"},
+		{"certificates", "giops-certificate", "--domain", "giops-domain"},
+		{"identityproviders", "giops-idp", "--domain", "giops-domain"},
 		{"domains", "giops-domain"},
 		{"domains", "giops-other-domain"},
 		{"domains", "giops-json-domain"},
+		{"dataplanes", "giops-dataplane"},
 	},
 	"apim": {
 		{"groups", "giops-group"},
@@ -235,19 +243,19 @@ func (c cli) mustRun(args ...string) string {
 	return r.out
 }
 
-// getJSON reads one resource with `get -o json` and decodes it.
-func (c cli) getJSON(module, subject, id string) map[string]any {
+// getJSON reads one resource with `get -o json` and decodes it. flags are added to the command, such as parents.
+func (c cli) getJSON(module, subject, id string, flags ...string) map[string]any {
 	c.t.Helper()
-	out := c.mustRun(module, "get", subject, id, "-o", "json")
+	out := c.mustRun(append([]string{module, "get", subject, id, "-o", "json"}, flags...)...)
 	var resource map[string]any
 	require.NoErrorf(c.t, json.Unmarshal([]byte(out), &resource), "not JSON:\n%s", out)
 	return resource
 }
 
-// requireAbsent fails the test if the resource can be read.
-func (c cli) requireAbsent(module, subject, id string) {
+// requireAbsent fails the test if the resource can be read. flags are added to the command, such as parents.
+func (c cli) requireAbsent(module, subject, id string, flags ...string) {
 	c.t.Helper()
-	r := c.run(module, "get", subject, id, "-o", "json")
+	r := c.run(append([]string{module, "get", subject, id, "-o", "json"}, flags...)...)
 	require.Errorf(c.t, r.err, "%s %s should not exist, got:\n%s", subject, id, r.out)
 }
 

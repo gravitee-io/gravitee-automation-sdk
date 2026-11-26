@@ -50,11 +50,26 @@ func TestExampleAMResources(t *testing.T) {
 
 	giops.mustRun("am", "apply", "domains", "-f", example(t, "am/domain.yaml"), "--yes")
 	giops.mustRun("am", "apply", "identityproviders", "-f", example(t, "am/identity-provider.yaml"), "--yes")
+	for _, apply := range [][]string{
+		{"reporters", "am/reporter.yaml"},
+		{"certificates", "am/certificate.yaml"},
+		{"applications", "am/application.yaml"},
+		{"secrets", "am/secret.yaml"},
+		{"dataplanes", "am/dataplane.yaml"},
+	} {
+		giops.mustRun("am", "apply", apply[0], "-f", example(t, apply[1]), "--yes")
+	}
 
 	domain := giops.getJSON("am", "domains", "example-domain")
 	assert.Equal(t, "Example domain", domain["name"])
 	out := giops.mustRun("am", "get", "identityproviders", "--domain", "example-domain")
-	assert.Regexp(t, `example-users\s+Example users\s+inline-am-idp`, out)
+	assert.Regexp(t, `example-users\s+inline-am-idp`, out)
+	inDomain := []string{"--domain", "example-domain"}
+	assert.Equal(t, "Example audit file", giops.getJSON("am", "reporters", "example-reporter", inDomain...)["name"])
+	assert.Equal(t, "Example signing certificate", giops.getJSON("am", "certificates", "example-certificate", inDomain...)["name"])
+	assert.Equal(t, "Example service", giops.getJSON("am", "applications", "example-app", inDomain...)["name"])
+	assert.Equal(t, "example-secret", giops.getJSON("am", "secrets", "example-secret", "--domain", "example-domain", "--application", "example-app")["key"])
+	assert.Equal(t, "Example data plane", giops.getJSON("am", "dataplanes", "example-dataplane")["name"])
 }
 
 func TestExampleAPIMResources(t *testing.T) {

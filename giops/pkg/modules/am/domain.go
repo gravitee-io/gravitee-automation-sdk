@@ -26,7 +26,6 @@ import (
 func DomainColumns() []*res.Column {
 	return []*res.Column{
 		res.NewColumnFromField("Key"),
-		res.NewColumnFromField("Name"),
 		res.NewColumnFromField("Path"),
 		res.NewColumnFromField("Enabled"),
 	}
@@ -41,7 +40,7 @@ func ListDomain(ctx context.Context, _ core.Module, _ res.Kind) ([]any, error) {
 }
 
 func DryRunDomain(ctx context.Context, _ core.Module, kind res.Kind, _ *res.AdditionalOptions) error {
-	resp, err := put(ctx, true, kind)
+	resp, err := putDomain(ctx, true, kind)
 	if err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func DryRunDomain(ctx context.Context, _ core.Module, kind res.Kind, _ *res.Addi
 }
 
 func PutDomain(ctx context.Context, _ core.Module, kind res.Kind, _ *res.AdditionalOptions) error {
-	_, err := put(ctx, false, kind)
+	_, err := putDomain(ctx, false, kind)
 	return err
 }
 
@@ -64,7 +63,7 @@ func DeleteDomain(ctx context.Context, _ core.Module, _ res.Kind, id string) err
 	return core.ExpectSuccess(response.StatusCode(), response.Body)
 }
 
-func put(ctx context.Context, dryRun bool, kind res.Kind) (*sdk.UpsertDomainResponse, error) {
+func putDomain(ctx context.Context, dryRun bool, kind res.Kind) (*sdk.UpsertDomainResponse, error) {
 	body := *kind.GetObject().(*sdk.Domain)
 	response, err := internal.Client(ctx).UpsertDomainWithResponse(ctx, &sdk.UpsertDomainParams{DryRun: &dryRun}, body)
 	if err != nil {
