@@ -123,3 +123,14 @@ func TestExamplePortalResources(t *testing.T) {
 	assert.Equal(t, "Status page", giops.getJSON("portal", "links", "example-status", inPortal...)["name"])
 	assert.Equal(t, "example-listing", giops.getJSON("portal", "listings", "example-listing", inPortal...)["hrid"])
 }
+
+func TestExampleAIMResources(t *testing.T) {
+	requireMock(t, "the examples are not giops-* resources the live tests clean up")
+	giops := newGammaCLI(t, "aim")
+
+	giops.mustRun("aim", "apply", "mcp-servers", "-f", example(t, "aim/mcp-server.yaml"), "--yes")
+	giops.mustRun("aim", "apply", "mcp-proxies", "-f", example(t, "aim/mcp-proxy.yaml"), "--yes")
+
+	assert.Equal(t, "mcp-server.example", giops.getJSON("aim", "mcp-servers", "example-mcp-server")["entityId"])
+	assert.Equal(t, "Example MCP proxy", giops.getJSON("aim", "mcp-proxies", "example-mcp-proxy")["name"])
+}

@@ -18,9 +18,9 @@ go build -o giops ./giops
 
 ## Configuration
 
-giops connects to one or both products through three modules: `am` for AM, and `apim` and `portal`
-for APIM (its core and its developer portal). The `am` module reads the `am` section of the configuration;
-the two APIM modules share the `gamma` section. Declare at least one section.
+giops connects to one or both products through four modules: `am` for AM, and `apim`, `portal` and `aim`
+for APIM (its core, its developer portal and its AI Management). The `am` module reads the `am` section of
+the configuration; the three APIM modules share the `gamma` section. Declare at least one section.
 
 ### File
 
@@ -163,6 +163,8 @@ the APIM Automation API has no list endpoint, so APIM `get` needs an id.
 | `portal` | `documentations` | `hrid` | `portal` | no | [examples/portal/documentation.yaml](examples/portal/documentation.yaml) |
 | `portal` | `links` | `hrid` | `portal` | no | [examples/portal/link.yaml](examples/portal/link.yaml) |
 | `portal` | `listings` | `hrid` | `portal` | no | [examples/portal/listing.yaml](examples/portal/listing.yaml) |
+| `aim` | `mcp-proxies` | `hrid` | — | no | [examples/aim/mcp-proxy.yaml](examples/aim/mcp-proxy.yaml) |
+| `aim` | `mcp-servers` | `hrid` | — | no | [examples/aim/mcp-server.yaml](examples/aim/mcp-server.yaml) |
 
 ```bash
 giops am apply domains -f examples/am/domain.yaml

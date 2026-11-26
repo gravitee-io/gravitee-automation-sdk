@@ -47,5 +47,9 @@ func MainCommand() *cobra.Command {
 	registerPortalResourceConfigs(portalModule, main)
 	registerAPIMActionConfigs(portalModule, main)
 
+	aimModule := core.Module{Name: "aim", ClientFactory: Gamma}
+	registerAIMResourceConfigs(aimModule, main)
+	registerAPIMActionConfigs(aimModule, main)
+
 	return main
 }

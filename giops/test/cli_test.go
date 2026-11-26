@@ -94,6 +94,10 @@ var liveResources = map[string][][]string{
 		{"portals", "giops-other-portal"},
 		{"themes", "giops-theme"},
 	},
+	"aim": {
+		{"mcp-proxies", "giops-mcp-proxy"},
+		{"mcp-servers", "giops-mcp-server"},
+	},
 }
 
 // requireMock skips the test on live servers.
