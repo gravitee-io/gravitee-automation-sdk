@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.3.0...apim-sdk/v0.4.0) (2026-11-27)
+
+
+### Features
+
+* **apim-sdk:** declare hridContainsUUID on shared policy group operations (APIM-16602) ([195996b](https://github.com/gravitee-io/gravitee-automation-sdk/commit/195996b40c5c3a39c0e1a4d04afa55aef652119f))
+
 ## [0.3.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-sdk/v0.2.2...apim-sdk/v0.3.0) (2026-11-26)
 
 
