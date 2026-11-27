@@ -1,4 +1,4 @@
-MODULES := am-sdk apim-sdk common am-mock-server apim-mock-server
+MODULES := am-sdk apim-sdk common am-mock-server apim-mock-server giops
 
 HAS_GO = [ -n "$$(find $$mod -name '*.go' -print -quit)" ]
 

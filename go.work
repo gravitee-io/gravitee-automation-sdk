@@ -6,4 +6,5 @@ use (
 	./apim-mock-server
 	./apim-sdk
 	./common
+	./giops
 )

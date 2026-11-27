@@ -1,0 +1,67 @@
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# An AM security domain.
+#   giops am apply domains -f domain.yaml
+#   giops am get domains example-domain -o yaml
+#   giops am delete domains example-domain
+
+# Identifies the domain: immutable, lowercase letters, digits and hyphens.
+key: example-domain
+name: Example domain
+description: A security domain managed with giops
+# Context path on the AM gateway.
+path: /example-domain
+enabled: true
+# Data plane the domain runs on; resolved from the environment when left out. Immutable.
+dataPlaneId: default
+# Sharding tags: which gateways deploy the domain.
+tags:
+  - production
+  - external
+corsSettings:
+  enabled: true
+  allowedOrigins:
+    - https://app.example.com
+  allowedMethods:
+    - GET
+    - POST
+  allowedHeaders:
+    - Authorization
+    - Content-Type
+  allowCredentials: true
+  maxAge: 3600
+loginSettings:
+  forgotPasswordEnabled: true
+  registerEnabled: true
+  rememberMeEnabled: true
+  passwordlessEnabled: false
+  identifierFirstEnabled: false
+passwordSettings:
+  minLength: 12
+  maxLength: 128
+  includeNumbers: true
+  includeSpecialCharacters: true
+  lettersInMixedCase: true
+  maxConsecutiveLetters: 3
+  passwordHistoryEnabled: true
+  oldPasswords: 5
+accountSettings:
+  loginAttemptsDetectionEnabled: true
+  maxLoginAttempts: 5
+  loginAttemptsResetTime: 600
+  accountBlockedDuration: 1800
+  sendRecoverAccountEmail: true
+scim:
+  enabled: true
