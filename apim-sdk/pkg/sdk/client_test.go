@@ -185,6 +185,52 @@ func TestUpsert_DecodesErrorDetailsWhateverTheirInvalidValue(t *testing.T) {
 	}
 }
 
+// GKO sends hridContainsUUID=true for shared policy groups created before the Automation API, whose hrid is their id.
+func TestSharedPolicyGroup_SendsHridContainsUUIDOnlyWhenSet(t *testing.T) {
+	calls := map[string]func(c *APIMClient, flag *bool) error{
+		"upsert": func(c *APIMClient, flag *bool) error {
+			_, err := c.UpsertSharedPolicyGroupWithResponse(context.Background(),
+				&UpsertSharedPolicyGroupParams{HridContainsUUID: flag}, SharedPolicyGroup{Hrid: "x"})
+			return err
+		},
+		"get": func(c *APIMClient, flag *bool) error {
+			_, err := c.GetSharedPolicyGroupWithResponse(context.Background(), "x",
+				&GetSharedPolicyGroupParams{HridContainsUUID: flag})
+			return err
+		},
+		"delete": func(c *APIMClient, flag *bool) error {
+			_, err := c.DeleteSharedPolicyGroupWithResponse(context.Background(), "x",
+				&DeleteSharedPolicyGroupParams{HridContainsUUID: flag})
+			return err
+		},
+	}
+	for name, call := range calls {
+		for _, tt := range []struct {
+			name string
+			flag *bool
+			want []string
+		}{
+			{"set", new(true), []string{"true"}},
+			{"nil", nil, nil},
+		} {
+			t.Run(name+" "+tt.name, func(t *testing.T) {
+				var query map[string][]string
+				s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					query = r.URL.Query()
+					w.WriteHeader(http.StatusNoContent)
+				}))
+				defer s.Close()
+				client, err := NewAPIMClient(bearerContext(s.URL))
+				require.NoError(t, err)
+
+				require.NoError(t, call(client, tt.flag))
+
+				assert.Equal(t, tt.want, query["hridContainsUUID"])
+			})
+		}
+	}
+}
+
 type countingTransport struct {
 	calls int
 }
