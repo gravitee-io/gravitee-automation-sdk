@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.3.1...apim-mock-server/v0.4.0) (2026-11-27)
+
+
+### Features
+
+* **apim-sdk:** declare hridContainsUUID on shared policy group operations (APIM-16602) ([195996b](https://github.com/gravitee-io/gravitee-automation-sdk/commit/195996b40c5c3a39c0e1a4d04afa55aef652119f))
+
+
+### Bug Fixes
+
+* **deps:** bump apim-sdk to v0.4.0 ([194a774](https://github.com/gravitee-io/gravitee-automation-sdk/commit/194a7741e587e620ecd26f3d2e72781abb29aef3))
+
 ## [0.3.1](https://github.com/gravitee-io/gravitee-automation-sdk/compare/apim-mock-server/v0.3.0...apim-mock-server/v0.3.1) (2026-11-26)
 
 
