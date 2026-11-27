@@ -47,6 +47,31 @@ func TestSpec_KeepsOnlyTheFieldsAPutSends(t *testing.T) {
 	}, state.Spec())
 }
 
+func TestSpec_SharedPolicyGroupKeepsItsCrossIdAndSteps(t *testing.T) {
+	steps := []StepV4{{Name: new("rate limit"), Policy: "rate-limit", Enabled: true, MessageCondition: new("{#message.id != null}")}}
+	state := SharedPolicyGroupState{
+		Hrid:           "limits",
+		CrossId:        new("c1"),
+		Name:           "Limits",
+		ApiType:        SharedPolicyGroupApiTypeMESSAGE,
+		Phase:          FlowPhasePUBLISH,
+		Steps:          steps,
+		Id:             new("8f1c"),
+		OrganizationId: new("DEFAULT"),
+		EnvironmentId:  new("DEFAULT"),
+		Errors:         &Errors{Warning: []string{"ignored"}},
+	}
+
+	assert.Equal(t, SharedPolicyGroup{
+		Hrid:    "limits",
+		CrossId: new("c1"),
+		Name:    "Limits",
+		ApiType: SharedPolicyGroupApiTypeMESSAGE,
+		Phase:   FlowPhasePUBLISH,
+		Steps:   steps,
+	}, state.Spec())
+}
+
 func TestSpec_ConvertsTheApplicationStatus(t *testing.T) {
 	state := ApplicationState{Hrid: "app", Status: new(ApplicationStateStatusARCHIVED)}
 

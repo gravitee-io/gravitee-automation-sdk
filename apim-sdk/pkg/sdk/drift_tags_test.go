@@ -77,6 +77,16 @@ func TestDriftTags_Authz(t *testing.T) {
 	})
 }
 
+// The tags of GKO's shared policy group DTO: GKO swaps the hrid for the id of a legacy group, and a GET returns no
+// steps to a caller that may not update the group.
+func TestDriftTags_SharedPolicyGroup(t *testing.T) {
+	assertDriftTags(t, []driftTag{
+		{SharedPolicyGroup{}, "Hrid", "ignore"},
+		{SharedPolicyGroup{}, "CrossId", "ignore"},
+		{SharedPolicyGroup{}, "Steps", "empty-is-nil"},
+	})
+}
+
 type driftTag struct {
 	value any
 	field string

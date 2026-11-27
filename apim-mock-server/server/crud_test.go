@@ -162,7 +162,7 @@ func sdkKinds(t *testing.T) []struct {
 				return c.UpsertSharedPolicyGroupWithResponse(ctx, nil, as[sdk.SharedPolicyGroup](t, sharedPolicyGroupBody("test")))
 			},
 			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
-				return c.GetSharedPolicyGroupWithResponse(ctx, hrid)
+				return c.GetSharedPolicyGroupWithResponse(ctx, hrid, nil)
 			},
 			func(ctx context.Context, c *sdk.APIMClient, hrid string) (response.StatusCoder, error) {
 				return c.DeleteSharedPolicyGroupWithResponse(ctx, hrid, nil)

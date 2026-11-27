@@ -950,7 +950,7 @@ type ClientInterface interface {
 	// Get a policy group using HRID.
 	//
 	// Corresponds with GET /shared-policy-groups/{hrid} (the `GetSharedPolicyGroup` operationId).
-	GetSharedPolicyGroup(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetSharedPolicyGroup(ctx context.Context, hrid HridParam, params *GetSharedPolicyGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 // UpsertAimCatalogMcpServerWithBody Create or update a Catalog MCP server from its spec
@@ -2529,8 +2529,8 @@ func (c *Client) DeleteSharedPolicyGroup(ctx context.Context, hrid HridParam, pa
 // Get a policy group using HRID.
 //
 // Corresponds with GET /shared-policy-groups/{hrid} (the `GetSharedPolicyGroup` operationId).
-func (c *Client) GetSharedPolicyGroup(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSharedPolicyGroupRequest(c.Server, hrid)
+func (c *Client) GetSharedPolicyGroup(ctx context.Context, hrid HridParam, params *GetSharedPolicyGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSharedPolicyGroupRequest(c.Server, hrid, params)
 	if err != nil {
 		return nil, err
 	}
@@ -5502,6 +5502,18 @@ func NewUpsertSharedPolicyGroupRequestWithBody(server string, params *UpsertShar
 
 		}
 
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
 		if encoded := queryValues.Encode(); encoded != "" {
 			rawQueryFragments = append(rawQueryFragments, encoded)
 		}
@@ -5565,6 +5577,18 @@ func NewDeleteSharedPolicyGroupRequest(server string, hrid HridParam, params *De
 
 		}
 
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
 		if encoded := queryValues.Encode(); encoded != "" {
 			rawQueryFragments = append(rawQueryFragments, encoded)
 		}
@@ -5580,7 +5604,7 @@ func NewDeleteSharedPolicyGroupRequest(server string, hrid HridParam, params *De
 }
 
 // NewGetSharedPolicyGroupRequest constructs an http.Request for the GetSharedPolicyGroup method
-func NewGetSharedPolicyGroupRequest(server string, hrid HridParam) (*http.Request, error) {
+func NewGetSharedPolicyGroupRequest(server string, hrid HridParam, params *GetSharedPolicyGroupParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -5603,6 +5627,33 @@ func NewGetSharedPolicyGroupRequest(server string, hrid HridParam) (*http.Reques
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.HridContainsUUID != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "hridContainsUUID", *params.HridContainsUUID, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
@@ -6559,7 +6610,7 @@ type ClientWithResponsesInterface interface {
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /shared-policy-groups/{hrid} (the `GetSharedPolicyGroup` operationId).
-	GetSharedPolicyGroupWithResponse(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*GetSharedPolicyGroupResponse, error)
+	GetSharedPolicyGroupWithResponse(ctx context.Context, hrid HridParam, params *GetSharedPolicyGroupParams, reqEditors ...RequestEditorFn) (*GetSharedPolicyGroupResponse, error)
 }
 
 type UpsertAimCatalogMcpServerResponse struct {
@@ -11826,8 +11877,8 @@ func (c *ClientWithResponses) DeleteSharedPolicyGroupWithResponse(ctx context.Co
 // Returns a wrapper object for the known response body format(s).
 //
 // Corresponds with GET /shared-policy-groups/{hrid} (the `GetSharedPolicyGroup` operationId).
-func (c *ClientWithResponses) GetSharedPolicyGroupWithResponse(ctx context.Context, hrid HridParam, reqEditors ...RequestEditorFn) (*GetSharedPolicyGroupResponse, error) {
-	rsp, err := c.GetSharedPolicyGroup(ctx, hrid, reqEditors...)
+func (c *ClientWithResponses) GetSharedPolicyGroupWithResponse(ctx context.Context, hrid HridParam, params *GetSharedPolicyGroupParams, reqEditors ...RequestEditorFn) (*GetSharedPolicyGroupResponse, error) {
+	rsp, err := c.GetSharedPolicyGroup(ctx, hrid, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}

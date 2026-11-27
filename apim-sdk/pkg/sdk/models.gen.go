@@ -8618,6 +8618,11 @@ type UpsertSharedPolicyGroupParams struct {
 	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
 	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
 }
 
 // DeleteSharedPolicyGroupParams defines parameters for DeleteSharedPolicyGroup.
@@ -8627,6 +8632,19 @@ type DeleteSharedPolicyGroupParams struct {
 	// sent without `dryRun`, unless the stored state changes in between. Only the write and its side effects
 	// (deployment, events, audit) are skipped.
 	DryRun *DryRunQueryParam `form:"dryRun,omitempty" json:"dryRun,omitempty"`
+
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
+}
+
+// GetSharedPolicyGroupParams defines parameters for GetSharedPolicyGroup.
+type GetSharedPolicyGroupParams struct {
+	// HridContainsUUID When true, the HRID path or spec value is treated as an existing UUID rather than
+	// a human-readable identifier. This is to support backward compatibility for resources
+	// created before migration to the automation API and should not be used for new resources.
+	HridContainsUUID *HridContainsUUIDQueryParam `form:"hridContainsUUID,omitempty" json:"hridContainsUUID,omitempty"`
 }
 
 // UpsertAimCatalogMcpServerJSONRequestBody defines body for UpsertAimCatalogMcpServer for application/json ContentType.

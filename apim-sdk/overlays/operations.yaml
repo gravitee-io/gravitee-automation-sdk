@@ -35,12 +35,19 @@ actions:
   - target: $.paths["/organizations/{orgId}/environments/{envId}/shared-policy-groups/{hrid}"].get
     update:
       operationId: getSharedPolicyGroup
+      # APIM serves hridContainsUUID on shared policy groups but its OAS does not declare it yet
+      parameters:
+        - $ref: "#/components/parameters/hridContainsUUIDQueryParam"
   - target: $.paths["/organizations/{orgId}/environments/{envId}/shared-policy-groups/{hrid}"].delete
     update:
       operationId: deleteSharedPolicyGroup
+      parameters:
+        - $ref: "#/components/parameters/hridContainsUUIDQueryParam"
   - target: $.paths["/organizations/{orgId}/environments/{envId}/shared-policy-groups"].put
     update:
       operationId: upsertSharedPolicyGroup
+      parameters:
+        - $ref: "#/components/parameters/hridContainsUUIDQueryParam"
   - target: $.paths["/organizations/{orgId}/environments/{envId}/portals"].put
     update:
       operationId: upsertPortal
